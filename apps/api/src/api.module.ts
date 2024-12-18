@@ -19,7 +19,7 @@ import { ApmModule } from 'nestjs-elastic-apm';
 import { LogRequestBodyMiddleware } from './utils/middleware/log-request-body.middleware';
 import { JsonBodyMiddleware } from './utils/middleware/json-body.middleware';
 import { ProxyMiddleware } from './utils/middleware/proxy.middleware';
-import { DeliveryEndpoints } from '@app/common/utils/paths';
+import { ApiEndpoints, DeliveryEndpoints } from '@app/common/utils/paths';
 import { HttpModule } from '@nestjs/axios';
 import { HttpClientService } from './utils/middleware/http-client.service';
 import { HttpConfigModule } from '@app/common/http-config/http-config.module';
@@ -60,10 +60,12 @@ export class ApiModule implements NestModule {
     if (process.env.IS_PROXY === "true") {
       consumer.apply(ProxyMiddleware)
         .exclude(
+          { path: `(.*)${ApiEndpoints.checkHealth}`, method: RequestMethod.ALL },
           { path: `(.*)${DeliveryEndpoints.preparedDelivery}`, method: RequestMethod.ALL },
           { path: `(.*)${DeliveryEndpoints.getPreparedByCatalogId}(.*)`, method: RequestMethod.ALL },
           { path: `(.*)${DeliveryEndpoints.cacheConfig}`, method: RequestMethod.ALL },
           { path: `(.*)${DeliveryEndpoints.cacheDelete}`, method: RequestMethod.ALL },
+          { path: `(.*)${DeliveryEndpoints.checkHealth}`, method: RequestMethod.ALL },
         )
         .forRoutes('*')
     }
