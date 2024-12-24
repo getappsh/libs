@@ -1,6 +1,6 @@
 import { ProjectManagementTopics } from "@app/common/microservice-client/topics";
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
-import { ProjectMemberDto, ProjectDto, EditProjectMemberDto, ProjectConfigDto } from "@app/common/dto/project-management";
+import { ProjectMemberDto, EditProjectMemberDto, CreateProjectDto, CreateRegulationDto, UpdateRegulationDto } from "@app/common/dto/project-management";
 import { MicroserviceClient, MicroserviceName } from "@app/common/microservice-client";
 
 
@@ -12,21 +12,11 @@ export class ProjectManagementService implements OnModuleInit{
    }
   
 
-  createProject(user: any, projectDto: ProjectDto){
+  createProject(user: any, projectDto: CreateProjectDto){
     return this.projectManagementClient.send(
       ProjectManagementTopics.CREATE_PROJECT,
       {member: user, project: projectDto}
     )
-  }
-
-  getProjectConfigOption(){
-    return this.projectManagementClient.send(
-      ProjectManagementTopics.GET_PROJECT_CONFIG_OPTION, '')
-  }
-
-  setProjectConfigOption(body: ProjectConfigDto) {
-    return this.projectManagementClient.send(
-      ProjectManagementTopics.SET_PROJECT_CONFIG_OPTION, body)
   }
 
   addMemberToProject(user: any, projectMemberDto: ProjectMemberDto, params:  {projectId: string}){
@@ -92,6 +82,52 @@ export class ProjectManagementService implements OnModuleInit{
     return this.projectManagementClient.send(
       ProjectManagementTopics.GET_DEVICES_BY_PLATFORM,
       platform
+    )
+  }
+
+
+  getAllRegulationTypes(){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.GET_REGULATION_TYPES,
+      {}
+    )
+  }
+
+  getProjectRegulations(projectId: number){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.GET_PROJECT_REGULATIONS,
+      projectId
+    )
+  }
+
+  createRegulation(createRegulationDto: CreateRegulationDto){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.CREATE_REGULATION,
+      createRegulationDto
+    )
+  }
+
+  editRegulation(id: number, updateRegulationDto: UpdateRegulationDto){
+    updateRegulationDto.id = id;
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.UPDATE_REGULATION,
+      updateRegulationDto
+    )
+  }
+
+
+  getRegulationById(id: number){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.GET_REGULATION_BY_ID,
+      id
+    )
+  }
+
+
+  deleteRegulation(id: number){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.DELETE_REGULATION,
+      id
     )
   }
 
