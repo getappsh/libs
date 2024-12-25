@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Delete, Put, Param, Logger } from "@nestjs/common";
+import { Body, Controller, Get, Post, Delete, Put, Param, Logger, UseInterceptors } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags, ApiParam, ApiCreatedResponse, ApiOkResponse, ApiExcludeEndpoint } from "@nestjs/swagger";
 import { AuthUser, Unprotected } from "../../utils/sso/sso.decorators";
 import { PROJECT_MANAGEMENT } from "@app/common/utils/paths";
@@ -11,13 +11,16 @@ import {
   CreateRegulationDto,
   RegulationDto,
   RegulationTypeDto,
-  UpdateRegulationDto
+  UpdateRegulationDto,
+  RegulationParams
 } from "@app/common/dto/project-management";
 import { DeviceResDto } from "@app/common/dto/project-management/dto/device-res.dto";
+import { UserContextInterceptor } from "../../utils/interceptor/user-context.interceptor";
 
 
 @ApiTags('Project Management')
 @ApiBearerAuth()
+@UseInterceptors(UserContextInterceptor)
 @Controller(PROJECT_MANAGEMENT)
 export class ProjectManagementController {
 
@@ -114,49 +117,47 @@ export class ProjectManagementController {
     return this.projectManagementService.getAllRegulationTypes();
   }
 
-  @Get('project/:projectId/regulations')
+  @Get('project/:projectId/regulation')
   @ApiOperation({ summary: 'Get all Project Regulations' })
   @ApiParam({ name: 'projectId' })
-  @ApiOkResponse({ type: [RegulationDto] })
+  @ApiOkResponse({ type: [RegulationDto], isArray: true })
   getProjectRegulations(@Param('projectId') projectId: number) {
     this.logger.debug("Getting all project regulations for project: ", projectId);
     return this.projectManagementService.getProjectRegulations(projectId);
   }
-  // TODO: create and update regulation need to be associated with a project
-  @Post('regulation')
-  @ApiOperation({ summary: 'Create Regulation' })
-  @ApiCreatedResponse({ type: RegulationDto })
-  createRegulation(@Body() createRegulationDto: CreateRegulationDto) {
-    this.logger.debug("Creating regulation: ", JSON.stringify(createRegulationDto))
-    return this.projectManagementService.createRegulation(createRegulationDto);
-  }
 
-  // TODO: create and update regulation need to be associated with a project
-  @Put('regulation/:id')
-  @ApiOperation({ summary: 'Edit Regulation' })
-  @ApiParam({ name: 'id', description: 'ID of the regulation to edit' })
-  @ApiOkResponse({ type: RegulationDto })
-  editRegulation(@Param('id') id: number, @Body() updateRegulationDto: UpdateRegulationDto) {
-    this.logger.debug("Editing regulation: ", JSON.stringify(updateRegulationDto));
-    return this.projectManagementService.editRegulation(id, updateRegulationDto);
-  }
-
-  @Get('regulation/:id')
+  @Get('project/:projectId/regulation/:regulationId')
   @ApiOperation({ summary: 'Get Regulation by ID' })
-  @ApiParam({ name: 'id', description: 'ID of the regulation to get' })
   @ApiOkResponse({ type: RegulationDto })
-  getRegulationById(@Param('id') id: number) {
-    this.logger.debug("Getting regulation by ID: ", id);
-    return this.projectManagementService.getRegulationById(id);
+  getProjectRegulationById(@Param() regulationParams: RegulationParams) {
+    this.logger.debug(`Getting regulation by Project ID: ${regulationParams.projectId} and Regulation ID: ${regulationParams.regulationId}`);
+    return this.projectManagementService.getProjectRegulationById(regulationParams);
   }
 
-  @Delete('regulation/:id')
+  @Post('project/:projectId/regulation')
+  @ApiOperation({ summary: 'Create Regulation' })
+  @ApiParam({ name: 'projectId' })
+  @ApiCreatedResponse({ type: RegulationDto })
+  createProjectRegulation(@Param('projectId') projectId: number, @Body() createRegulationDto: CreateRegulationDto) {
+    this.logger.debug(`Creating regulation for project: ${projectId}`, JSON.stringify(createRegulationDto));
+    return this.projectManagementService.createProjectRegulation(projectId, createRegulationDto);
+  }
+
+  @Put('project/:projectId/regulation/:regulationId')
+  @ApiOperation({ summary: 'Edit Regulation' })
+  @ApiOkResponse({ type: RegulationDto })
+  editProjectRegulation(@Param() regulationParams: RegulationParams, @Body() updateRegulationDto: UpdateRegulationDto) {
+    console.log(regulationParams);
+    this.logger.debug(`Editing regulation by Project ID: ${regulationParams.projectId} and Regulation ID: ${regulationParams.regulationId}`, JSON.stringify(updateRegulationDto));
+    return this.projectManagementService.editProjectRegulation(regulationParams, updateRegulationDto);
+  }
+
+  @Delete('project/:projectId/regulation/:regulationId')
   @ApiOperation({ summary: 'Delete Regulation by ID' })
-  @ApiParam({ name: 'id', description: 'ID of the regulation to delete' })
   @ApiOkResponse()
-  deleteRegulation(@Param('id') id: number) {
-    this.logger.debug("Deleting regulation by ID: ", id);
-    return this.projectManagementService.deleteRegulation(id);
+  deleteProjectRegulation(@Param() regulationParams: RegulationParams) {
+    this.logger.debug(`Deleting regulation by Project ID: ${regulationParams.projectId} and Regulation ID: ${regulationParams.regulationId}`);
+    return this.projectManagementService.deleteProjectRegulation(regulationParams);
   }
 
   @Get('checkHealth')
