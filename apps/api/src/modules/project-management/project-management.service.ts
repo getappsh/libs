@@ -1,6 +1,6 @@
 import { ProjectManagementTopics } from "@app/common/microservice-client/topics";
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
-import { ProjectMemberDto, EditProjectMemberDto, CreateProjectDto, CreateRegulationDto, UpdateRegulationDto, RegulationParams } from "@app/common/dto/project-management";
+import { AddMemberToProjectDto, EditProjectMemberDto, CreateProjectDto, CreateRegulationDto, UpdateRegulationDto, RegulationParams, ProjectMemberParams } from "@app/common/dto/project-management";
 import { MicroserviceClient, MicroserviceName } from "@app/common/microservice-client";
 
 
@@ -13,33 +13,34 @@ export class ProjectManagementService implements OnModuleInit{
   
 
   createProject(user: any, projectDto: CreateProjectDto){
+    projectDto.username = user?.email;
     return this.projectManagementClient.send(
       ProjectManagementTopics.CREATE_PROJECT,
-      {member: user, project: projectDto}
+      projectDto
     )
   }
 
-  addMemberToProject(user: any, projectMemberDto: ProjectMemberDto, params:  {projectId: string}){
-    projectMemberDto.projectId = parseInt(params.projectId);
+  addMemberToProject(projectMemberDto: AddMemberToProjectDto, projectId: number){
+    projectMemberDto.projectId = projectId;
     return this.projectManagementClient.send(
-      ProjectManagementTopics.ADD_NEW_MEMBER,
-      {user: user, projectMember: projectMemberDto}
+      ProjectManagementTopics.ADD_PROJECT_NEW_MEMBER,
+      projectMemberDto
     )
   }
 
-  removeMemberFromProject(user: any, params: {projectId: string, memberId: string}){
+  removeMemberFromProject(params: ProjectMemberParams){
     return this.projectManagementClient.send(
-      ProjectManagementTopics.REMOVE_MEMBER,
-      {user: user, projectMember: params}
+      ProjectManagementTopics.REMOVE_PROJECT_MEMBER,
+      params
     )
   }
 
-  editMember(user: any, editProjectMemberDto: EditProjectMemberDto, params: {projectId: string, memberId: string}){
-    editProjectMemberDto.projectId = parseInt(params.projectId);
-    editProjectMemberDto.memberId = parseInt(params.memberId);
+  editMember(editProjectMemberDto: EditProjectMemberDto, params: ProjectMemberParams){
+    editProjectMemberDto.projectId = params.projectId;
+    editProjectMemberDto.memberId = params.memberId;
     return this.projectManagementClient.send(
-      ProjectManagementTopics.EDIT_MEMBER,
-      {user: user, projectMember: editProjectMemberDto}
+      ProjectManagementTopics.EDIT_PROJECT_MEMBER,
+      editProjectMemberDto
     )
   }
 
@@ -50,17 +51,17 @@ export class ProjectManagementService implements OnModuleInit{
     )
   }
 
-  createToken(user: any, data: {projectId: string}){
+  createToken(projectId: number){
     return this.projectManagementClient.send(
-      ProjectManagementTopics.CREATE_TOKEN,
-      {user: user, projectId: data.projectId}
+      ProjectManagementTopics.CREATE_PROJECT_TOKEN,
+      {projectId: projectId}
     )
   }
 
-  getProjectReleases(user: any, params: {projectId: string}){
+  getProjectReleases(projectId: number){
     return this.projectManagementClient.send(
       ProjectManagementTopics.GET_PROJECT_RELEASES,
-      {user: user, projectId: parseInt(params.projectId)}
+      {projectId: projectId}
     )
   }
 
