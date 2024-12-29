@@ -33,10 +33,10 @@ export class AuthGuard extends ckAuthGuard {
       return true
     }
     else {
-      if (request.header("Device-Auth") && request.header("Device-Auth") === (process.env.DEVICE_AUTH ?? process.env.DEVICE_SECRET)) {
-        return true;
-      } else if (request.header("Authorization")) {
+      if (request.header("Authorization")) {
         return await super.canActivate(context);
+      } else if (request.header("Device-Auth") && request.header("Device-Auth") === (process.env.DEVICE_AUTH ?? process.env.DEVICE_SECRET)) {
+        return true;
       } else {
         throw new UnauthorizedException({ message: socket.authorizationError || "unknown error" })
       }
