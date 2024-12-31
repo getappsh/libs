@@ -1,6 +1,6 @@
 import { ProjectManagementTopics } from "@app/common/microservice-client/topics";
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
-import { AddMemberToProjectDto, EditProjectMemberDto, CreateProjectDto, CreateRegulationDto, UpdateRegulationDto, RegulationParams, ProjectMemberParams } from "@app/common/dto/project-management";
+import { AddMemberToProjectDto, EditProjectMemberDto, CreateProjectDto, CreateRegulationDto, UpdateRegulationDto, RegulationParams, ProjectMemberParams, RegulationStatusParams, VersionRegulationStatusParams, SetRegulationCompliancyDto, SetRegulationStatusDto } from "@app/common/dto/project-management";
 import { MicroserviceClient, MicroserviceName } from "@app/common/microservice-client";
 
 
@@ -132,6 +132,49 @@ export class ProjectManagementService implements OnModuleInit{
       params
     )
   }
+
+  getVersionRegulationStatus(params: RegulationStatusParams){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.GET_VERSION_REGULATION_STATUS_BY_ID,
+      params
+    )
+  }
+
+  getVersionRegulationsStatuses(params: VersionRegulationStatusParams){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.GET_VERSION_REGULATIONS_STATUSES,
+      params
+    )
+  }
+
+  setRegulationStatus(params: RegulationStatusParams, setRegulationStatusDto: SetRegulationStatusDto){
+    setRegulationStatusDto.regulationId = params.regulationId;
+    setRegulationStatusDto.versionId = params.versionId;
+    setRegulationStatusDto.projectId = params.projectId;
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.SET_VERSION_REGULATION_STATUS,
+      setRegulationStatusDto
+    )
+  }
+
+  setRegulationCompliancy(params: RegulationStatusParams, setRegulationCompliancyDto: SetRegulationCompliancyDto){
+    setRegulationCompliancyDto.regulationId = params.regulationId;
+    setRegulationCompliancyDto.versionId = params.versionId;
+    setRegulationCompliancyDto.projectId = params.projectId;
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.SET_VERSION_REGULATION_COMPLIANCE,
+      setRegulationCompliancyDto
+    )
+  }
+
+
+  deleteVersionRegulationStatus(params: RegulationStatusParams){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.DELETE_VERSION_REGULATION_STATUS,
+      params
+    )
+  }
+
 
   checkHealth() {
     return this.projectManagementClient.send(ProjectManagementTopics.CHECK_HEALTH, {})

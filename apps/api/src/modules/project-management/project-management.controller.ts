@@ -13,7 +13,12 @@ import {
   RegulationTypeDto,
   UpdateRegulationDto,
   RegulationParams,
-  ProjectMemberParams
+  ProjectMemberParams,
+  RegulationStatusDto,
+  VersionRegulationStatusParams,
+  RegulationStatusParams,
+  SetRegulationStatusDto,
+  SetRegulationCompliancyDto
 } from "@app/common/dto/project-management";
 import { DeviceResDto } from "@app/common/dto/project-management/dto/device-res.dto";
 import { UserContextInterceptor } from "../../utils/interceptor/user-context.interceptor";
@@ -158,6 +163,49 @@ export class ProjectManagementController {
     this.logger.debug(`Deleting regulation by Project ID: ${regulationParams.projectId} and Regulation ID: ${regulationParams.regulationId}`);
     return this.projectManagementService.deleteProjectRegulation(regulationParams);
   }
+
+
+  @Get('project/:projectId/version/:versionId/regulation/status')
+  @ApiOperation({ summary: 'Get Version Regulation Statuses by Regulation ID' })
+  @ApiOkResponse({ type: [RegulationStatusDto], isArray: true })
+  getVersionRegulationStatuses(@Param() params: VersionRegulationStatusParams) {
+    this.logger.debug(`Getting version regulation statuses by Project ID: ${params.projectId} and Version ID: ${params.versionId}`);
+    return this.projectManagementService.getVersionRegulationsStatuses(params);
+  }
+
+  @Get('project/:projectId/version/:versionId/regulation/:regulationId/status')
+  @ApiOperation({ summary: 'Get Regulation Status by Regulation ID and Version ID' })
+  @ApiOkResponse({ type: RegulationStatusDto })
+  getRegulationStatus(@Param() params: RegulationStatusParams) {
+    this.logger.debug(`Getting regulation status by Project ID: ${params.projectId}, Regulation ID: ${params.regulationId}, and Version ID: ${params.versionId}`);
+    return this.projectManagementService.getVersionRegulationStatus(params);
+  }
+
+
+  @Post('project/:projectId/version/:versionId/regulation/:regulationId/status')
+  @ApiOperation({ summary: 'Set Regulation Status' })
+  @ApiOkResponse({ type: RegulationStatusDto })
+  setRegulationStatus(@Param() params: RegulationStatusParams, @Body() setRegulationStatusDto: SetRegulationStatusDto) {
+    this.logger.debug(`Setting regulation status for: ${JSON.stringify(params)}, with: ${JSON.stringify(setRegulationStatusDto)}`);
+    return this.projectManagementService.setRegulationStatus(params, setRegulationStatusDto);
+  }
+
+  @Post('project/:projectId/version/:versionId/regulation/:regulationId/compliancy')
+  @ApiOperation({ summary: 'Set Regulation Compliancy' })
+  @ApiOkResponse({ type: RegulationStatusDto })
+  setRegulationCompliancy(@Param() params: RegulationStatusParams, @Body() setRegulationCompliancyDto: SetRegulationCompliancyDto) {
+    this.logger.debug(`Setting regulation compliancy for: ${JSON.stringify(params)}, with: ${JSON.stringify(setRegulationCompliancyDto)}`);
+    return this.projectManagementService.setRegulationCompliancy(params, setRegulationCompliancyDto);
+  }
+
+  @Delete('project/:projectId/version/:versionId/regulation/:regulationId/status')
+  @ApiOperation({ summary: 'Delete Regulation Status' })
+  @ApiOkResponse({ description: 'Regulation status deleted' })
+  deleteRegulationStatus(@Param() params: RegulationStatusParams) {
+    this.logger.debug(`Deleting regulation status for Project ID: ${params.projectId}, Regulation ID: ${params.regulationId}, and Version ID: ${params.versionId}`);
+    return this.projectManagementService.deleteVersionRegulationStatus(params);
+  }
+
 
   @Get('checkHealth')
   @Unprotected()
