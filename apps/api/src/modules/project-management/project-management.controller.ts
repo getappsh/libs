@@ -65,6 +65,12 @@ export class ProjectManagementController {
     return this.projectManagementService.createToken(projectId);
   }
 
+  @Post('project/:projectId/confirm')
+  @ApiOperation({ summary: 'Confirm invitation for project' })
+  @ApiOkResponse({type: ProjectDto})
+  ConfirmMemberToProject(@Param('projectId') projectId:  number) {
+    return this.projectManagementService.ConfirmMemberToProject(projectId)
+  }
 
   @Delete('project/:projectId/member/:memberId')
   @ApiOperation({ summary: 'Remove member from Project' })

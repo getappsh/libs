@@ -28,6 +28,13 @@ export class ProjectManagementService implements OnModuleInit{
     )
   }
 
+  ConfirmMemberToProject(projectId:  number){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.CONFIRM_PROJECT_MEMBER,
+      projectId
+    )
+  }
+
   removeMemberFromProject(params: ProjectMemberParams){
     return this.projectManagementClient.send(
       ProjectManagementTopics.REMOVE_PROJECT_MEMBER,
