@@ -22,6 +22,7 @@ import {
 } from "@app/common/dto/project-management";
 import { DeviceResDto } from "@app/common/dto/project-management/dto/device-res.dto";
 import { UserContextInterceptor } from "../../utils/interceptor/user-context.interceptor";
+import { UserSearchDto } from "@app/common/oidc/oidc.interface";
 
 
 @ApiTags('Project Management')
@@ -35,11 +36,11 @@ export class ProjectManagementController {
     private readonly projectManagementService: ProjectManagementService,
   ) { }
 
-  @Get('users')
+  @Post('users')
   @ApiOperation({ summary: 'Get all Users' })
   @ApiOkResponse({ type: [MemberResDto] })
-  getAllUsers() {
-    return this.projectManagementService.getAllUsers();
+  getAllUsers(@Body() params: UserSearchDto) {
+    return this.projectManagementService.getAllUsers(params);
   }
 
   @Post('project')
