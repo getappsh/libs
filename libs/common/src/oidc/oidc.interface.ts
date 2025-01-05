@@ -4,7 +4,7 @@ import { IsBoolean, IsOptional, IsString } from "class-validator";
 
 export interface OidcService {
   authenticate(): Promise<void>
-  getUsers(params?: UserSearchDto): Promise<UserDto[]>
+  getUsers(params?: UserSearchDto, limit?: number): Promise<UserDto[]>
   inviteUser(params?: UserDto): Promise<void>
 }
 
