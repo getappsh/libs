@@ -35,6 +35,13 @@ export class ProjectManagementController {
     private readonly projectManagementService: ProjectManagementService,
   ) { }
 
+  @Get('users')
+  @ApiOperation({ summary: 'Get all Users' })
+  @ApiOkResponse({ type: [MemberResDto] })
+  getAllUsers() {
+    return this.projectManagementService.getAllUsers();
+  }
+
   @Post('project')
   @ApiOperation({ summary: 'Create Project' })
   @ApiOkResponse({ type: ProjectDto })

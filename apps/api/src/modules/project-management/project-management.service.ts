@@ -6,11 +6,14 @@ import { MicroserviceClient, MicroserviceName } from "@app/common/microservice-c
 
 @Injectable()
 export class ProjectManagementService implements OnModuleInit{
-
+  
   constructor(
     @Inject(MicroserviceName.PROJECT_MANAGEMENT_SERVICE) private readonly projectManagementClient: MicroserviceClient) {
-   }
-  
+    }
+    
+    getAllUsers() {
+      return this.projectManagementClient.send(ProjectManagementTopics.GET_USERS, {})
+    }
 
   createProject(user: any, projectDto: CreateProjectDto){
     projectDto.username = user?.email;
