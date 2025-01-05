@@ -6,7 +6,8 @@ export const UploadTopics = {
     UPLOAD_MANIFEST: `getapp-upload.manifest${region}`,
     UPDATE_UPLOAD_STATUS: `getapp-upload.update-upload-status${region}`,
     LAST_VERSION: `getapp-upload.last-version${region}`,
-    CHECK_HEALTH: `getapp-upload.check-health${region}`
+    CHECK_HEALTH: `getapp-upload.check-health${region}`,
+    CREATE_FILE_UPLOAD_URL: `getapp-upload.create-file-upload-url${region}`
 } as const
 
 export const DeliveryTopics = {
@@ -45,6 +46,7 @@ export const DeployTopicsEmit = {
 } as const
 
 export const ProjectManagementTopics = {
+    GET_USERS: `getapp-project-management.get-users${region}`,
     GET_USER_PROJECTS: `getapp-project-management.get-user-projects${region}`,
     CREATE_PROJECT: `getapp-project-management.create-project${region}`,
     CREATE_PROJECT_TOKEN: `getapp-project-management.create-project-token${region}`,
