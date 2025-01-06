@@ -4,9 +4,14 @@ import { AuthUser, Unprotected } from "../../utils/sso/sso.decorators";
 import { PROJECT_MANAGEMENT } from "@app/common/utils/paths";
 import { ProjectManagementService } from "./project-management.service";
 import {
-  ProjectMemberDto, ProjectDto, EditProjectMemberDto, ProjectConfigDto,
-  ProjectConfigResDto, ProjectTokenDto, ProjectReleasesDto, MemberProjectResDto,
-  MemberProjectsResDto, MemberResDto, ProjectResDto
+  ProjectMemberDto, ProjectDto, EditProjectMemberDto,
+  ProjectTokenDto, ProjectReleasesDto, MemberProjectResDto,
+  MemberProjectsResDto, MemberResDto,
+  CreateProjectDto,
+  CreateRegulationDto,
+  RegulationDto,
+  RegulationTypeDto,
+  UpdateRegulationDto
 } from "@app/common/dto/project-management";
 import { DeviceResDto } from "@app/common/dto/project-management/dto/device-res.dto";
 
@@ -23,8 +28,8 @@ export class ProjectManagementController {
 
   @Post('project')
   @ApiOperation({ summary: 'Create Project' })
-  @ApiOkResponse({ type: ProjectResDto })
-  createProject(@AuthUser() user: any, @Body() projectDto: ProjectDto) {
+  @ApiOkResponse({ type: ProjectDto })
+  createProject(@AuthUser() user: any, @Body() projectDto: CreateProjectDto) {
     return this.projectManagementService.createProject(user, projectDto)
   }
 
@@ -33,22 +38,6 @@ export class ProjectManagementController {
   @ApiOkResponse({ type: MemberProjectsResDto })
   getUserProjects(@AuthUser() user: any) {
     return this.projectManagementService.getUserProjects(user);
-  }
-
-  @Get('projectConfigOption')
-  @ApiOperation({ summary: "Get project's config option" })
-  @ApiOkResponse({ type: ProjectConfigResDto })
-  getProjectConfigOption() {
-    this.logger.debug("Get project config option")
-    return this.projectManagementService.getProjectConfigOption();
-  }
-
-  @Post('projectConfigOption')
-  @ApiOperation({ summary: "Set project's config option" })
-  @ApiOkResponse({ type: ProjectConfigDto })
-  setProjectConfigOption(@Body() body: ProjectConfigDto) {
-    this.logger.debug("Set project config option")
-    return this.projectManagementService.setProjectConfigOption(body);
   }
 
   @Post('project/:projectId/createToken')
@@ -114,6 +103,60 @@ export class ProjectManagementController {
   @ApiOkResponse({ type: DeviceResDto, isArray: true })
   getDeviceByPlatform(@Param('platform') platform: string) {
     return this.projectManagementService.getDeviceByPlatform(platform);
+  }
+
+
+  @Get('regulation-types')
+  @ApiOperation({ summary: 'Get all Regulation Types' })
+  @ApiOkResponse({ type: [RegulationTypeDto] })
+  getAllRegulationTypes() {
+    this.logger.debug("Getting all regulation types");
+    return this.projectManagementService.getAllRegulationTypes();
+  }
+
+  @Get('project/:projectId/regulations')
+  @ApiOperation({ summary: 'Get all Project Regulations' })
+  @ApiParam({ name: 'projectId' })
+  @ApiOkResponse({ type: [RegulationDto] })
+  getProjectRegulations(@Param('projectId') projectId: number) {
+    this.logger.debug("Getting all project regulations for project: ", projectId);
+    return this.projectManagementService.getProjectRegulations(projectId);
+  }
+  // TODO: create and update regulation need to be associated with a project
+  @Post('regulation')
+  @ApiOperation({ summary: 'Create Regulation' })
+  @ApiCreatedResponse({ type: RegulationDto })
+  createRegulation(@Body() createRegulationDto: CreateRegulationDto) {
+    this.logger.debug("Creating regulation: ", JSON.stringify(createRegulationDto))
+    return this.projectManagementService.createRegulation(createRegulationDto);
+  }
+
+  // TODO: create and update regulation need to be associated with a project
+  @Put('regulation/:id')
+  @ApiOperation({ summary: 'Edit Regulation' })
+  @ApiParam({ name: 'id', description: 'ID of the regulation to edit' })
+  @ApiOkResponse({ type: RegulationDto })
+  editRegulation(@Param('id') id: number, @Body() updateRegulationDto: UpdateRegulationDto) {
+    this.logger.debug("Editing regulation: ", JSON.stringify(updateRegulationDto));
+    return this.projectManagementService.editRegulation(id, updateRegulationDto);
+  }
+
+  @Get('regulation/:id')
+  @ApiOperation({ summary: 'Get Regulation by ID' })
+  @ApiParam({ name: 'id', description: 'ID of the regulation to get' })
+  @ApiOkResponse({ type: RegulationDto })
+  getRegulationById(@Param('id') id: number) {
+    this.logger.debug("Getting regulation by ID: ", id);
+    return this.projectManagementService.getRegulationById(id);
+  }
+
+  @Delete('regulation/:id')
+  @ApiOperation({ summary: 'Delete Regulation by ID' })
+  @ApiParam({ name: 'id', description: 'ID of the regulation to delete' })
+  @ApiOkResponse()
+  deleteRegulation(@Param('id') id: number) {
+    this.logger.debug("Deleting regulation by ID: ", id);
+    return this.projectManagementService.deleteRegulation(id);
   }
 
   @Get('checkHealth')
