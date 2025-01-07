@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ProjectManagementController } from './project-management.controller';
 import { ProjectManagementService } from './project-management.service';
 import { MicroserviceModule, MicroserviceName, MicroserviceType } from '@app/common/microservice-client';
+import { UsersController } from './users.controller';
 
 @Module({
   imports: [
@@ -11,6 +12,6 @@ import { MicroserviceModule, MicroserviceName, MicroserviceType } from '@app/com
       })
   ],
   providers: [ProjectManagementService],
-  controllers: [ProjectManagementController]
+  controllers: [ProjectManagementController, UsersController]
 })
 export class ProjectManagementModule {}
