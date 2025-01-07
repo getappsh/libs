@@ -20,7 +20,10 @@ export class AuthGuard extends ckAuthGuard {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const socket = request.socket as TLSSocket;
+    
     const isUnprotected = this.ref.getAllAndOverride("out-of-auth", [context.getHandler(), context.getClass()])
+    const authOrProject = this.ref.getAllAndOverride("auth-or-project", [context.getHandler(), context.getClass()])
+
     if ((socket.authorized && request.header("auth_type") && request.header("auth_type") == "CC") || isUnprotected) { // CC stands for client certificates
       if (request.header("integration_test") === "true") {
         request["user"] = {
@@ -33,6 +36,9 @@ export class AuthGuard extends ckAuthGuard {
       return true
     }
     else {
+      if (authOrProject && request.headers['x-project-token']) {
+        return true
+      }
       if (request.header("Authorization")) {
         return await super.canActivate(context);
       } else if (request.header("Device-Auth") && request.header("Device-Auth") === (process.env.DEVICE_AUTH ?? process.env.DEVICE_SECRET)) {

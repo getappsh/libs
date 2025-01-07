@@ -9,11 +9,17 @@ export class UserContextInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
+    const projectToken = request.headers['x-project-token'];
+
 
     if (user) {
       this.clsService.set('user', user);
     }
 
+    if (projectToken) {
+      this.clsService.set('projectToken', projectToken);
+    }
+    
     return next.handle();
   }
 }
