@@ -1,8 +1,8 @@
-import { Body, Controller, Delete, Get, Logger, Param, Post, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Logger, Param, Post, UseInterceptors } from "@nestjs/common";
 import { ApiBearerAuth, ApiCreatedResponse, ApiHeader, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { ReleasesService } from "./releases.service";
-import { ReleaseDto, SetReleaseDto, SetReleaseArtifactResDto, SetReleaseArtifactDto, ReleaseParams } from "@app/common/dto/upload";
-import { AuthOrProject, Unprotected } from '../../utils/sso/sso.decorators';
+import { ReleaseDto, SetReleaseDto, SetReleaseArtifactResDto, SetReleaseArtifactDto, ReleaseParams, RegulationStatusParams, VersionRegulationStatusParams, SetRegulationCompliancyDto, SetRegulationStatusDto, RegulationStatusDto  } from "@app/common/dto/upload";
+import { AuthOrProject } from '../../utils/sso/sso.decorators';
 import { UserContextInterceptor } from "../../utils/interceptor/user-context.interceptor";
 import { UPLOAD_RELEASES } from "@app/common/utils/paths";
 
@@ -94,6 +94,48 @@ export class ReleasesController {
   deleteReleaseArtifact(@Param() params: ReleaseParams){
     this.logger.debug(`Deleting release artifact for project: ${params.projectId}, version: ${params.version}`);
     return this.releasesService.deleteReleaseArtifact(params);
+  }
+
+
+  @Get('project/:projectId/version/:version/regulation-status')
+  @ApiOperation({ summary: 'Get Version Regulation Statuses by Regulation ID' })
+  @ApiOkResponse({ type: [RegulationStatusDto], isArray: true })
+  getVersionRegulationStatuses(@Param() params: VersionRegulationStatusParams) {
+    this.logger.debug(`Getting version regulation statuses by Project ID: ${params.projectId} and Version: ${params.version}`);
+    return this.releasesService.getVersionRegulationsStatuses(params);
+  }
+
+  @Get('project/:projectId/version/:version/regulation-status/:regulation')
+  @ApiOperation({ summary: 'Get Regulation Status by Regulation ID and Version ID' })
+  @ApiOkResponse({ type: RegulationStatusDto })
+  getRegulationStatus(@Param() params: RegulationStatusParams) {
+    this.logger.debug(`Getting regulation status by Project ID: ${params.projectId}, Regulation: ${params.regulation}, and Version: ${params.version}`);
+    return this.releasesService.getVersionRegulationStatus(params);
+  }
+
+
+  @Post('project/:projectId/version/:version/regulation-status/:regulation')
+  @ApiOperation({ summary: 'Set Regulation Status' })
+  @ApiOkResponse({ type: RegulationStatusDto })
+  setRegulationStatus(@Param() params: RegulationStatusParams, @Body() setRegulationStatusDto: SetRegulationStatusDto) {
+    this.logger.debug(`Setting regulation status for: ${JSON.stringify(params)}, with: ${JSON.stringify(setRegulationStatusDto)}`);
+    return this.releasesService.setRegulationStatus(params, setRegulationStatusDto);
+  }
+
+  @Post('project/:projectId/version/:version/regulation-status/:regulation/compliancy')
+  @ApiOperation({ summary: 'Set Regulation Compliancy' })
+  @ApiOkResponse({ type: RegulationStatusDto })
+  setRegulationCompliancy(@Param() params: RegulationStatusParams, @Body() setRegulationCompliancyDto: SetRegulationCompliancyDto) {
+    this.logger.debug(`Setting regulation compliancy for: ${JSON.stringify(params)}, with: ${JSON.stringify(setRegulationCompliancyDto)}`);
+    return this.releasesService.setRegulationCompliancy(params, setRegulationCompliancyDto);
+  }
+
+  @Delete('project/:projectId/version/:version/regulation-status/:regulation')
+  @ApiOperation({ summary: 'Delete Regulation Status' })
+  @ApiOkResponse({ description: 'Regulation status deleted' })
+  deleteRegulationStatus(@Param() params: RegulationStatusParams) {
+    this.logger.debug(`Deleting regulation status for Project ID: ${params.projectId}, Regulation: ${params.regulation}, and Version: ${params.version}`);
+    return this.releasesService.deleteVersionRegulationStatus(params);
   }
 
   
