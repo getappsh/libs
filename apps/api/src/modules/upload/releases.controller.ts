@@ -79,7 +79,7 @@ export class ReleasesController {
     summary: "Set Release Artifact",
     description: "This service message allows creation of a release artifact."
   })
-  @ApiCreatedResponse()
+  @ApiCreatedResponse({type: SetReleaseArtifactResDto})
   setReleaseArtifact(@Body() artifact: SetReleaseArtifactDto, @Param() params: ReleaseParams){
     this.logger.debug(`Setting release artifact for project: ${params.projectId}, version: ${params.version}, artifactName: ${artifact.artifactName}`);
     return this.releasesService.setReleaseArtifact(artifact, params);
@@ -99,7 +99,7 @@ export class ReleasesController {
 
   @Get('project/:projectId/version/:version/regulation-status')
   @ApiOperation({ summary: 'Get Version Regulation Statuses by Regulation ID' })
-  @ApiOkResponse({ type: [RegulationStatusDto], isArray: true })
+  @ApiOkResponse({ type: RegulationStatusDto, isArray: true })
   getVersionRegulationStatuses(@Param() params: VersionRegulationStatusParams) {
     this.logger.debug(`Getting version regulation statuses by Project ID: ${params.projectId} and Version: ${params.version}`);
     return this.releasesService.getVersionRegulationsStatuses(params);

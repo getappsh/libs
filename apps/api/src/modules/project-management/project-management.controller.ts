@@ -125,7 +125,7 @@ export class ProjectManagementController {
   @Get('/:projectId/regulation')
   @ApiOperation({ summary: 'Get all Project Regulations' })
   @ApiParam({ name: 'projectId' })
-  @ApiOkResponse({ type: [RegulationDto], isArray: true })
+  @ApiOkResponse({ type: RegulationDto, isArray: true })
   getProjectRegulations(@Param('projectId') projectId: number) {
     this.logger.debug("Getting all project regulations for project: ", projectId);
     return this.projectManagementService.getProjectRegulations(projectId);
