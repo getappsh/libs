@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Logger, Param, Post, UseInterceptors } from "@nestjs/common";
 import { ApiBearerAuth, ApiCreatedResponse, ApiHeader, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { ReleasesService } from "./releases.service";
-import { ReleaseDto, SetReleaseDto, SetReleaseArtifactResDto, SetReleaseArtifactDto, ReleaseParams, RegulationStatusParams, VersionRegulationStatusParams, SetRegulationCompliancyDto, SetRegulationStatusDto, RegulationStatusDto  } from "@app/common/dto/upload";
+import { ReleaseDto, SetReleaseDto, SetReleaseArtifactResDto, SetReleaseArtifactDto, ReleaseParams, RegulationStatusParams, VersionRegulationStatusParams, SetRegulationCompliancyDto, SetRegulationStatusDto, RegulationStatusDto, ReleaseArtifactParams  } from "@app/common/dto/upload";
 import { AuthOrProject } from '../../utils/sso/sso.decorators';
 import { UserContextInterceptor } from "../../utils/interceptor/user-context.interceptor";
 import { UPLOAD_RELEASES } from "@app/common/utils/paths";
@@ -67,7 +67,7 @@ export class ReleasesController {
     summary: "Delete Release", 
     description: "This service message allows deletion of a release."
   })
-  @ApiOkResponse({type: SetReleaseArtifactResDto})
+  @ApiOkResponse({description: "Release deleted."})
   deleteRelease(@Param() params: ReleaseParams){
     this.logger.debug(`Deleting release for project: ${params.projectId}, version: ${params.version}`);
     return this.releasesService.deleteRelease(params);
@@ -86,12 +86,13 @@ export class ReleasesController {
 
   }
 
-  @Delete('project/:projectId/version/:version/artifact')
+  @Delete('project/:projectId/version/:version/artifact/:artifactId')
   @ApiOperation({
     summary: "Delete Release Artifact",
+    description: "This service message allows deletion of a release artifact."
   }) 
-  @ApiOkResponse({type: SetReleaseArtifactResDto})
-  deleteReleaseArtifact(@Param() params: ReleaseParams){
+  @ApiOkResponse({description: "Release artifact deleted."})
+  deleteReleaseArtifact(@Param() params: ReleaseArtifactParams){
     this.logger.debug(`Deleting release artifact for project: ${params.projectId}, version: ${params.version}`);
     return this.releasesService.deleteReleaseArtifact(params);
   }
