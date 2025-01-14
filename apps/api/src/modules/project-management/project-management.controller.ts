@@ -45,6 +45,14 @@ export class ProjectManagementController {
     return this.projectManagementService.addMemberToProject(projectMemberDto, projectId)
   }
 
+  @Get('/:projectName')
+  @ApiOperation({ summary: 'Get Project details' })
+  @ApiParam({ name: 'projectName', type: String })
+  @ApiOkResponse({ type: ProjectDto })
+  getProject(@Param("projectName") projectName: string) {
+    return this.projectManagementService.getProject(projectName)
+  }
+
   @Get('')
   @ApiOperation({ summary: "Get all User's projects" })
   @ApiOkResponse({ type: MemberProjectsResDto })

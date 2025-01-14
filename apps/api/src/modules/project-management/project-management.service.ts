@@ -55,6 +55,13 @@ export class ProjectManagementService implements OnModuleInit{
     )
   }
 
+  getProject(projectName: string){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.GET_PROJECT_BY_IDENTIFIER,
+    {projectIdentifier: projectName}
+    )
+  }
+
   getUserProjects(user: any){
     return this.projectManagementClient.send(
       ProjectManagementTopics.GET_USER_PROJECTS,
