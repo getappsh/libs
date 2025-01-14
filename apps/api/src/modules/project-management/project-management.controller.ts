@@ -13,11 +13,11 @@ import {
   RegulationTypeDto,
   UpdateRegulationDto,
   RegulationParams,
-  ProjectMemberParams
+  ProjectMemberParams,
+  ProjectIdentifierParams
 } from "@app/common/dto/project-management";
 import { DeviceResDto } from "@app/common/dto/project-management/dto/device-res.dto";
 import { UserContextInterceptor } from "../../utils/interceptor/user-context.interceptor";
-import { ProjectIdentifierPipe } from "../../utils/pipe";
 
 
 @ApiTags('Project')
@@ -48,11 +48,10 @@ export class ProjectManagementController {
 
   @Get('/:projectIdentifier')
   @ApiOperation({ summary: 'Get Project details' })
-  @ApiParam({name: 'projectIdentifier', type: String, description: 'Project identifier (ID or name)'})
   @ApiOkResponse({ type: ProjectDto })
-  getProject(@Param('projectIdentifier', ProjectIdentifierPipe) projectIdentifier: string | number) {
-    this.logger.debug(`Getting project: ${projectIdentifier}`);
-    return this.projectManagementService.getProject(projectIdentifier)
+  getProject(@Param() params: ProjectIdentifierParams) {
+    this.logger.debug(`Getting project: ${params.projectIdentifier}`);
+    return this.projectManagementService.getProject(params)
   }
 
   @Get('')
