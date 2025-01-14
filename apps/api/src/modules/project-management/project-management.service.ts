@@ -55,10 +55,10 @@ export class ProjectManagementService implements OnModuleInit{
     )
   }
 
-  getProject(projectName: string){
+  getProject(projectIdentifier: string | number){
     return this.projectManagementClient.send(
       ProjectManagementTopics.GET_PROJECT_BY_IDENTIFIER,
-    {projectIdentifier: projectName}
+    {projectIdentifier: projectIdentifier}
     )
   }
 

@@ -17,6 +17,7 @@ import {
 } from "@app/common/dto/project-management";
 import { DeviceResDto } from "@app/common/dto/project-management/dto/device-res.dto";
 import { UserContextInterceptor } from "../../utils/interceptor/user-context.interceptor";
+import { ProjectIdentifierPipe } from "../../utils/pipe";
 
 
 @ApiTags('Project')
@@ -45,12 +46,13 @@ export class ProjectManagementController {
     return this.projectManagementService.addMemberToProject(projectMemberDto, projectId)
   }
 
-  @Get('/:projectName')
+  @Get('/:projectIdentifier')
   @ApiOperation({ summary: 'Get Project details' })
-  @ApiParam({ name: 'projectName', type: String })
+  @ApiParam({name: 'projectIdentifier', type: String, description: 'Project Name (string) or Project ID (number)'})
   @ApiOkResponse({ type: ProjectDto })
-  getProject(@Param("projectName") projectName: string) {
-    return this.projectManagementService.getProject(projectName)
+  getProject(@Param('projectIdentifier', ProjectIdentifierPipe) projectIdentifier: string | number) {
+    this.logger.debug(`Getting project: ${projectIdentifier}`);
+    return this.projectManagementService.getProject(projectIdentifier)
   }
 
   @Get('')
