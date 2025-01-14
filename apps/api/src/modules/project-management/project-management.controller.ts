@@ -48,7 +48,7 @@ export class ProjectManagementController {
 
   @Get('/:projectIdentifier')
   @ApiOperation({ summary: 'Get Project details' })
-  @ApiParam({name: 'projectIdentifier', type: String, description: 'Project Name (string) or Project ID (number)'})
+  @ApiParam({name: 'projectIdentifier', type: String, description: 'Project identifier (ID or name)'})
   @ApiOkResponse({ type: ProjectDto })
   getProject(@Param('projectIdentifier', ProjectIdentifierPipe) projectIdentifier: string | number) {
     this.logger.debug(`Getting project: ${projectIdentifier}`);

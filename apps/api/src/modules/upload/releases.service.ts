@@ -1,4 +1,5 @@
-import { ReleaseParams, SetReleaseDto, RegulationStatusParams, VersionRegulationStatusParams, SetRegulationCompliancyDto, SetRegulationStatusDto } from "@app/common/dto/upload";
+import { ProjectIdentifierParams } from "@app/common/dto/project-management";
+import { ReleaseParams, SetReleaseDto, RegulationStatusParams, SetRegulationCompliancyDto, SetRegulationStatusDto, SetReleaseArtifactDto } from "@app/common/dto/upload";
 import { MicroserviceClient, MicroserviceName } from "@app/common/microservice-client";
 import { UploadTopics } from "@app/common/microservice-client/topics";
 import { Inject, Injectable, Logger } from "@nestjs/common";
@@ -12,13 +13,13 @@ export class ReleasesService {
     @Inject(MicroserviceName.UPLOAD_SERVICE) private uploadClient: MicroserviceClient
   ) { }
 
-  setRelease(dto: SetReleaseDto, projectId: number) {
-    dto.projectId = projectId;
+  setRelease(dto: SetReleaseDto, params: ProjectIdentifierParams) {
+    dto.projectIdentifier = params.projectIdentifier;
     return this.uploadClient.send(UploadTopics.SET_RELEASE, dto);
   }
 
-  getReleases(projectId: number) {
-    return this.uploadClient.send(UploadTopics.GET_RELEASES, { projectId: projectId });
+  getReleases(params: ProjectIdentifierParams) {
+    return this.uploadClient.send(UploadTopics.GET_RELEASES, params);
   }
 
   getRelease(params: ReleaseParams) {
@@ -30,8 +31,8 @@ export class ReleasesService {
     return this.uploadClient.send(UploadTopics.DELETE_RELEASE, params);
   }
 
-  setReleaseArtifact(dto: SetReleaseDto, params: ReleaseParams) {
-    dto.projectId = params.projectId;
+  setReleaseArtifact(dto: SetReleaseArtifactDto, params: ReleaseParams) {
+    dto.projectIdentifier = params.projectIdentifier;
     dto.version = params.version;
     return this.uploadClient.send(UploadTopics.SET_RELEASE_ARTIFACT, dto);
   }
@@ -49,7 +50,7 @@ export class ReleasesService {
     )
   }
 
-  getVersionRegulationsStatuses(params: VersionRegulationStatusParams) {
+  getVersionRegulationsStatuses(params: ReleaseParams) {
     return this.uploadClient.send(
       UploadTopics.GET_VERSION_REGULATIONS_STATUSES,
       params
@@ -59,7 +60,7 @@ export class ReleasesService {
   setRegulationStatus(params: RegulationStatusParams, setRegulationStatusDto: SetRegulationStatusDto) {
     setRegulationStatusDto.regulation = params.regulation;
     setRegulationStatusDto.version = params.version;
-    setRegulationStatusDto.projectId = params.projectId;
+    setRegulationStatusDto.projectIdentifier = params.projectIdentifier;
     return this.uploadClient.send(
       UploadTopics.SET_VERSION_REGULATION_STATUS,
       setRegulationStatusDto
@@ -69,7 +70,7 @@ export class ReleasesService {
   setRegulationCompliancy(params: RegulationStatusParams, setRegulationCompliancyDto: SetRegulationCompliancyDto) {
     setRegulationCompliancyDto.regulation = params.regulation;
     setRegulationCompliancyDto.version = params.version;
-    setRegulationCompliancyDto.projectId = params.projectId;
+    setRegulationCompliancyDto.projectIdentifier = params.projectIdentifier;
     return this.uploadClient.send(
       UploadTopics.SET_VERSION_REGULATION_COMPLIANCE,
       setRegulationCompliancyDto
