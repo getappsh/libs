@@ -1,10 +1,10 @@
-import { Body, Controller, Get, Post, Delete, Put, Param, Logger, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Get, Post, Delete, Put, Param, Logger, UseInterceptors, Query, Version } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags, ApiParam, ApiCreatedResponse, ApiOkResponse, ApiExcludeEndpoint } from "@nestjs/swagger";
 import { AuthUser, Unprotected } from "../../utils/sso/sso.decorators";
 import { PROJECT_MANAGEMENT } from "@app/common/utils/paths";
 import { ProjectManagementService } from "./project-management.service";
 import {
-  AddMemberToProjectDto, ProjectDto, EditProjectMemberDto,
+  AddMemberToProjectDto, ExtendedProjectDto, EditProjectMemberDto,
   ProjectTokenDto, ProjectReleasesDto, MemberProjectResDto,
   MemberProjectsResDto, MemberResDto,
   CreateProjectDto,
@@ -14,11 +14,15 @@ import {
   UpdateRegulationDto,
   RegulationParams,
   ProjectMemberParams,
-  ProjectIdentifierParams
+  ProjectIdentifierParams,
+  SearchProjectsQueryDto,
+  GetProjectsQueryDto,
+  BaseProjectDto,
+
 } from "@app/common/dto/project-management";
 import { DeviceResDto } from "@app/common/dto/project-management/dto/device-res.dto";
 import { UserContextInterceptor } from "../../utils/interceptor/user-context.interceptor";
-
+import { ApiOkResponsePaginated } from "@app/common/dto/pagination.dto";
 
 @ApiTags('Project')
 @ApiBearerAuth()
@@ -33,7 +37,7 @@ export class ProjectManagementController {
 
   @Post('')
   @ApiOperation({ summary: 'Create Project' })
-  @ApiOkResponse({ type: ProjectDto })
+  @ApiOkResponse({ type: ExtendedProjectDto })
   createProject(@AuthUser() user: any, @Body() projectDto: CreateProjectDto) {
     return this.projectManagementService.createProject(user, projectDto)
   }
@@ -46,19 +50,37 @@ export class ProjectManagementController {
     return this.projectManagementService.addMemberToProject(projectMemberDto, projectId)
   }
 
-  @Get('/:projectIdentifier')
-  @ApiOperation({ summary: 'Get Project details' })
-  @ApiOkResponse({ type: ProjectDto })
-  getProject(@Param() params: ProjectIdentifierParams) {
-    this.logger.debug(`Getting project: ${params.projectIdentifier}`);
-    return this.projectManagementService.getProject(params)
-  }
-
   @Get('')
   @ApiOperation({ summary: "Get all User's projects" })
   @ApiOkResponse({ type: MemberProjectsResDto })
   getUserProjects(@AuthUser() user: any) {
     return this.projectManagementService.getUserProjects(user);
+  }
+
+  
+  @Get()
+  @Version('2')
+  @ApiOperation({ summary: 'Get all projects' })
+  @ApiOkResponsePaginated(ExtendedProjectDto)
+  getProjects(@Query() query: GetProjectsQueryDto){
+    this.logger.debug(`Getting all projects: ${JSON.stringify(query)}`);
+    return this.projectManagementService.getProjects(query);
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'Search projects' })
+  @ApiOkResponsePaginated(BaseProjectDto)
+  searchProjects(@Query() query: SearchProjectsQueryDto) {
+    this.logger.debug(`Searching projects: ${JSON.stringify(query)}`);
+    return this.projectManagementService.searchProjects(query);
+  }
+
+  @Get('/:projectIdentifier')
+  @ApiOperation({ summary: 'Get Project details' })
+  @ApiOkResponse({ type: ExtendedProjectDto })
+  getProject(@Param() params: ProjectIdentifierParams) {
+    this.logger.debug(`Getting project: ${params.projectIdentifier}`);
+    return this.projectManagementService.getProject(params)
   }
 
   @Post('/:projectId/createToken')
@@ -71,7 +93,7 @@ export class ProjectManagementController {
 
   @Post('/:projectId/confirm')
   @ApiOperation({ summary: 'Confirm invitation for project' })
-  @ApiOkResponse({type: ProjectDto})
+  @ApiOkResponse({type: ExtendedProjectDto})
   ConfirmMemberToProject(@Param('projectId') projectId:  number) {
     return this.projectManagementService.ConfirmMemberToProject(projectId)
   }
