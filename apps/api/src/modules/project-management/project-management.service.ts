@@ -24,18 +24,18 @@ export class ProjectManagementService implements OnModuleInit{
     )
   }
 
-  addMemberToProject(projectMemberDto: AddMemberToProjectDto, projectId: number){
-    projectMemberDto.projectId = projectId;
+  addMemberToProject(projectMemberDto: AddMemberToProjectDto, params: ProjectIdentifierParams){
+    projectMemberDto.projectIdentifier = params.projectIdentifier;
     return this.projectManagementClient.send(
       ProjectManagementTopics.ADD_PROJECT_NEW_MEMBER,
       projectMemberDto
     )
   }
 
-  ConfirmMemberToProject(projectId:  number){
+  confirmMemberToProject(params: ProjectIdentifierParams){
     return this.projectManagementClient.send(
       ProjectManagementTopics.CONFIRM_PROJECT_MEMBER,
-      projectId
+      params
     )
   }
 
@@ -47,7 +47,7 @@ export class ProjectManagementService implements OnModuleInit{
   }
 
   editMember(editProjectMemberDto: EditProjectMemberDto, params: ProjectMemberParams){
-    editProjectMemberDto.projectId = params.projectId;
+    editProjectMemberDto.projectIdentifier = params.projectIdentifier;
     editProjectMemberDto.memberId = params.memberId;
     return this.projectManagementClient.send(
       ProjectManagementTopics.EDIT_PROJECT_MEMBER,
@@ -83,17 +83,17 @@ export class ProjectManagementService implements OnModuleInit{
     )
   }
 
-  createToken(projectId: number){
+  createToken(params: ProjectIdentifierParams){
     return this.projectManagementClient.send(
       ProjectManagementTopics.CREATE_PROJECT_TOKEN,
-      {projectId: projectId}
+      params
     )
   }
 
-  getProjectReleases(projectId: number){
+  getProjectReleases(params: ProjectIdentifierParams){
     return this.projectManagementClient.send(
       ProjectManagementTopics.GET_PROJECT_RELEASES,
-      {projectId: projectId}
+      params
     )
   }
 
@@ -126,10 +126,10 @@ export class ProjectManagementService implements OnModuleInit{
     )
   }
 
-  getProjectRegulations(projectId: number){
+  getProjectRegulations(params: ProjectIdentifierParams){
     return this.projectManagementClient.send(
       ProjectManagementTopics.GET_PROJECT_REGULATIONS,
-      {projectId: projectId}
+      params
     )
   }
 
@@ -140,8 +140,8 @@ export class ProjectManagementService implements OnModuleInit{
     )
   }
 
-  createProjectRegulation(projectId: number, createRegulationDto: CreateRegulationDto){
-    createRegulationDto.projectId = projectId;
+  createProjectRegulation(createRegulationDto: CreateRegulationDto, params: ProjectIdentifierParams){
+    createRegulationDto.projectIdentifier = params.projectIdentifier;
     return this.projectManagementClient.send(
       ProjectManagementTopics.CREATE_PROJECT_REGULATION,
       createRegulationDto
@@ -150,7 +150,7 @@ export class ProjectManagementService implements OnModuleInit{
 
   editProjectRegulation(params: RegulationParams, updateRegulationDto: UpdateRegulationDto){
     updateRegulationDto.regulationId = params.regulationId;
-    updateRegulationDto.projectId = params.projectId;
+    updateRegulationDto.projectIdentifier = params.projectIdentifier;
     return this.projectManagementClient.send(
       ProjectManagementTopics.UPDATE_PROJECT_REGULATION,
       updateRegulationDto

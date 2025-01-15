@@ -42,12 +42,11 @@ export class ProjectManagementController {
     return this.projectManagementService.createProject(user, projectDto)
   }
 
-  @Post('/:projectId/member')
+  @Post('/:projectIdentifier/member')
   @ApiOperation({ summary: 'Add member to Project' })
-  @ApiParam({ name: 'projectId', type: Number })
   @ApiCreatedResponse({ type: MemberProjectResDto })
-  addMemberToProject(@Body() projectMemberDto: AddMemberToProjectDto, @Param("projectId") projectId: number) {
-    return this.projectManagementService.addMemberToProject(projectMemberDto, projectId)
+  addMemberToProject(@Body() projectMemberDto: AddMemberToProjectDto, @Param() params: ProjectIdentifierParams) {
+    return this.projectManagementService.addMemberToProject(projectMemberDto, params)
   }
 
   @Get('')
@@ -57,7 +56,6 @@ export class ProjectManagementController {
     return this.projectManagementService.getUserProjects(user);
   }
 
-  
   @Get()
   @Version('2')
   @ApiOperation({ summary: 'Get all projects' })
@@ -83,41 +81,39 @@ export class ProjectManagementController {
     return this.projectManagementService.getProject(params)
   }
 
-  @Post('/:projectId/createToken')
+  @Post('/:projectIdentifier/createToken')
   @ApiOperation({ summary: "Create Upload token for a Project" })
-  @ApiParam({ name: 'projectId', type: Number })
   @ApiCreatedResponse({ type: ProjectTokenDto })
-  createToken( @Param('projectId') projectId:  number) {
-    return this.projectManagementService.createToken(projectId);
+  createToken( @Param() params: ProjectIdentifierParams) {
+    return this.projectManagementService.createToken(params);
   }
 
-  @Post('/:projectId/confirm')
+  @Post('/:projectIdentifier/confirm')
   @ApiOperation({ summary: 'Confirm invitation for project' })
   @ApiOkResponse({type: ExtendedProjectDto})
-  ConfirmMemberToProject(@Param('projectId') projectId:  number) {
-    return this.projectManagementService.ConfirmMemberToProject(projectId)
+  confirmMemberToProject(@Param() params: ProjectIdentifierParams) {
+    return this.projectManagementService.confirmMemberToProject(params)
   }
 
-  @Delete('/:projectId/member/:memberId')
+  @Delete('/:projectIdentifier/member/:memberId')
   @ApiOperation({ summary: 'Remove member from Project' })
   @ApiOkResponse()
   removeMemberFromProject(@Param() params: ProjectMemberParams) {
     return this.projectManagementService.removeMemberFromProject(params)
   }
 
-  @Put('/:projectId/member/:memberId')
+  @Put('/:projectIdentifier/member/:memberId')
   @ApiOperation({ summary: 'Edit member details' })
   @ApiOkResponse({ type: MemberResDto })
   editMember(@Body() editProjectMemberDto: EditProjectMemberDto, @Param() params: ProjectMemberParams) {
     return this.projectManagementService.editMember(editProjectMemberDto, params)
   }
   
-  @Get('/:projectId/projectReleases')
+  @Get('/:projectIdentifier/projectReleases')
   @ApiOperation({ summary: 'Get project release' })
-  @ApiParam({ name: 'projectId', type: Number })
   @ApiOkResponse({ type: ProjectReleasesDto, isArray: true })
-  getProjectReleases(@Param('projectId') projectId: number) {
-    return this.projectManagementService.getProjectReleases(projectId);
+  getProjectReleases(@Param() params: ProjectIdentifierParams) {
+    return this.projectManagementService.getProjectReleases(params);
   }
 
   @Get('devices/catalogId/:catalogId')
@@ -153,46 +149,43 @@ export class ProjectManagementController {
     return this.projectManagementService.getAllRegulationTypes();
   }
 
-  @Get('/:projectId/regulation')
+  @Get('/:projectIdentifier/regulation')
   @ApiOperation({ summary: 'Get all Project Regulations' })
-  @ApiParam({ name: 'projectId' })
   @ApiOkResponse({ type: RegulationDto, isArray: true })
-  getProjectRegulations(@Param('projectId') projectId: number) {
-    this.logger.debug("Getting all project regulations for project: ", projectId);
-    return this.projectManagementService.getProjectRegulations(projectId);
+  getProjectRegulations(@Param() params: ProjectIdentifierParams) {
+    this.logger.debug("Getting all project regulations for project: ", params);
+    return this.projectManagementService.getProjectRegulations(params);
   }
 
-  @Get('/:projectId/regulation/:regulationId')
+  @Get('/:projectIdentifier/regulation/:regulationId')
   @ApiOperation({ summary: 'Get Regulation by ID' })
   @ApiOkResponse({ type: RegulationDto })
   getProjectRegulationById(@Param() regulationParams: RegulationParams) {
-    this.logger.debug(`Getting regulation by Project ID: ${regulationParams.projectId} and Regulation ID: ${regulationParams.regulationId}`);
+    this.logger.debug(`Getting regulation by Project: ${regulationParams.regulationId} and Regulation ID: ${regulationParams.regulationId}`);
     return this.projectManagementService.getProjectRegulationById(regulationParams);
   }
 
-  @Post('/:projectId/regulation')
+  @Post('/:projectIdentifier/regulation')
   @ApiOperation({ summary: 'Create Regulation' })
-  @ApiParam({ name: 'projectId' })
   @ApiCreatedResponse({ type: RegulationDto })
-  createProjectRegulation(@Param('projectId') projectId: number, @Body() createRegulationDto: CreateRegulationDto) {
-    this.logger.debug(`Creating regulation for project: ${projectId}`, JSON.stringify(createRegulationDto));
-    return this.projectManagementService.createProjectRegulation(projectId, createRegulationDto);
+  createProjectRegulation(@Param() params: ProjectIdentifierParams, @Body() createRegulationDto: CreateRegulationDto) {
+    this.logger.debug(`Creating regulation for project: ${params.projectIdentifier}`, JSON.stringify(createRegulationDto));
+    return this.projectManagementService.createProjectRegulation(createRegulationDto, params);
   }
 
-  @Put('/:projectId/regulation/:regulationId')
+  @Put('/:projectIdentifier/regulation/:regulationId')
   @ApiOperation({ summary: 'Edit Regulation' })
   @ApiOkResponse({ type: RegulationDto })
   editProjectRegulation(@Param() regulationParams: RegulationParams, @Body() updateRegulationDto: UpdateRegulationDto) {
-    console.log(regulationParams);
-    this.logger.debug(`Editing regulation by Project ID: ${regulationParams.projectId} and Regulation ID: ${regulationParams.regulationId}`, JSON.stringify(updateRegulationDto));
+    this.logger.debug(`Editing regulation by Project: ${regulationParams.projectIdentifier} and Regulation ID: ${regulationParams.regulationId}`, JSON.stringify(updateRegulationDto));
     return this.projectManagementService.editProjectRegulation(regulationParams, updateRegulationDto);
   }
 
-  @Delete('/:projectId/regulation/:regulationId')
+  @Delete('/:projectIdentifier/regulation/:regulationId')
   @ApiOperation({ summary: 'Delete Regulation by ID' })
   @ApiOkResponse()
   deleteProjectRegulation(@Param() regulationParams: RegulationParams) {
-    this.logger.debug(`Deleting regulation by Project ID: ${regulationParams.projectId} and Regulation ID: ${regulationParams.regulationId}`);
+    this.logger.debug(`Deleting regulation by Project: ${regulationParams.projectIdentifier} and Regulation ID: ${regulationParams.regulationId}`);
     return this.projectManagementService.deleteProjectRegulation(regulationParams);
   }
 
