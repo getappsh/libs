@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Delete, Put, Param, Logger, UseInterceptors, Query, Version } from "@nestjs/common";
-import { ApiBearerAuth, ApiOperation, ApiTags, ApiParam, ApiCreatedResponse, ApiOkResponse, ApiExcludeEndpoint } from "@nestjs/swagger";
-import { AuthUser, Unprotected } from "../../utils/sso/sso.decorators";
+import { ApiBearerAuth, ApiOperation, ApiTags, ApiParam, ApiCreatedResponse, ApiOkResponse, ApiExcludeEndpoint, ApiHeader } from "@nestjs/swagger";
+import { AuthOrProject, AuthUser, Unprotected } from "../../utils/sso/sso.decorators";
 import { PROJECT_MANAGEMENT } from "@app/common/utils/paths";
 import { ProjectManagementService } from "./project-management.service";
 import {
@@ -40,13 +40,6 @@ export class ProjectManagementController {
   @ApiOkResponse({ type: ExtendedProjectDto })
   createProject(@AuthUser() user: any, @Body() projectDto: CreateProjectDto) {
     return this.projectManagementService.createProject(user, projectDto)
-  }
-
-  @Post('/:projectIdentifier/member')
-  @ApiOperation({ summary: 'Add member to Project' })
-  @ApiCreatedResponse({ type: MemberProjectResDto })
-  addMemberToProject(@Body() projectMemberDto: AddMemberToProjectDto, @Param() params: ProjectIdentifierParams) {
-    return this.projectManagementService.addMemberToProject(projectMemberDto, params)
   }
 
   @Get('')
@@ -93,6 +86,13 @@ export class ProjectManagementController {
   @ApiOkResponse({type: ExtendedProjectDto})
   confirmMemberToProject(@Param() params: ProjectIdentifierParams) {
     return this.projectManagementService.confirmMemberToProject(params)
+  }
+
+  @Post(':projectIdentifier/member')
+  @ApiOperation({ summary: 'Add member to Project' })
+  @ApiCreatedResponse({ type: MemberResDto })
+  addMemberToProject(@Body() projectMemberDto: AddMemberToProjectDto, @Param() params: ProjectIdentifierParams) {
+    return this.projectManagementService.addMemberToProject(projectMemberDto, params)
   }
 
   @Delete('/:projectIdentifier/member/:memberId')
@@ -150,6 +150,8 @@ export class ProjectManagementController {
   }
 
   @Get('/:projectIdentifier/regulation')
+  @AuthOrProject()
+  @ApiHeader({name: 'X-Project-Token', required: false})
   @ApiOperation({ summary: 'Get all Project Regulations' })
   @ApiOkResponse({ type: RegulationDto, isArray: true })
   getProjectRegulations(@Param() params: ProjectIdentifierParams) {
@@ -158,6 +160,8 @@ export class ProjectManagementController {
   }
 
   @Get('/:projectIdentifier/regulation/:regulationId')
+  @AuthOrProject()
+  @ApiHeader({name: 'X-Project-Token', required: false})
   @ApiOperation({ summary: 'Get Regulation by ID' })
   @ApiOkResponse({ type: RegulationDto })
   getProjectRegulationById(@Param() regulationParams: RegulationParams) {
