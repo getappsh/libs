@@ -1,6 +1,6 @@
 import { ProjectManagementTopics } from "@app/common/microservice-client/topics";
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
-import { AddMemberToProjectDto, EditProjectMemberDto, CreateProjectDto, CreateRegulationDto, UpdateRegulationDto, RegulationParams, ProjectMemberParams, ProjectIdentifierParams, GetProjectsQueryDto, SearchProjectsQueryDto} from "@app/common/dto/project-management";
+import { AddMemberToProjectDto, EditProjectMemberDto, CreateProjectDto, CreateRegulationDto, UpdateRegulationDto, RegulationParams, ProjectMemberParams, ProjectIdentifierParams, GetProjectsQueryDto, SearchProjectsQueryDto, TokenParams, CreateProjectTokenDto, UpdateProjectTokenDto} from "@app/common/dto/project-management";
 import { MicroserviceClient, MicroserviceName } from "@app/common/microservice-client";
 import { UserSearchDto } from "@app/common/oidc/oidc.interface";
 
@@ -166,7 +166,45 @@ export class ProjectManagementService implements OnModuleInit{
   }
 
   
+  // PROJECT TOKENS
+  getProjectTokens(params: ProjectIdentifierParams){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.GET_PROJECT_TOKENS,
+      params
+    )
+  }
 
+  getProjectTokenById(params: TokenParams){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.GET_PROJECT_TOKEN_BY_ID,
+      params
+    )
+  }
+
+  createProjectToken(params: ProjectIdentifierParams, dto: CreateProjectTokenDto){
+    dto.projectIdentifier = params.projectIdentifier
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.CREATE_PROJECT_TOKEN,
+      dto
+    )
+  }
+
+
+  updateProjectToken(params: TokenParams, dto: UpdateProjectTokenDto){
+    dto.projectIdentifier = params.projectIdentifier;
+    dto.id = params.tokenId;
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.UPDATE_PROJECT_TOKEN,
+      dto
+    )
+  }
+
+  deleteProjectToken(params: TokenParams){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.DELETE_PROJECT_TOKEN,
+      params
+    ) 
+  }
 
   checkHealth() {
     return this.projectManagementClient.send(ProjectManagementTopics.CHECK_HEALTH, {})

@@ -4,7 +4,7 @@ import { AuthOrProject, AuthUser, Unprotected } from "../../utils/sso/sso.decora
 import { PROJECT_MANAGEMENT } from "@app/common/utils/paths";
 import { ProjectManagementService } from "./project-management.service";
 import {
-  AddMemberToProjectDto, ExtendedProjectDto, EditProjectMemberDto,
+  AddMemberToProjectDto, ProjectDto, EditProjectMemberDto,
   ProjectTokenDto, ProjectReleasesDto, MemberProjectResDto,
   MemberProjectsResDto, MemberResDto,
   CreateProjectDto,
@@ -18,6 +18,10 @@ import {
   SearchProjectsQueryDto,
   GetProjectsQueryDto,
   BaseProjectDto,
+  TokenParams,
+  CreateProjectTokenDto,
+  UpdateProjectTokenDto,
+  DetailedProjectDto,
 
 } from "@app/common/dto/project-management";
 import { DeviceResDto } from "@app/common/dto/project-management/dto/device-res.dto";
@@ -37,7 +41,7 @@ export class ProjectManagementController {
 
   @Post('')
   @ApiOperation({ summary: 'Create Project' })
-  @ApiOkResponse({ type: ExtendedProjectDto })
+  @ApiOkResponse({ type: ProjectDto })
   createProject(@AuthUser() user: any, @Body() projectDto: CreateProjectDto) {
     return this.projectManagementService.createProject(user, projectDto)
   }
@@ -52,7 +56,7 @@ export class ProjectManagementController {
   @Get()
   @Version('2')
   @ApiOperation({ summary: 'Get all projects' })
-  @ApiOkResponsePaginated(ExtendedProjectDto)
+  @ApiOkResponsePaginated(ProjectDto)
   getProjects(@Query() query: GetProjectsQueryDto){
     this.logger.debug(`Getting all projects: ${JSON.stringify(query)}`);
     return this.projectManagementService.getProjects(query);
@@ -68,7 +72,7 @@ export class ProjectManagementController {
 
   @Get('/:projectIdentifier')
   @ApiOperation({ summary: 'Get Project details' })
-  @ApiOkResponse({ type: ExtendedProjectDto })
+  @ApiOkResponse({ type: DetailedProjectDto })
   getProject(@Param() params: ProjectIdentifierParams) {
     this.logger.debug(`Getting project: ${params.projectIdentifier}`);
     return this.projectManagementService.getProject(params)
@@ -83,7 +87,7 @@ export class ProjectManagementController {
 
   @Post('/:projectIdentifier/confirm')
   @ApiOperation({ summary: 'Confirm invitation for project' })
-  @ApiOkResponse({type: ExtendedProjectDto})
+  @ApiOkResponse({type: ProjectDto})
   confirmMemberToProject(@Param() params: ProjectIdentifierParams) {
     return this.projectManagementService.confirmMemberToProject(params)
   }
@@ -191,6 +195,60 @@ export class ProjectManagementController {
   deleteProjectRegulation(@Param() regulationParams: RegulationParams) {
     this.logger.debug(`Deleting regulation by Project: ${regulationParams.projectIdentifier} and Regulation ID: ${regulationParams.regulationId}`);
     return this.projectManagementService.deleteProjectRegulation(regulationParams);
+  }
+
+  // Tokens
+  @Get('/:projectIdentifier/token/')
+  @ApiOperation({ summary: 'Get all tokens for a project' })
+  @ApiOkResponse({ type: ProjectTokenDto, isArray: true })
+  getProjectTokens(@Param() params: ProjectIdentifierParams) {
+    this.logger.debug(`Fetching tokens for project: ${params.projectIdentifier}`);
+    return this.projectManagementService.getProjectTokens(params);
+  }
+
+  @Get('/:projectIdentifier/token/:tokenId')
+  @ApiOperation({ summary: 'Get a token by ID' })
+  @ApiOkResponse({ type: ProjectTokenDto })
+  getProjectTokenById(@Param() params: TokenParams) {
+    this.logger.debug(`Fetching token by ID: ${params.tokenId} for project: ${params.projectIdentifier}`);
+    return this.projectManagementService.getProjectTokenById(params);
+  }
+
+  @Post('/:projectIdentifier/token/')
+  @ApiOperation({ summary: 'Create a token for a project' })
+  @ApiCreatedResponse({ type: ProjectTokenDto })
+  createProjectToken(
+    @Param() params: ProjectIdentifierParams,
+    @Body() dto: CreateProjectTokenDto,
+  ) {
+    this.logger.debug( `Creating token for project: ${params.projectIdentifier}`);
+    return this.projectManagementService.createProjectToken(params, dto);
+  }
+
+  @Put('/:projectIdentifier/token/:tokenId')
+  @ApiOperation({ summary: 'Update a token' })
+  @ApiOkResponse({ type: ProjectTokenDto })
+  updateProjectToken(
+    @Param() params: TokenParams,
+    @Body() updateProjectTokenDto: UpdateProjectTokenDto,
+  ) {
+    this.logger.debug(`Updating token with ID: ${params.tokenId} for project: ${params.projectIdentifier}`);
+    console.log(updateProjectTokenDto)
+
+    return this.projectManagementService.updateProjectToken(
+      params,
+      updateProjectTokenDto,
+    );
+  }
+
+  @Delete('/:projectIdentifier/token/:tokenId')
+  @ApiOperation({ summary: 'Delete a token by ID' })
+  @ApiOkResponse()
+  deleteProjectToken(@Param() params: TokenParams) {
+    this.logger.debug(
+      `Deleting token with ID: ${params.tokenId} for project: ${params.projectIdentifier}`,
+    );
+    return this.projectManagementService.deleteProjectToken(params);
   }
 
   @Get('checkHealth')

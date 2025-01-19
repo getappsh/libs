@@ -3,7 +3,7 @@ import { promises as fs } from "fs";
 
 import { CONFIG_OPTION, CREATE_TOKEN, MANIFEST, PROJECT, PROJECT_MANAGEMENT, RELEASES, UPDATE_UPLOAD_STATUS, UPLOAD } from "@app/common/utils/paths";
 
-import { MemberProjectResDto, ExtendedProjectDto, ProjectReleasesDto, ProjectResDto } from "@app/common/dto/project-management";
+import { MemberProjectResDto, ProjectDto, ProjectReleasesDto, ProjectResDto } from "@app/common/dto/project-management";
 import { UpdateUploadStatusDto } from "@app/common/dto/upload";
 
 import { UploadStatus } from "@app/common/database/entities/enums.entity";
@@ -51,7 +51,7 @@ export const getProjectConfigOptionTest = async (request: SuperAgentTest, setCon
 export const createAndGetProjectTest = async (request: SuperAgentTest) => {
   let project: ProjectResDto;
   const componentName = process.env.COMPONENT_NAME;
-  const newProject: ExtendedProjectDto = {
+  const newProject: ProjectDto = {
     componentName,
     OS: configOption.operationsSystem,
     platformType: configOption.platforms,
