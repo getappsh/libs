@@ -1,6 +1,6 @@
 import { ProjectManagementTopics } from "@app/common/microservice-client/topics";
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
-import { AddMemberToProjectDto, EditProjectMemberDto, CreateProjectDto, CreateRegulationDto, UpdateRegulationDto, RegulationParams, ProjectMemberParams, ProjectIdentifierParams, GetProjectsQueryDto, SearchProjectsQueryDto, TokenParams, CreateProjectTokenDto, UpdateProjectTokenDto} from "@app/common/dto/project-management";
+import { AddMemberToProjectDto, EditProjectMemberDto, CreateProjectDto, CreateRegulationDto, UpdateRegulationDto, RegulationParams, ProjectMemberParams, ProjectIdentifierParams, GetProjectsQueryDto, SearchProjectsQueryDto, TokenParams, CreateProjectTokenDto, UpdateProjectTokenDto, EditProjectDto} from "@app/common/dto/project-management";
 import { MicroserviceClient, MicroserviceName } from "@app/common/microservice-client";
 import { UserSearchDto } from "@app/common/oidc/oidc.interface";
 
@@ -72,6 +72,21 @@ export class ProjectManagementService implements OnModuleInit{
   getProject(params: ProjectIdentifierParams){
     return this.projectManagementClient.send(
       ProjectManagementTopics.GET_PROJECT_BY_IDENTIFIER,
+      params
+    )
+  }
+
+  editProject(params: ProjectIdentifierParams, dto: EditProjectDto){
+    dto.projectIdentifier = params.projectIdentifier
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.EDIT_PROJECT,
+      dto
+    )
+  }
+
+  deleteProject(params: ProjectIdentifierParams){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.DELETE_PROJECT,
       params
     )
   }

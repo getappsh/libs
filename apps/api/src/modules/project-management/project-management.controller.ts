@@ -22,6 +22,7 @@ import {
   CreateProjectTokenDto,
   UpdateProjectTokenDto,
   DetailedProjectDto,
+  EditProjectDto,
 
 } from "@app/common/dto/project-management";
 import { DeviceResDto } from "@app/common/dto/project-management/dto/device-res.dto";
@@ -41,7 +42,7 @@ export class ProjectManagementController {
 
   @Post('')
   @ApiOperation({ summary: 'Create Project' })
-  @ApiOkResponse({ type: ProjectDto })
+  @ApiOkResponse({ type: BaseProjectDto })
   createProject(@AuthUser() user: any, @Body() projectDto: CreateProjectDto) {
     return this.projectManagementService.createProject(user, projectDto)
   }
@@ -77,6 +78,21 @@ export class ProjectManagementController {
     this.logger.debug(`Getting project: ${params.projectIdentifier}`);
     return this.projectManagementService.getProject(params)
   }
+
+  @Put('/:projectIdentifier')
+  @ApiOperation({ summary: 'Edit Project' })
+  @ApiOkResponse({ type: BaseProjectDto })
+  editProject(@Param() params: ProjectIdentifierParams, @Body() dto: EditProjectDto) {
+    return this.projectManagementService.editProject(params, dto)
+  }
+
+  @Delete('/:projectIdentifier')
+  @ApiOperation({ summary: 'Delete Project' })
+  @ApiOkResponse()
+  deleteProject(@Param() params: ProjectIdentifierParams) {
+    return this.projectManagementService.deleteProject(params)
+  }
+
 
   @Post('/:projectIdentifier/createToken')
   @ApiOperation({ summary: "Create Upload token for a Project" })
