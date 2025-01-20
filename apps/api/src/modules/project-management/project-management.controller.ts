@@ -23,6 +23,7 @@ import {
   UpdateProjectTokenDto,
   DetailedProjectDto,
   EditProjectDto,
+  ProjectMemberPreferencesDto,
 
 } from "@app/common/dto/project-management";
 import { DeviceResDto } from "@app/common/dto/project-management/dto/device-res.dto";
@@ -106,6 +107,21 @@ export class ProjectManagementController {
   @ApiOkResponse({type: ProjectDto})
   confirmMemberToProject(@Param() params: ProjectIdentifierParams) {
     return this.projectManagementService.confirmMemberToProject(params)
+  }
+
+  
+  @Get('/:projectIdentifier/member/preferences')
+  @ApiOperation({ summary: 'Get member project preferences' })
+  @ApiOkResponse({ type: ProjectMemberPreferencesDto })
+  getMemberProjectPreferences(@Param() params: ProjectIdentifierParams) {
+    return this.projectManagementService.getMemberProjectPreferences(params)
+  }
+
+  @Put('/:projectIdentifier/member/preferences')
+  @ApiOperation({ summary: 'Update member project preferences' })
+  @ApiOkResponse({ type: ProjectMemberPreferencesDto })
+  updateMemberProjectPreferences(@Body() dto: ProjectMemberPreferencesDto, @Param() params: ProjectIdentifierParams) {
+    return this.projectManagementService.updateMemberProjectPreferences(dto, params)
   }
 
   @Post(':projectIdentifier/member')

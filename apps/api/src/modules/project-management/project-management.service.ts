@@ -1,6 +1,6 @@
 import { ProjectManagementTopics } from "@app/common/microservice-client/topics";
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
-import { AddMemberToProjectDto, EditProjectMemberDto, CreateProjectDto, CreateRegulationDto, UpdateRegulationDto, RegulationParams, ProjectMemberParams, ProjectIdentifierParams, GetProjectsQueryDto, SearchProjectsQueryDto, TokenParams, CreateProjectTokenDto, UpdateProjectTokenDto, EditProjectDto} from "@app/common/dto/project-management";
+import { AddMemberToProjectDto, EditProjectMemberDto, CreateProjectDto, CreateRegulationDto, UpdateRegulationDto, RegulationParams, ProjectMemberParams, ProjectIdentifierParams, GetProjectsQueryDto, SearchProjectsQueryDto, TokenParams, CreateProjectTokenDto, UpdateProjectTokenDto, EditProjectDto, ProjectMemberPreferencesDto} from "@app/common/dto/project-management";
 import { MicroserviceClient, MicroserviceName } from "@app/common/microservice-client";
 import { UserSearchDto } from "@app/common/oidc/oidc.interface";
 
@@ -52,6 +52,20 @@ export class ProjectManagementService implements OnModuleInit{
     return this.projectManagementClient.send(
       ProjectManagementTopics.EDIT_PROJECT_MEMBER,
       editProjectMemberDto
+    )
+  }
+
+  getMemberProjectPreferences(params: ProjectIdentifierParams){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.GET_MEMBER_PROJECT_PREFERENCES,
+      params
+    )
+  }
+  updateMemberProjectPreferences(dto: ProjectMemberPreferencesDto, params: ProjectIdentifierParams){
+    dto.projectIdentifier = params.projectIdentifier
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.UPDATE_MEMBER_PROJECT_PREFERENCES,
+      dto
     )
   }
 
