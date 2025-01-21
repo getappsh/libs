@@ -72,9 +72,8 @@ RUN npm install --only=production --omit=dev
 
 COPY --chown=${uid}:${uid} --from=build /node-app/dist/ .
 
-RUN echo "$api_version_tag" > docker_image_version.txt
 # a file that contains the image version
-COPY docker_image_version.txt .
+RUN echo "$api_version_tag" > docker_image_version.txt
 RUN cat docker_image_version.txt
 
 USER ${username}
