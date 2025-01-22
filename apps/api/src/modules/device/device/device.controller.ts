@@ -84,7 +84,7 @@ export class DeviceController {
     description: "This service message returns an object of device configurations.",
   })
   @ApiOkResponse({
-    schema: { oneOf: [{ $ref: getSchemaPath(AndroidConfigDto) }, { $ref: getSchemaPath(WindowsConfigDto) }] }
+    schema: { title: "ConfigDto", oneOf: [{ $ref: getSchemaPath(AndroidConfigDto) }, { $ref: getSchemaPath(WindowsConfigDto) }] }
   })
   getDeviceConfig(@Query('group') group: string) {
     console.log(group)
@@ -100,10 +100,10 @@ export class DeviceController {
   })
   @ApiExtraModels(AndroidConfigDto, WindowsConfigDto)
   @ApiBody({
-    schema: { oneOf: [{ $ref: getSchemaPath(AndroidConfigDto) }, { $ref: getSchemaPath(WindowsConfigDto) }] }
+    schema: { title: "ConfigDto", oneOf: [{ $ref: getSchemaPath(AndroidConfigDto) }, { $ref: getSchemaPath(WindowsConfigDto) }] }
   })
   @ApiOkResponse({
-    schema: { oneOf: [{ $ref: getSchemaPath(AndroidConfigDto) }, { $ref: getSchemaPath(WindowsConfigDto) }] }
+    schema: {title: "ConfigDto", oneOf: [{ $ref: getSchemaPath(AndroidConfigDto) }, { $ref: getSchemaPath(WindowsConfigDto) }] }
   })
   @UsePipes(DeviceConfigValidator)
   setDeviceConfig(@Body() config: AndroidConfigDto | BaseConfigDto) {
