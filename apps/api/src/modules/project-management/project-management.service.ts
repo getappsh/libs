@@ -162,9 +162,9 @@ export class ProjectManagementService implements OnModuleInit{
     )
   }
 
-  getProjectRegulationById(params: RegulationParams){
+  getProjectRegulationByName(params: RegulationParams){
     return this.projectManagementClient.send(
-      ProjectManagementTopics.GET_PROJECT_REGULATION_BY_ID,
+      ProjectManagementTopics.GET_PROJECT_REGULATION_BY_NAME,
       params
     )
   }
@@ -178,7 +178,7 @@ export class ProjectManagementService implements OnModuleInit{
   }
 
   editProjectRegulation(params: RegulationParams, updateRegulationDto: UpdateRegulationDto){
-    updateRegulationDto.regulationId = params.regulationId;
+    updateRegulationDto.regulation = params.regulation;
     updateRegulationDto.projectIdentifier = params.projectIdentifier;
     return this.projectManagementClient.send(
       ProjectManagementTopics.UPDATE_PROJECT_REGULATION,
