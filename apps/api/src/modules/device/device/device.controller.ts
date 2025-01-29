@@ -98,15 +98,15 @@ export class DeviceController {
     summary: "Set Device Configurations",
     description: "This service message returns an object of device configurations.",
   })
-  @ApiExtraModels(AndroidConfigDto, WindowsConfigDto)
+  @ApiExtraModels(AndroidConfigDto, WindowsConfigDto,)
   @ApiBody({
     schema: { title: "ConfigDto", oneOf: [{ $ref: getSchemaPath(AndroidConfigDto) }, { $ref: getSchemaPath(WindowsConfigDto) }] }
   })
   @ApiOkResponse({
-    schema: {title: "ConfigDto", oneOf: [{ $ref: getSchemaPath(AndroidConfigDto) }, { $ref: getSchemaPath(WindowsConfigDto) }] }
+    schema: { title: "ConfigDto", oneOf: [{ $ref: getSchemaPath(AndroidConfigDto) }, { $ref: getSchemaPath(WindowsConfigDto) }] }
   })
   @UsePipes(DeviceConfigValidator)
-  setDeviceConfig(@Body() config: AndroidConfigDto | BaseConfigDto) {
+  setDeviceConfig(@Body() config: AndroidConfigDto | WindowsConfigDto | BaseConfigDto) {
     this.logger.debug('Set device config')
     return this.deviceService.setDeviceConfig(config);
   }
