@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Post, Delete, Put, Param, Logger, UseInterceptors, Query, Version } from "@nestjs/common";
-import { ApiBearerAuth, ApiOperation, ApiTags, ApiParam, ApiCreatedResponse, ApiOkResponse, ApiExcludeEndpoint, ApiHeader } from "@nestjs/swagger";
+import { Body, Controller, Get, Post, Delete, Put, Param, Logger, UseInterceptors, Query, Version, UsePipes, ParseArrayPipe } from "@nestjs/common";
+import { ApiBearerAuth, ApiOperation, ApiTags, ApiParam, ApiCreatedResponse, ApiOkResponse, ApiExcludeEndpoint, ApiHeader, ApiBody } from "@nestjs/swagger";
 import { AuthOrProject, AuthUser, Unprotected } from "../../utils/sso/sso.decorators";
 import { PROJECT_MANAGEMENT } from "@app/common/utils/paths";
 import { ProjectManagementService } from "./project-management.service";
@@ -24,6 +24,7 @@ import {
   DetailedProjectDto,
   EditProjectDto,
   ProjectMemberPreferencesDto,
+  UpdateOneOfManyRegulationDto,
 
 } from "@app/common/dto/project-management";
 import { DeviceResDto } from "@app/common/dto/project-management/dto/device-res.dto";
@@ -210,6 +211,16 @@ export class ProjectManagementController {
   createProjectRegulation(@Param() params: ProjectIdentifierParams, @Body() createRegulationDto: CreateRegulationDto) {
     this.logger.debug(`Creating regulation for Project: ${params.projectIdentifier}`, JSON.stringify(createRegulationDto));
     return this.projectManagementService.createProjectRegulation(createRegulationDto, params);
+  }
+
+  @Put('/:projectIdentifier/regulation')
+  @ApiOperation({ summary: 'Edit Regulations' })
+  @ApiOkResponse({ type: RegulationDto, isArray: true })
+  @ApiBody({type: UpdateRegulationDto, isArray: true})
+  editProjectRegulations(@Param() params: ProjectIdentifierParams, 
+  @Body(new ParseArrayPipe({items: UpdateOneOfManyRegulationDto})) updateRegulationsDto: UpdateOneOfManyRegulationDto[]) {
+    this.logger.debug(`Editing regulations for Project: ${params.projectIdentifier}`, JSON.stringify(updateRegulationsDto));
+    return this.projectManagementService.editProjectRegulations(params, updateRegulationsDto);
   }
 
   @Put('/:projectIdentifier/regulation/:regulation')
