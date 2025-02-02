@@ -72,6 +72,14 @@ export class ProjectManagementController {
     return this.projectManagementService.searchProjects(query);
   }
 
+  @Get('regulation-types')
+  @ApiOperation({ summary: 'Get all Regulation Types' })
+  @ApiOkResponse({ type: [RegulationTypeDto] })
+  getAllRegulationTypes() {
+    this.logger.debug("Getting all regulation types");
+    return this.projectManagementService.getAllRegulationTypes();
+  }
+
   @Get('/:projectIdentifier')
   @ApiOperation({ summary: 'Get Project details' })
   @ApiOkResponse({ type: DetailedProjectDto })
@@ -174,15 +182,6 @@ export class ProjectManagementController {
   @ApiOkResponse({ type: DeviceResDto, isArray: true })
   getDeviceByPlatform(@Param('platform') platform: string) {
     return this.projectManagementService.getDeviceByPlatform(platform);
-  }
-
-
-  @Get('regulation-types')
-  @ApiOperation({ summary: 'Get all Regulation Types' })
-  @ApiOkResponse({ type: [RegulationTypeDto] })
-  getAllRegulationTypes() {
-    this.logger.debug("Getting all regulation types");
-    return this.projectManagementService.getAllRegulationTypes();
   }
 
   @Get('/:projectIdentifier/regulation')
