@@ -25,6 +25,10 @@ import {
   EditProjectDto,
   ProjectMemberPreferencesDto,
   UpdateOneOfManyRegulationDto,
+  DocsParams,
+  DocDto,
+  CreateDocDto,
+  UpdateDocDto,
 
 } from "@app/common/dto/project-management";
 import { DeviceResDto } from "@app/common/dto/project-management/dto/device-res.dto";
@@ -275,8 +279,6 @@ export class ProjectManagementController {
     @Body() updateProjectTokenDto: UpdateProjectTokenDto,
   ) {
     this.logger.debug(`Updating token with ID: ${params.tokenId} for project: ${params.projectIdentifier}`);
-    console.log(updateProjectTokenDto)
-
     return this.projectManagementService.updateProjectToken(
       params,
       updateProjectTokenDto,
@@ -291,6 +293,59 @@ export class ProjectManagementController {
       `Deleting token with ID: ${params.tokenId} for project: ${params.projectIdentifier}`,
     );
     return this.projectManagementService.deleteProjectToken(params);
+  }
+
+  // DOCS 
+
+  @Get('/:projectIdentifier/docs')
+  @ApiOperation({ summary: 'Get all documents for a project' })
+  @ApiOkResponse({ type: DocDto, isArray: true })
+  getDocs(@Param() params: ProjectIdentifierParams) {
+    this.logger.debug(`Fetching docs for project: ${params.projectIdentifier}`);
+    return this.projectManagementService.getDocs(params);
+  }
+
+  @Get('/:projectIdentifier/docs/:id')
+  @ApiOperation({ summary: 'Get a document by ID' })
+  @ApiOkResponse({ type: DocDto })
+  getDocById(@Param() params: DocsParams) {
+    this.logger.debug(`Fetching doc by ID: ${params.id} for project: ${params.projectIdentifier}`);
+    return this.projectManagementService.getDocById(params);
+  }
+
+  @Post('/:projectIdentifier/docs')
+  @ApiOperation({ summary: 'Create a document for a project' })
+  @ApiCreatedResponse({ type: DocDto })
+  createDoc(
+    @Param() params: ProjectIdentifierParams,
+    @Body() dto: CreateDocDto,
+  ) {
+    this.logger.debug( `Creating doc for project: ${params.projectIdentifier}`);
+    return this.projectManagementService.createDoc(params, dto);
+  }
+
+  @Put('/:projectIdentifier/docs/:id')
+  @ApiOperation({ summary: 'Update a document' })
+  @ApiOkResponse({ type: DocDto })
+  updateDoc(
+    @Param() params: DocsParams,
+    @Body() updateDocDto: UpdateDocDto,
+  ) {
+    this.logger.debug(`Updating doc with ID: ${params.id} for project: ${params.projectIdentifier}`);
+    return this.projectManagementService.updateDoc(
+      params,
+      updateDocDto,
+    ); 
+  }
+  
+  @Delete('/:projectIdentifier/docs/:id')
+  @ApiOperation({ summary: 'Delete a document by ID' })
+  @ApiOkResponse()
+  deleteDoc(@Param() params: DocsParams) {
+    this.logger.debug(
+      `Deleting doc with ID: ${params.id} for project: ${params.projectIdentifier}`,
+    );
+    return this.projectManagementService.deleteDoc(params);
   }
 
   @Get('checkHealth')

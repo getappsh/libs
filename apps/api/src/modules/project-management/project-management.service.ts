@@ -1,6 +1,6 @@
 import { ProjectManagementTopics } from "@app/common/microservice-client/topics";
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
-import { AddMemberToProjectDto, EditProjectMemberDto, CreateProjectDto, CreateRegulationDto, UpdateRegulationDto, RegulationParams, ProjectMemberParams, ProjectIdentifierParams, GetProjectsQueryDto, SearchProjectsQueryDto, TokenParams, CreateProjectTokenDto, UpdateProjectTokenDto, EditProjectDto, ProjectMemberPreferencesDto, UpdateOneOfManyRegulationDto} from "@app/common/dto/project-management";
+import { AddMemberToProjectDto, EditProjectMemberDto, CreateProjectDto, CreateRegulationDto, UpdateRegulationDto, RegulationParams, ProjectMemberParams, ProjectIdentifierParams, GetProjectsQueryDto, SearchProjectsQueryDto, TokenParams, CreateProjectTokenDto, UpdateProjectTokenDto, EditProjectDto, ProjectMemberPreferencesDto, UpdateOneOfManyRegulationDto, DocsParams, CreateDocDto, UpdateDocDto} from "@app/common/dto/project-management";
 import { MicroserviceClient, MicroserviceName } from "@app/common/microservice-client";
 import { UserSearchDto } from "@app/common/oidc/oidc.interface";
 
@@ -239,6 +239,46 @@ export class ProjectManagementService implements OnModuleInit{
   deleteProjectToken(params: TokenParams){
     return this.projectManagementClient.send(
       ProjectManagementTopics.DELETE_PROJECT_TOKEN,
+      params
+    ) 
+  }
+
+  // DOCS
+
+  getDocs(params: ProjectIdentifierParams){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.GET_PROJECT_DOCS,
+      params
+    )
+  }
+
+  getDocById(params: DocsParams){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.GET_PROJECT_DOC_BY_ID,
+      params
+    )
+  }
+
+  createDoc(params: ProjectIdentifierParams, dto: CreateDocDto){
+    dto.projectIdentifier = params.projectIdentifier
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.CREATE_PROJECT_DOC,
+      dto
+    )
+  }
+
+  updateDoc(params: DocsParams, dto: UpdateDocDto){
+    dto.projectIdentifier = params.projectIdentifier;
+    dto.id = params.id;
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.UPDATE_PROJECT_DOC,
+      dto
+    )
+  }
+
+  deleteDoc(params: DocsParams){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.DELETE_PROJECT_DOC,
       params
     ) 
   }
