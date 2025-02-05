@@ -220,7 +220,7 @@ export class ProjectManagementController {
   @Put('/:projectIdentifier/regulation')
   @ApiOperation({ summary: 'Edit Regulations' })
   @ApiOkResponse({ type: RegulationDto, isArray: true })
-  @ApiBody({type: UpdateRegulationDto, isArray: true})
+  @ApiBody({type: UpdateOneOfManyRegulationDto, isArray: true})
   editProjectRegulations(@Param() params: ProjectIdentifierParams, 
   @Body(new ParseArrayPipe({items: UpdateOneOfManyRegulationDto})) updateRegulationsDto: UpdateOneOfManyRegulationDto[]) {
     this.logger.debug(`Editing regulations for Project: ${params.projectIdentifier}`, JSON.stringify(updateRegulationsDto));
