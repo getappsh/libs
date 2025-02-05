@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Delete, Put, Param, Logger, UseInterceptors, Query, Version, UsePipes, ParseArrayPipe } from "@nestjs/common";
-import { ApiBearerAuth, ApiOperation, ApiTags, ApiParam, ApiCreatedResponse, ApiOkResponse, ApiExcludeEndpoint, ApiHeader, ApiBody } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOperation, ApiTags, ApiParam, ApiCreatedResponse, ApiOkResponse, ApiExcludeEndpoint, ApiHeader, ApiBody, ApiQuery } from "@nestjs/swagger";
 import { AuthOrProject, AuthUser, Unprotected } from "../../utils/sso/sso.decorators";
 import { PROJECT_MANAGEMENT } from "@app/common/utils/paths";
 import { ProjectManagementService } from "./project-management.service";
@@ -48,7 +48,7 @@ export class ProjectManagementController {
 
   @Post('')
   @ApiOperation({ summary: 'Create Project' })
-  @ApiOkResponse({ type: BaseProjectDto })
+  @ApiOkResponse({ type: ProjectDto })
   createProject(@AuthUser() user: any, @Body() projectDto: CreateProjectDto) {
     return this.projectManagementService.createProject(user, projectDto)
   }
@@ -85,6 +85,14 @@ export class ProjectManagementController {
     return this.projectManagementService.getAllRegulationTypes();
   }
 
+  @Get('/platforms')
+  @ApiOperation({ summary: 'Get all platforms' })
+  @ApiOkResponse({ type: String, isArray: true })
+  @ApiQuery({ name: 'query', required: false, description: 'Query to search platforms', type: String })
+  getPlatforms(@Query('query') query?: string) {
+    return this.projectManagementService.getPlatforms(query)
+  }
+
   @Get('/:projectIdentifier')
   @ApiOperation({ summary: 'Get Project details' })
   @ApiOkResponse({ type: DetailedProjectDto })
@@ -95,7 +103,7 @@ export class ProjectManagementController {
 
   @Put('/:projectIdentifier')
   @ApiOperation({ summary: 'Edit Project' })
-  @ApiOkResponse({ type: BaseProjectDto })
+  @ApiOkResponse({ type: ProjectDto })
   editProject(@Param() params: ProjectIdentifierParams, @Body() dto: EditProjectDto) {
     return this.projectManagementService.editProject(params, dto)
   }

@@ -155,6 +155,13 @@ export class ProjectManagementService implements OnModuleInit{
     )
   }
 
+  getPlatforms(query?: string){
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.GET_PLATFORMS,
+      query
+    )
+  }
+
   getProjectRegulations(params: ProjectIdentifierParams){
     return this.projectManagementClient.send(
       ProjectManagementTopics.GET_PROJECT_REGULATIONS,
