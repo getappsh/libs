@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Logger, Param, Post, UseInterceptors } from "@nestjs/common";
 import { ApiBearerAuth, ApiCreatedResponse, ApiHeader, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { ReleasesService } from "./releases.service";
-import { ReleaseDto, SetReleaseDto, SetReleaseArtifactResDto, SetReleaseArtifactDto, ReleaseParams, RegulationStatusParams, SetRegulationCompliancyDto, SetRegulationStatusDto, RegulationStatusDto, ReleaseArtifactParams  } from "@app/common/dto/upload";
+import { ReleaseDto, SetReleaseDto, SetReleaseArtifactResDto, SetReleaseArtifactDto, ReleaseParams, RegulationStatusParams, SetRegulationCompliancyDto, SetRegulationStatusDto, RegulationStatusDto, ReleaseArtifactParams, DetailedReleaseDto  } from "@app/common/dto/upload";
 import { AuthOrProject } from '../../utils/sso/sso.decorators';
 import { UserContextInterceptor } from "../../utils/interceptor/user-context.interceptor";
 import { UPLOAD_RELEASES } from "@app/common/utils/paths";
@@ -29,7 +29,7 @@ export class ReleasesController {
     summary: "Set a Release", 
     description: "This service message allows creation of a release." 
   })
-  @ApiCreatedResponse({type: ReleaseDto})
+  @ApiCreatedResponse({type: DetailedReleaseDto})
   setRelease(@Body() release: SetReleaseDto, @Param() params: ProjectIdentifierParams){
     this.logger.debug(`Setting release for project: ${params.projectIdentifier}, version: ${release.version}`);
     return this.releasesService.setRelease(release, params);
@@ -53,7 +53,7 @@ export class ReleasesController {
     summary: "Get Release", 
     description: "This service message allows retrieval of a release."
   })
-  @ApiOkResponse({type: ReleaseDto})
+  @ApiOkResponse({type: DetailedReleaseDto})
   getRelease(@Param() params: ReleaseParams){
     this.logger.debug(`Getting release for project: ${params.projectIdentifier}, version: ${params.version}`);
     return this.releasesService.getRelease(params);
