@@ -2,13 +2,14 @@ import { DeviceTopics, DeviceTopicsEmit, GetMapTopics } from '@app/common/micros
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { DeviceRegisterDto, MTlsStatusDto } from '@app/common/dto/device';
 import { Observable, lastValueFrom } from 'rxjs';
-import { DiscoveryMessageDto } from '@app/common/dto/discovery';
+import { DiscoveryMessageDto, DiscoveryMessageV2Dto } from '@app/common/dto/discovery';
 import { DiscoveryResDto } from '@app/common/dto/discovery';
 import { MicroserviceClient, MicroserviceName } from '@app/common/microservice-client';
 import { DeviceDiscoverDto } from '@app/common/dto/im';
-import { MapOfferingStatus, OfferingMapProductsResDto, OfferingMapResDto } from '@app/common/dto/offering';
+import { ComponentOfferingRequestDto, MapOfferingStatus, OfferingMapProductsResDto, OfferingMapResDto } from '@app/common/dto/offering';
 import { OfferingService } from '../../offering/offering.service';
-import { ErrorCode, ErrorDto } from '@app/common/dto/error';
+import { ErrorCode } from '@app/common/dto/error';
+import { DeviceComponentStateEnum } from '@app/common/database/entities';
 
 @Injectable()
 export class DiscoveryService{
@@ -25,6 +26,16 @@ export class DiscoveryService{
   async deviceComponentDiscovery(discoveryMessageDto: DiscoveryMessageDto) : Promise<any>{
     this.sendDeviceContext(discoveryMessageDto);
     return this.offeringService.getDeviceComponentOffering(discoveryMessageDto.general.physicalDevice.ID);
+  }
+  
+  async deviceComponentDiscoveryV2(dto: DiscoveryMessageV2Dto) : Promise<any>{
+    this.sendDeviceContextV2(dto);
+
+    const offeringDto = ComponentOfferingRequestDto.fromDiscoveryMessageDto(dto);
+    offeringDto.components = dto.softwareData?.components
+      ?.filter(comp => comp.state === DeviceComponentStateEnum.INSTALLED && comp?.error === undefined)
+      ?.map(comp => comp.catalogId)
+    return this.offeringService.getDeviceComponentsOfferingV2(offeringDto);
   }
 
   async deviceMapDiscovery(discoveryMessageDto: DiscoveryMessageDto) : Promise<OfferingMapResDto>{
@@ -70,6 +81,11 @@ export class DiscoveryService{
   async sendDeviceContext(discoveryMessageDto: DiscoveryMessageDto){
     this.logger.log(`emit device context, deviceId: ${discoveryMessageDto.general.physicalDevice.ID}`);
     this.deviceClient.emit(DeviceTopicsEmit.DISCOVER_DEVICE_CONTEXT, discoveryMessageDto);
+  }
+
+  async sendDeviceContextV2(dto: DiscoveryMessageV2Dto){
+    this.logger.log(`emit device context, deviceId: ${dto.general.physicalDevice.ID}`);
+    this.deviceClient.emit(DeviceTopicsEmit.DISCOVER_DEVICE_CONTEXT_V2, dto);
   }
 
   

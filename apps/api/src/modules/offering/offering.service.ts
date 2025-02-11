@@ -1,7 +1,7 @@
 import { OfferingTopics, OfferingTopicsEmit } from '@app/common/microservice-client/topics';
 import { Inject, Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { MicroserviceClient, MicroserviceName } from '@app/common/microservice-client';
-import { PushOfferingDto } from '@app/common/dto/offering';
+import { ComponentOfferingRequestDto, PushOfferingDto } from '@app/common/dto/offering';
 
 @Injectable()
 export class OfferingService implements OnModuleInit{
@@ -21,6 +21,11 @@ export class OfferingService implements OnModuleInit{
   getDeviceComponentOffering(deviceId: string){
     this.logger.debug(`Get device component offering, deviceId: ${deviceId}`)
     return this.offeringClient.send(OfferingTopics.DEVICE_COMPONENT_OFFERING, deviceId);
+  }
+
+  getDeviceComponentsOfferingV2(dto: ComponentOfferingRequestDto){
+    this.logger.debug(`Get components offering, dto: ${JSON.stringify(dto)}`)
+    return this.offeringClient.send(OfferingTopics.DEVICE_COMPONENT_OFFERING_V2, dto);
   }
 
   getDeviceMapOffering(deviceId: string){
