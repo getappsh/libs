@@ -10,11 +10,6 @@ export class ReleaseEntity {
   @PrimaryColumn({ name: 'catalog_id' })
   catalogId: string;
 
-  @BeforeInsert()
-  generateUUID() {
-    this.catalogId = nanoid();
-  }
-
   @Column({ name: 'version' })
   version: string;
 
@@ -57,6 +52,10 @@ export class ReleaseEntity {
     inverseJoinColumn: { name: 'dependency_release_id', referencedColumnName: 'catalogId' },
   })
   dependencies: ReleaseEntity[];
+
+
+  @Column({ name: 'sort_order', type: 'int', default: 0 })
+  sortOrder: number;
 
 
   @ManyToMany(() => ReleaseEntity, (release) => release.dependencies)
