@@ -36,7 +36,7 @@ export class SetReleaseArtifactDto {
   @ApiProperty({ required: false, type: 'object' })
   @IsOptional()
   metadata?: Record<string, any>;
-  
+
 }
 
 
@@ -45,12 +45,12 @@ export class SetReleaseArtifactResDto {
   @ApiProperty()
   artifactId: number
 
-  @ApiProperty({required: false, description: 'Only present for FILE artifact type' })
+  @ApiProperty({ required: false, description: 'Only present for FILE artifact type' })
   uploadUrl: string;
 }
 
 
-export class ReleaseArtifactDto{
+export class ReleaseArtifactDto {
 
   @ApiProperty()
   id: number
@@ -58,7 +58,7 @@ export class ReleaseArtifactDto{
   @ApiProperty()
   artifactName: string
 
-  @ApiProperty()
+  @ApiProperty({ type: 'enum', enum: ArtifactTypeEnum })
   type: ArtifactTypeEnum
 
   @ApiProperty()
@@ -67,7 +67,7 @@ export class ReleaseArtifactDto{
   @ApiProperty()
   isInstallationFile: boolean
 
-  @ApiProperty({required: false })
+  @ApiProperty({ required: false })
   dockerImageUrl?: string
 
   @ApiProperty()
@@ -76,22 +76,21 @@ export class ReleaseArtifactDto{
 
   static fromEntity(artifact: ReleaseArtifactEntity): ReleaseArtifactDto {
     const dto = new ReleaseArtifactDto();
-    dto.id = artifact.id,
-    dto.artifactName = artifact.artifactName,
-    dto.type = artifact.type,
-    dto.metadata = artifact.metadata,
-    dto.isInstallationFile = artifact.isInstallationFile,
-    dto.dockerImageUrl = artifact?.dockerImageUrl,
-    dto.uploadId = artifact.fileUpload ? artifact.fileUpload.id : null
+    dto.id = artifact.id;
+    dto.artifactName = artifact.artifactName;
+    dto.type = artifact.type;
+    dto.metadata = artifact.metadata;
+    dto.isInstallationFile = artifact.isInstallationFile;
+    dto.dockerImageUrl = artifact?.dockerImageUrl;
+    dto.uploadId = artifact.fileUpload ? artifact.fileUpload.id : null;
 
     return dto
-    
   }
 }
 
 
 export class ReleaseArtifactParams extends ProjectIdentifierParams {
-  
+
   @ApiProperty()
   @IsSemVer()
   @Type(() => String)
