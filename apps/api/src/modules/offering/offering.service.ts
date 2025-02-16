@@ -18,14 +18,9 @@ export class OfferingService implements OnModuleInit{
     return this.offeringClient.send(OfferingTopics.CHECK_HEALTH, {})
   }
 
-  getDeviceComponentOffering(deviceId: string){
-    this.logger.debug(`Get device component offering, deviceId: ${deviceId}`)
-    return this.offeringClient.send(OfferingTopics.DEVICE_COMPONENT_OFFERING, deviceId);
-  }
-
-  getDeviceComponentsOfferingV2(dto: ComponentOfferingRequestDto){
+  getDeviceComponentsOffering(dto: ComponentOfferingRequestDto){
     this.logger.debug(`Get components offering, dto: ${JSON.stringify(dto)}`)
-    return this.offeringClient.send(OfferingTopics.DEVICE_COMPONENT_OFFERING_V2, dto);
+    return this.offeringClient.send(OfferingTopics.DEVICE_COMPONENT_OFFERING, dto);
   }
 
   getDeviceMapOffering(deviceId: string){

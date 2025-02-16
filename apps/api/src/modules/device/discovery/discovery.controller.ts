@@ -1,13 +1,12 @@
-import { Controller, Post, Body, Logger, Get, Param, ParseArrayPipe, Version } from '@nestjs/common';
+import { Controller, Post, Body, Logger, ParseArrayPipe, Version } from '@nestjs/common';
 import { DiscoveryService } from './discovery.service';
-import { DeviceRegisterDto, DeviceContentResDto, MTlsStatusDto } from '@app/common/dto/device';
-import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { MTlsStatusDto } from '@app/common/dto/device';
+import { ApiBearerAuth, ApiCreatedResponse, ApiExcludeEndpoint, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DEVICE } from '@app/common/utils/paths';
 import { DiscoveryMessageV2Dto, DiscoveryResDto } from '@app/common/dto/discovery';
 import { DiscoveryMessageDto } from '@app/common/dto/discovery';
 import { DeviceDiscoverDto, DeviceDiscoverResDto } from '@app/common/dto/im';
-import { DeviceDto } from '@app/common/dto/device/dto/device.dto';
-import { DeviceComponentsOfferingDto, DeviceComponentsOfferingV2Dto, OfferingMapResDto } from '@app/common/dto/offering';
+import { DeviceComponentsOfferingDto, OfferingMapResDto } from '@app/common/dto/offering';
 @ApiTags("Device - discovery")
 @ApiBearerAuth()
 @Controller(DEVICE)
@@ -28,26 +27,23 @@ export class DiscoveryController {
   }
 
   @Post("discover/component")
+  @ApiExcludeEndpoint()
+  @Version("1")
+  discoverComponent(@Body() body: any) {
+    this.logger.warn(`**Deprecated** Device component discovery v1 : ${JSON.stringify(body)}`);
+    return {offer: [], push: []}
+  }
+
+  @Post("discover/component")
+  @Version("2")
   @ApiOperation({ 
     summary: "Discover Device Component", 
     description: "This service message allows a device to post the discovery context for getting device software offers." 
   })
   @ApiOkResponse({type: DeviceComponentsOfferingDto})
-  deviceComponentDiscovery(@Body() discoveryMessageDto: DiscoveryMessageDto) {
-    this.logger.debug(`Device component discovery: ${discoveryMessageDto}`);
-    return this.deviceService.deviceComponentDiscovery(discoveryMessageDto);
-  }
-
-  @Post("discover/component")
-  @Version('2')
-  @ApiOperation({ 
-    summary: "Discover Device Component", 
-    description: "This service message allows a device to post the discovery context for getting device software offers." 
-  })
-  @ApiOkResponse({type: DeviceComponentsOfferingV2Dto})
-  deviceComponentDiscoveryV2(@Body() dto: DiscoveryMessageV2Dto) {
-    this.logger.debug(`Device component V2 discovery: ${JSON.stringify(dto)}`);
-    return this.deviceService.deviceComponentDiscoveryV2(dto);
+  deviceComponentDiscovery(@Body() dto: DiscoveryMessageV2Dto) {
+    this.logger.debug(`Device component discovery: ${JSON.stringify(dto)}`);
+    return this.deviceService.deviceComponentDiscovery(dto);
   }
 
   @Post("discover/map")
