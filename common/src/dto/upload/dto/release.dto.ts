@@ -132,8 +132,8 @@ export class ComponentV2Dto{
   @ApiProperty()
   projectName: string;
 
-  @ApiProperty()
-  releaseNotes: string;
+  @ApiProperty({required: false})
+  releaseNotes?: string;
 
   @ApiProperty()
   metadata: Record<string, any>;
@@ -144,7 +144,7 @@ export class ComponentV2Dto{
   @ApiProperty({ type: 'enum', enum: ProjectType })
   type: ProjectType
 
-  @ApiProperty({type: 'integer'})
+  @ApiProperty({type: 'integer', format: 'int64', required: false})
   size: number
 
   @ApiProperty()
