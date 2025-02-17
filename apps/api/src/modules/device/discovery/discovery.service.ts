@@ -33,8 +33,8 @@ export class DiscoveryService{
     return this.offeringService.getDeviceComponentsOffering(offeringDto);
   }
 
-  async deviceMapDiscovery(discoveryMessageDto: DiscoveryMessageDto) : Promise<OfferingMapResDto>{
-    this.sendDeviceContext(discoveryMessageDto);
+  async deviceMapDiscovery(discoveryMessageDto: DiscoveryMessageV2Dto) : Promise<OfferingMapResDto>{
+    this.sendDeviceContextV2(discoveryMessageDto);
 
 
     let productsObservable = this.getMapClient.sendAndValidate(GetMapTopics.DISCOVERY_MAP, discoveryMessageDto?.mapData, OfferingMapProductsResDto);

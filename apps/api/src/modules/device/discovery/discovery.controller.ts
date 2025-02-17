@@ -52,7 +52,7 @@ export class DiscoveryController {
     description: "This service message allows a device to post the discovery context for getting device maps offers." 
   })
   @ApiOkResponse({type: OfferingMapResDto})
-  deviceMapDiscovery(@Body() discoveryMessageDto: DiscoveryMessageDto) {
+  deviceMapDiscovery(@Body() discoveryMessageDto: DiscoveryMessageV2Dto) {
     this.logger.debug(`Device map discovery: ${discoveryMessageDto}`);
     return this.deviceService.deviceMapDiscovery(discoveryMessageDto);
   }
