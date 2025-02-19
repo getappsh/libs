@@ -86,6 +86,10 @@ export class ReleaseArtifactDto {
 
     return dto
   }
+
+  toString(){
+    return JSON.stringify(this)
+  }
 }
 
 
