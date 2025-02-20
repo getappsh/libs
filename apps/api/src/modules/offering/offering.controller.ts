@@ -2,9 +2,9 @@ import { Body, Controller, Get, Logger, Param, Post } from '@nestjs/common';
 import { OfferingService } from './offering.service';
 import { ApiBearerAuth, ApiCreatedResponse, ApiExcludeEndpoint, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OFFERING } from '@app/common/utils/paths';
-import { ComponentDto } from '@app/common/dto/discovery';
 import { Unprotected } from '../../utils/sso/sso.decorators';
 import { PushOfferingDto } from '@app/common/dto/offering';
+import { ComponentV2Dto } from '@app/common/dto/upload';
 
 @ApiBearerAuth()
 @ApiTags("Offering")
@@ -19,7 +19,7 @@ export class OfferingController {
     summary: "Get Offering of Component", 
     description: "This service message allows retrieval of the offering of a specific component by catalog ID." 
   })
-  @ApiOkResponse({ type: ComponentDto })
+  @ApiOkResponse({ type: ComponentV2Dto })
   getOfferingOfComp(@Param("catalogId") catalogId: string) {
     this.logger.debug(`get offering of ${catalogId}`);
     return this.offeringService.getOfferingOfComp(catalogId);
