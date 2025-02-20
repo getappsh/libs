@@ -1,4 +1,4 @@
-import { ArtifactTypeEnum, ReleaseArtifactEntity } from "@app/common/database/entities";
+import { ArtifactTypeEnum, FileUPloadStatusEnum, ReleaseArtifactEntity } from "@app/common/database/entities";
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 import { IsString, IsNotEmpty, IsOptional, IsEnum, IsBoolean, IsNumber, IsSemVer } from "class-validator";
@@ -63,7 +63,7 @@ export class ReleaseArtifactDto {
   @ApiProperty()
   artifactName: string
 
-  @ApiProperty({ type: 'enum', enum: ArtifactTypeEnum })
+  @ApiProperty()
   type: ArtifactTypeEnum
 
   @ApiProperty()
@@ -72,11 +72,14 @@ export class ReleaseArtifactDto {
   @ApiProperty()
   isInstallationFile: boolean
 
-  @ApiProperty({ required: false })
+  @ApiProperty({required: false })
   dockerImageUrl?: string
 
   @ApiProperty()
   uploadId: number
+
+  @ApiProperty({type: 'enum', enum: FileUPloadStatusEnum, required: false})
+  status?: FileUPloadStatusEnum
 
 
   static fromEntity(artifact: ReleaseArtifactEntity): ReleaseArtifactDto {
@@ -88,6 +91,7 @@ export class ReleaseArtifactDto {
     dto.isInstallationFile = artifact.isInstallationFile;
     dto.dockerImageUrl = artifact?.dockerImageUrl;
     dto.uploadId = artifact.fileUpload ? artifact.fileUpload.id : null;
+    dto.status = artifact?.fileUpload?.status
 
     return dto
   }
