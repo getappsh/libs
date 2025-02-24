@@ -1,11 +1,15 @@
-import { Body, Controller, Delete, Get, Logger, Param, Post, UseInterceptors } from "@nestjs/common";
-import { ApiBearerAuth, ApiCreatedResponse, ApiHeader, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Delete, Get, Logger, Param, Post, Res, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { Response } from 'express';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiCreatedResponse, ApiHeader, ApiOkResponse, ApiOperation, ApiParam, ApiProduces, ApiTags } from "@nestjs/swagger";
 import { ReleasesService } from "./releases.service";
-import { ReleaseDto, SetReleaseDto, SetReleaseArtifactResDto, SetReleaseArtifactDto, ReleaseParams, RegulationStatusParams, SetRegulationCompliancyDto, SetRegulationStatusDto, RegulationStatusDto, ReleaseArtifactParams, DetailedReleaseDto  } from "@app/common/dto/upload";
-import { AuthOrProject } from '../../utils/sso/sso.decorators';
+import { ReleaseDto, SetReleaseDto, SetReleaseArtifactResDto, SetReleaseArtifactDto, ReleaseParams, RegulationStatusParams, SetRegulationCompliancyDto, SetRegulationStatusDto, RegulationStatusDto, ReleaseArtifactParams, DetailedReleaseDto, ReleaseArtifactNameParams  } from "@app/common/dto/upload";
+import { AuthOrProject, Unprotected } from '../../utils/sso/sso.decorators';
 import { UserContextInterceptor } from "../../utils/interceptor/user-context.interceptor";
 import { UPLOAD_RELEASES } from "@app/common/utils/paths";
 import { ProjectIdentifierParams } from "@app/common/dto/project-management";
+import { FileInterceptor } from "@nestjs/platform-express";
+import axios from 'axios';
+
 
 
 @ApiHeader({
@@ -94,6 +98,56 @@ export class ReleasesController {
     this.logger.debug(`Deleting release artifact for project: ${params.projectIdentifier}, version: ${params.version}`);
     return this.releasesService.deleteReleaseArtifact(params);
   }
+
+  @Get('project/:projectIdentifier/version/:version/artifact/download/:fileName')
+  @ApiOperation({
+    summary: "Download Release Artifact",
+    description: "This service allows downloading a release artifact by file name."
+  })
+  @ApiProduces('application/octet-stream') // Specifies the response is a binary file
+  @ApiOkResponse({ description: "Release artifact file." })
+  async downloadArtifact(
+    @Param() params: ReleaseArtifactNameParams,
+    @Res() res: Response
+  ) {
+    this.logger.debug(`Downloading release artifact for project: ${params.projectIdentifier}, version: ${params.version}, artifactName: ${params.fileName}`);
+    
+    const resDto = await this.releasesService.getArtifactDownloadUrl(params, params.fileName);
+    
+    const response = await axios.get(resDto.downloadUrl, { responseType: 'stream' });
+
+    res.setHeader('Content-Length', response.headers['content-length']);
+    res.setHeader('Content-Type', response.headers['content-type']);
+    res.setHeader('Content-Disposition', `attachment; filename="${params.fileName}"`);
+
+    response.data.pipe(res);
+  }
+
+  // @Post('project/:projectIdentifier/version/:version/artifact/upload/:fileName')
+  // @ApiOperation({
+  //   summary: "Upload Release Artifact",
+  //   description: "This service allows uploading a release artifact."
+  // })
+  // @ApiConsumes('multipart/form-data')
+  // @ApiBody({
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       file: { 
+  //         type: 'string', 
+  //         format: 'binary' 
+  //       }
+  //     }
+  //   }
+  // })
+  // @UseInterceptors(FileInterceptor('file'))
+  // async uploadArtifact(
+  //   @Param() params: ReleaseArtifactParams,
+  //   @Param('fileName') fileName: string,
+  //   @UploadedFile() file: Express.Multer.File
+  // ) {
+  //   return this.releasesService.uploadReleaseArtifact(params, file, fileName);
+  // }
 
 
   @Get('project/:projectIdentifier/version/:version/regulation-status')

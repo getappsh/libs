@@ -1,8 +1,9 @@
 import { ProjectIdentifierParams } from "@app/common/dto/project-management";
-import { ReleaseParams, SetReleaseDto, RegulationStatusParams, SetRegulationCompliancyDto, SetRegulationStatusDto, SetReleaseArtifactDto } from "@app/common/dto/upload";
+import { ReleaseParams, SetReleaseDto, RegulationStatusParams, SetRegulationCompliancyDto, SetRegulationStatusDto, SetReleaseArtifactDto, GetReleaseArtifactResDto } from "@app/common/dto/upload";
 import { MicroserviceClient, MicroserviceName } from "@app/common/microservice-client";
 import { UploadTopics } from "@app/common/microservice-client/topics";
 import { Inject, Injectable, Logger } from "@nestjs/common";
+import { lastValueFrom } from "rxjs";
 
 
 @Injectable()
@@ -42,6 +43,9 @@ export class ReleasesService {
     return this.uploadClient.send(UploadTopics.DELETE_RELEASE_ARTIFACT, params);
   }
 
+  async getArtifactDownloadUrl(params: ReleaseParams, fileName: string): Promise<GetReleaseArtifactResDto> {
+    return lastValueFrom(this.uploadClient.send(UploadTopics.GET_ARTIFACT_DOWNLOAD_URL, { ...params, fileName }));
+  }
 
   getVersionRegulationStatus(params: RegulationStatusParams) {
     return this.uploadClient.send(
