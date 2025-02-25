@@ -53,7 +53,7 @@
     "dotenv": "^16.0.3",
     "geojson-validation": "^1.0.2",
     "http-proxy-middleware": "^2.0.6",
-    "kafkajs": "github:getappsh/kafkajs#subscribe",
+    "kafkajs": "git://github.com/getappsh/kafkajs/tree/bug#17f3c7f0c1b9509e4071ad6a5a77e922362d19c0",
     "nanoid": "^3.3.7",
     "nest-keycloak-connect": "^1.9.1",
     "nestjs-cls": "^4.2.1",

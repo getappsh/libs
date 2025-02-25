@@ -9,6 +9,7 @@ import { UsersController } from './users.controller';
     MicroserviceModule.register({
         name: MicroserviceName.PROJECT_MANAGEMENT_SERVICE,
         type: MicroserviceType.PROJECT_MANAGEMENT,
+        id: "api",
       })
   ],
   providers: [ProjectManagementService],
