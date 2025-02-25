@@ -10,6 +10,7 @@ import { ReleasesService } from './releases.service';
     MicroserviceModule.register({
       name: MicroserviceName.UPLOAD_SERVICE,
       type: MicroserviceType.UPLOAD,
+      id: "api",
     })
     // MulterModule.register(),
   ],

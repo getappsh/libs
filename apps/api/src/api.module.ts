@@ -35,10 +35,12 @@ import { AnalyticsProxy } from './utils/middleware/analytics-proxy.middleware';
     MicroserviceModule.register({
       name: MicroserviceName.GET_MAP_SERVICE,
       type: MicroserviceType.GET_MAP,
+      id: "api",
     }),
     MicroserviceModule.register({
       name: MicroserviceName.DEVICE_SERVICE,
       type: MicroserviceType.DEVICE,
+      id: "api",
     }),
     Login,
     UploadModule,
