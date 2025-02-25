@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Logger, Param, Post, Res, UploadedFile, UseInterceptors } from "@nestjs/common";
 import { Response } from 'express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiCreatedResponse, ApiHeader, ApiOkResponse, ApiOperation, ApiParam, ApiProduces, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiCreatedResponse, ApiFoundResponse, ApiHeader, ApiOkResponse, ApiOperation, ApiParam, ApiProduces, ApiTags } from "@nestjs/swagger";
 import { ReleasesService } from "./releases.service";
 import { ReleaseDto, SetReleaseDto, SetReleaseArtifactResDto, SetReleaseArtifactDto, ReleaseParams, RegulationStatusParams, SetRegulationCompliancyDto, SetRegulationStatusDto, RegulationStatusDto, ReleaseArtifactParams, DetailedReleaseDto, ReleaseArtifactNameParams } from "@app/common/dto/upload";
 import { AuthOrProject, Unprotected } from '../../utils/sso/sso.decorators';
@@ -105,7 +105,8 @@ export class ReleasesController {
     description: "This service allows downloading a release artifact by file name."
   })
   @ApiProduces('application/octet-stream') // Specifies the response is a binary file
-  @ApiOkResponse({ description: "Release artifact file." })
+  // @ApiOkResponse({ description: "Release artifact file." })
+  @ApiFoundResponse({ description: 'Redirects to a URL' })
   async downloadArtifact(
     @Param() params: ReleaseArtifactNameParams,
     @Res() res: Response
@@ -114,7 +115,14 @@ export class ReleasesController {
 
     const resDto = await this.releasesService.getArtifactDownloadUrl(params, params.fileName);
 
-    res.redirect(302, resDto.downloadUrl)
+    // const response = await axios.get(resDto.downloadUrl, { responseType: 'stream' });
+
+    // res.setHeader('Content-Length', response.headers['content-length']);
+    // res.setHeader('Content-Type', response.headers['content-type']);
+    // res.setHeader('Content-Disposition', `attachment; filename="${params.fileName}"`);
+    // response.data.pipe(res);
+
+    res.redirect(302, resDto.downloadUrl);
   }
 
   // @Post('project/:projectIdentifier/version/:version/artifact/upload/:fileName')
@@ -184,4 +192,6 @@ export class ReleasesController {
     this.logger.debug(`Deleting regulation status for Project: ${params.projectIdentifier}, Regulation: ${params.regulation}, and Version: ${params.version}`);
     return this.releasesService.deleteVersionRegulationStatus(params);
   }
+
+
 }
