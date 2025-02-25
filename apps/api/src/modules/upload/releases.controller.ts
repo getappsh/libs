@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Logger, Param, Post, Res, UploadedFile, 
 import { Response } from 'express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiCreatedResponse, ApiHeader, ApiOkResponse, ApiOperation, ApiParam, ApiProduces, ApiTags } from "@nestjs/swagger";
 import { ReleasesService } from "./releases.service";
-import { ReleaseDto, SetReleaseDto, SetReleaseArtifactResDto, SetReleaseArtifactDto, ReleaseParams, RegulationStatusParams, SetRegulationCompliancyDto, SetRegulationStatusDto, RegulationStatusDto, ReleaseArtifactParams, DetailedReleaseDto, ReleaseArtifactNameParams  } from "@app/common/dto/upload";
+import { ReleaseDto, SetReleaseDto, SetReleaseArtifactResDto, SetReleaseArtifactDto, ReleaseParams, RegulationStatusParams, SetRegulationCompliancyDto, SetRegulationStatusDto, RegulationStatusDto, ReleaseArtifactParams, DetailedReleaseDto, ReleaseArtifactNameParams } from "@app/common/dto/upload";
 import { AuthOrProject, Unprotected } from '../../utils/sso/sso.decorators';
 import { UserContextInterceptor } from "../../utils/interceptor/user-context.interceptor";
 import { UPLOAD_RELEASES } from "@app/common/utils/paths";
@@ -24,17 +24,17 @@ import axios from 'axios';
 export class ReleasesController {
 
   private readonly logger = new Logger(ReleasesController.name);
-  
-  constructor(private readonly releasesService: ReleasesService){}
+
+  constructor(private readonly releasesService: ReleasesService) { }
 
 
   @Post('project/:projectIdentifier')
-  @ApiOperation({ 
-    summary: "Set a Release", 
-    description: "This service message allows creation of a release." 
+  @ApiOperation({
+    summary: "Set a Release",
+    description: "This service message allows creation of a release."
   })
-  @ApiCreatedResponse({type: DetailedReleaseDto})
-  setRelease(@Body() release: SetReleaseDto, @Param() params: ProjectIdentifierParams){
+  @ApiCreatedResponse({ type: DetailedReleaseDto })
+  setRelease(@Body() release: SetReleaseDto, @Param() params: ProjectIdentifierParams) {
     this.logger.debug(`Setting release for project: ${params.projectIdentifier}, version: ${release.version}`);
     return this.releasesService.setRelease(release, params);
   }
@@ -42,11 +42,11 @@ export class ReleasesController {
 
   @Get('project/:projectIdentifier')
   @ApiOperation({
-    summary: "Get Releases", 
+    summary: "Get Releases",
     description: "This service message allows retrieval of releases."
   })
-  @ApiOkResponse({type: ReleaseDto, isArray: true})
-  getReleases(@Param() params: ProjectIdentifierParams){
+  @ApiOkResponse({ type: ReleaseDto, isArray: true })
+  getReleases(@Param() params: ProjectIdentifierParams) {
     this.logger.debug(`Getting releases for project: ${params.projectIdentifier}`);
     return this.releasesService.getReleases(params);
   }
@@ -54,11 +54,11 @@ export class ReleasesController {
 
   @Get('project/:projectIdentifier/version/:version')
   @ApiOperation({
-    summary: "Get Release", 
+    summary: "Get Release",
     description: "This service message allows retrieval of a release."
   })
-  @ApiOkResponse({type: DetailedReleaseDto})
-  getRelease(@Param() params: ReleaseParams){
+  @ApiOkResponse({ type: DetailedReleaseDto })
+  getRelease(@Param() params: ReleaseParams) {
     this.logger.debug(`Getting release for project: ${params.projectIdentifier}, version: ${params.version}`);
     return this.releasesService.getRelease(params);
   }
@@ -66,11 +66,11 @@ export class ReleasesController {
 
   @Delete('project/:projectIdentifier/version/:version')
   @ApiOperation({
-    summary: "Delete Release", 
+    summary: "Delete Release",
     description: "This service message allows deletion of a release."
   })
-  @ApiOkResponse({description: "Release deleted."})
-  deleteRelease(@Param() params: ReleaseParams){
+  @ApiOkResponse({ description: "Release deleted." })
+  deleteRelease(@Param() params: ReleaseParams) {
     this.logger.debug(`Deleting release for project: ${params.projectIdentifier}, version: ${params.version}`);
     return this.releasesService.deleteRelease(params);
   }
@@ -81,8 +81,8 @@ export class ReleasesController {
     summary: "Set Release Artifact",
     description: "This service message allows creation of a release artifact."
   })
-  @ApiCreatedResponse({type: SetReleaseArtifactResDto})
-  setReleaseArtifact(@Body() artifact: SetReleaseArtifactDto, @Param() params: ReleaseParams){
+  @ApiCreatedResponse({ type: SetReleaseArtifactResDto })
+  setReleaseArtifact(@Body() artifact: SetReleaseArtifactDto, @Param() params: ReleaseParams) {
     this.logger.debug(`Setting release artifact for project: ${params.projectIdentifier}, version: ${params.version}, artifactName: ${artifact.artifactName}`);
     return this.releasesService.setReleaseArtifact(artifact, params);
 
@@ -92,9 +92,9 @@ export class ReleasesController {
   @ApiOperation({
     summary: "Delete Release Artifact",
     description: "This service message allows deletion of a release artifact."
-  }) 
-  @ApiOkResponse({description: "Release artifact deleted."})
-  deleteReleaseArtifact(@Param() params: ReleaseArtifactParams){
+  })
+  @ApiOkResponse({ description: "Release artifact deleted." })
+  deleteReleaseArtifact(@Param() params: ReleaseArtifactParams) {
     this.logger.debug(`Deleting release artifact for project: ${params.projectIdentifier}, version: ${params.version}`);
     return this.releasesService.deleteReleaseArtifact(params);
   }
@@ -111,16 +111,10 @@ export class ReleasesController {
     @Res() res: Response
   ) {
     this.logger.debug(`Downloading release artifact for project: ${params.projectIdentifier}, version: ${params.version}, artifactName: ${params.fileName}`);
-    
+
     const resDto = await this.releasesService.getArtifactDownloadUrl(params, params.fileName);
-    
-    const response = await axios.get(resDto.downloadUrl, { responseType: 'stream' });
 
-    res.setHeader('Content-Length', response.headers['content-length']);
-    res.setHeader('Content-Type', response.headers['content-type']);
-    res.setHeader('Content-Disposition', `attachment; filename="${params.fileName}"`);
-
-    response.data.pipe(res);
+    res.redirect(302, resDto.downloadUrl)
   }
 
   // @Post('project/:projectIdentifier/version/:version/artifact/upload/:fileName')
@@ -190,6 +184,4 @@ export class ReleasesController {
     this.logger.debug(`Deleting regulation status for Project: ${params.projectIdentifier}, Regulation: ${params.regulation}, and Version: ${params.version}`);
     return this.releasesService.deleteVersionRegulationStatus(params);
   }
-
-  
 }
