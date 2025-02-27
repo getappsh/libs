@@ -28,7 +28,7 @@ export class AuthGuard extends ckAuthGuard {
       accessToken = this.getCookie(request.headers.cookie, "accessToken");
     }
     if (accessToken) {
-      request.headers["authorization"] = `Bearer ${accessToken}`;
+      request.headers["Authorization"] = `Bearer ${accessToken}`;
     }
 
     if ((socket.authorized && request.header("auth_type") && request.header("auth_type") == "CC") || isUnprotected) { // CC stands for client certificates
@@ -47,7 +47,7 @@ export class AuthGuard extends ckAuthGuard {
       return true
     }
 
-    if (request.header("Authorization") || request.headers["authorization"]) {
+    if (request.header("Authorization") || request.headers["Authorization"]) {
       return await super.canActivate(context);
     }
 
