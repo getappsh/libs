@@ -152,8 +152,8 @@ export class ComponentV2Dto{
   @ApiProperty({required: false})
   releaseNotes?: string;
 
-  @ApiProperty()
-  metadata: Record<string, any>;
+  @ApiProperty({required: false})
+  metadata?: Record<string, any>;
 
   @ApiProperty({ type: 'enum', enum: ReleaseStatusEnum })
   status: ReleaseStatusEnum;
