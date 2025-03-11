@@ -24,6 +24,7 @@ import { HttpModule } from '@nestjs/axios';
 import { HttpClientService } from './utils/middleware/http-client.service';
 import { HttpConfigModule } from '@app/common/http-config/http-config.module';
 import { AnalyticsProxy } from './utils/middleware/analytics-proxy.middleware';
+import { ClsMiddleware } from 'nestjs-cls';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { AnalyticsProxy } from './utils/middleware/analytics-proxy.middleware';
 })
 export class ApiModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
+    consumer.apply(ClsMiddleware).forRoutes('*');
     if (process.env.ANALYTICS_SERVER_URL) {      
       consumer.apply(AnalyticsProxy).forRoutes(`*/analytics`);
     }
