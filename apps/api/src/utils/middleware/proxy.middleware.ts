@@ -9,7 +9,7 @@ import { ProxyHttpConfigService } from "@app/common/http-config/http-config.serv
 import { ClientRequest } from "http";
 import { IncomingMessage } from "http";
 import * as https from 'https'
-
+import { ClsService } from "nestjs-cls";
 
 @Injectable()
 export class ProxyMiddleware implements NestMiddleware {
@@ -23,7 +23,8 @@ export class ProxyMiddleware implements NestMiddleware {
   constructor(
     private httpConfig: ProxyHttpConfigService,
     private httpService: HttpClientService,
-    configService: ConfigService
+    configService: ConfigService,
+    private cls: ClsService
   ) {
     if (this.isDistSecureMode) {
       this.logger.log("Proxy configured in secure mode");
@@ -71,6 +72,9 @@ export class ProxyMiddleware implements NestMiddleware {
 
   async onProxyReq(proxyReq: ClientRequest, req: Request, res: Response,) {
     const socket = req.socket as TLSSocket;
+ 
+    const traceId = this.cls.getId(); 
+    proxyReq.setHeader("x-request-id", traceId);
 
     if (!this.isSecureMode || socket.authorized) {
       if (socket.authorized) {
@@ -89,7 +93,7 @@ export class ProxyMiddleware implements NestMiddleware {
           proxyReq.setHeader(key, value as string);
         }
       }
-      this.logger.debug(`Proxy Middleware routes the end-point: ${proxyReq.path}`)
+      this.logger.debug(`Proxy Middleware routes the end-point: ${proxyReq.path}`);
     }
     else {
       const deviceId = req.header("DeviceId")
