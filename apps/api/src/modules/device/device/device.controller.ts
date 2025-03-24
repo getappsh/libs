@@ -87,7 +87,6 @@ export class DeviceController {
     schema: { title: "ConfigDto", oneOf: [{ $ref: getSchemaPath(AndroidConfigDto) }, { $ref: getSchemaPath(WindowsConfigDto) }] }
   })
   getDeviceConfig(@Query('group') group: string) {
-    console.log(group)
     this.logger.debug(`Get device config - group: ${group}`)
     return this.deviceService.getDeviceConfig(group);
   }
