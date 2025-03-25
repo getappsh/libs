@@ -11,6 +11,12 @@ import { GET_APP_LOGGER } from '@app/common/logger/logger.module';
 import { API } from '@app/common/utils/paths';
 import * as fs from "fs";
 import { HttpsOptions } from '@nestjs/common/interfaces/external/https-options.interface';
+import { OfferingModule } from './modules/offering/offering.module';
+import { DeliveryModule } from './modules/delivery/delivery.module';
+import { DeployModule } from './modules/deploy/deploy.module';
+import { DeviceModule } from './modules/device/device.module';
+import { GetMapModule } from './modules/get-map/get-map.module';
+import { Login } from './modules/login/login.module';
 
 async function bootstrap() {
 
@@ -62,6 +68,13 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
+  const deviceDocs =  SwaggerModule.createDocument(app, config, {
+      include: [DeliveryModule, DeployModule, DeviceModule, GetMapModule, Login, OfferingModule],
+  });
+  SwaggerModule.setup('docs/device', app, deviceDocs);
+
+
   await app.listen(Number(process.env.SERVER_PORT?? 3000))
 }
+
 bootstrap();
