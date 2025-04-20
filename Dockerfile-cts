@@ -1,100 +1,73 @@
 # Dockerfile to build the getapp application
-# Optimized for smaller final image size
+# to fit the prod environmet in the cts
 
 ############################################################
-###   Base Stage - Common setup for Node Alpine        ###
+###               ///    CTS part     ///                ###
 ############################################################
-FROM node:19.5.0-alpine as base
+FROM node:19.5.0-alpine as cts
 
-# Install essential CA certificates - usually needed
-RUN apk --no-cache add ca-certificates
-
-# Set up working directory
 WORKDIR /node-app
 
-# Create non-root user and group matching CTS requirements
-# Using addgroup/adduser is slightly cleaner if available (usually are in Alpine)
-ARG UID=1004370000
-ARG GID=${UID} # Often UID and GID are the same
-ARG USERNAME=getapp
-RUN addgroup -g ${GID} ${USERNAME} && \
-    adduser -u ${UID} -G ${USERNAME} -D -h /home/${USERNAME} ${USERNAME}
-# RUN echo "${USERNAME}:x:${UID}:${GID}:${USERNAME}:/home/${USERNAME}:/sbin/nologin" >> /etc/passwd # Alternative manual way
-# RUN echo "${USERNAME}:x:${GID}:" >> /etc/group                                        # Alternative manual way
+# ===   create a uid and a gid to fit CTS project uid and setup CA certificates === #
+ARG uid=1004370000
+ARG username=getapp
 
-# Optional: Add custom CA certs if needed at RUNTIME (copied later)
-# RUN mkdir -p /usr/local/share/ca-certificates/my-custom-cas
-# COPY --chown=${UID}:${GID} idfcts/*.crt /usr/local/share/ca-certificates/my-custom-cas/
+# Combine user creation and CA setup in a single layer
+RUN echo "${username}:x:${uid}:${uid}:${username}:/home/${username}:/sbin/nologin" >> /etc/passwd && \
+    echo "${username}:x:${uid}:" >> /etc/group && \
+    apk --no-cache add ca-certificates bash curl && \
+    mkdir -p /usr/local/share/ca-certificates/ && \
+    chown -R ${uid}:${uid} /node-app
+
+# ===   inside part - must be run inside in the CTS   === #
+# Update the CA certificates bundle inside the container
+# inside the CTS build the image only with these two lines, ant commit all the rest.
+# COPY idfcts/* /usr/local/share/ca-certificates/
 # RUN update-ca-certificates
 
-############################################################
-###   Builder Stage - Install deps, build the app      ###
-############################################################
-FROM base as builder
-# Root is often needed for global npm installs or certain build steps
-USER root
-
-# Install ALL dependencies (including dev)
-COPY package*.json ./
-RUN npm install --ignore-scripts # Use --ignore-scripts if postinstall isn't needed for build
-
-# Copy application code
-# Make sure you have a good .dockerignore file!
-COPY --chown=${UID}:${GID} . .
-
-# Run tests (optional in builder, depends on workflow)
-# RUN npm run test
-
-# Build the application
-RUN npm run build
-
-# Optional Pruning: Install only prod dependencies for cleaner copy later
-# This creates a clean node_modules with only production deps
-RUN npm prune --production
+ENV CI=true
 
 ############################################################
-###   Final Stage - Minimal runtime environment        ###
+###               ///       end      ///                 ###
 ############################################################
-FROM base as final
 
-ARG UID=1004370000
-ARG GID=${UID}
-ARG USERNAME=getapp
-ENV NODE_ENV=production
+# Build stage with minimal dependencies
+FROM node:19.5.0-alpine as build
 
 WORKDIR /node-app
 
-# Copy only necessary files from the builder stage
-# 1. Copy production node_modules (pruned in builder stage)
-COPY --from=builder --chown=${UID}:${GID} /node-app/node_modules ./node_modules
-# 2. Copy built application artifacts
-COPY --from=builder --chown=${UID}:${GID} /node-app/dist ./dist
-# 3. Copy package.json (maybe needed by runtime, e.g., for version info)
-#    If not needed at runtime, you can potentially remove this COPY line.
-COPY --from=builder --chown=${UID}:${GID} /node-app/package.json ./package.json
+# Copy package files first to leverage cache
+COPY package*.json ./
+# Use npm ci for more reliable builds and clean install
+RUN npm ci && \
+    # Keep only production dependencies
+    npm prune --production
 
-# Alternative to copying node_modules from builder: Install prod deps here
-# This is simpler if you don't prune in the builder, but adds an npm install step/layer here.
-# COPY --chown=${UID}:${GID} package*.json ./
-# RUN npm install --only=production --omit=dev --ignore-scripts && \
-#     npm cache clean --force && \
-#     rm -rf /tmp/* # Clean up npm cache and tmp files
+# Copy source and build
+COPY . .
+# Combine test and build in single layer
+RUN npm run test && \
+    npm run build
 
-# Add version file
-ARG API_VERSION_TAG=unknown
-ENV API_VERSION_TAG=${API_VERSION_TAG}
-RUN echo "$API_VERSION_TAG" > api_image_version.txt
-RUN chown ${UID}:${GID} api_image_version.txt
+# Final stage
+FROM cts as deploy
 
-# Ensure correct ownership of the entire app directory
-# RUN chown -R ${UID}:${GID} /node-app # Might not be needed if COPY --chown works reliably
+ENV NODE_ENV=production
 
-# Switch to the non-root user
-USER ${USERNAME}
+ARG uid=1004370000
+ARG username=getapp
 
-# Expose port if necessary (replace 3000 with your app's port)
-# EXPOSE 3000
+# Copy only necessary files from build stage
+COPY --chown=${uid}:${uid} package*.json ./
+RUN npm ci --only=production --omit=dev
 
-# Define the command to run the application
-# Adjust the path if your main entrypoint is different after build
-CMD ["node", "dist/apps/api/main.js"]
+# Copy only the dist directory from build stage
+COPY --chown=${uid}:${uid} --from=build /node-app/dist/ .
+
+# Set version info in a single layer
+ARG api_version_tag
+ENV api_version_tag=$api_version_tag
+RUN echo "$api_version_tag" > api_image_version.txt
+
+USER ${username}
+CMD ["node", "apps/api/main.js"]
