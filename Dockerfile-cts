@@ -43,9 +43,8 @@ COPY package*.json ./
 RUN npm ci && \
     npm cache clean --force
 
-# Copy only necessary source files
-COPY tsconfig*.json ./ 
-COPY src/ ./src/
+# Copy source files needed for build
+COPY . .
 
 # Run tests and build, then create a clean production node_modules
 RUN npm run test && \
@@ -79,4 +78,4 @@ ENV api_version_tag=$api_version_tag
 RUN echo "$api_version_tag" > api_image_version.txt
 
 USER ${username}
-CMD ["node", "apps/api/main.js"].
+CMD ["node", "apps/api/main.js"]
