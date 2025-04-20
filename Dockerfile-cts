@@ -1,83 +1,100 @@
-# ==================================
-# Build Stage
-# Use a Node.js LTS version (Slim or standard)
-# ==================================
-FROM node:22-slim AS build
+# Dockerfile to build the getapp application
+# Optimized for smaller final image size
 
-# Set working directory
+############################################################
+###   Base Stage - Common setup for Node Alpine        ###
+############################################################
+FROM node:19.5.0-alpine as base
+
+# Install essential CA certificates - usually needed
+RUN apk --no-cache add ca-certificates
+
+# Set up working directory
 WORKDIR /node-app
 
-# Copy package files first to leverage Docker cache
-COPY package*.json /node-app/
+# Create non-root user and group matching CTS requirements
+# Using addgroup/adduser is slightly cleaner if available (usually are in Alpine)
+ARG UID=1004370000
+ARG GID=${UID} # Often UID and GID are the same
+ARG USERNAME=getapp
+RUN addgroup -g ${GID} ${USERNAME} && \
+    adduser -u ${UID} -G ${USERNAME} -D -h /home/${USERNAME} ${USERNAME}
+# RUN echo "${USERNAME}:x:${UID}:${GID}:${USERNAME}:/home/${USERNAME}:/sbin/nologin" >> /etc/passwd # Alternative manual way
+# RUN echo "${USERNAME}:x:${GID}:" >> /etc/group                                        # Alternative manual way
 
-# Install ALL dependencies (including dev) needed for build and tests using npm ci
-# Ensure package-lock.json is up-to-date and committed
-RUN npm ci
+# Optional: Add custom CA certs if needed at RUNTIME (copied later)
+# RUN mkdir -p /usr/local/share/ca-certificates/my-custom-cas
+# COPY --chown=${UID}:${GID} idfcts/*.crt /usr/local/share/ca-certificates/my-custom-cas/
+# RUN update-ca-certificates
 
-# Copy the rest of the application source code
-# This invalidates the cache more often, so it comes after npm ci
-COPY . .
+############################################################
+###   Builder Stage - Install deps, build the app      ###
+############################################################
+FROM base as builder
+# Root is often needed for global npm installs or certain build steps
+USER root
 
-# Run tests (Optional but recommended)
+# Install ALL dependencies (including dev)
+COPY package*.json ./
+RUN npm install --ignore-scripts # Use --ignore-scripts if postinstall isn't needed for build
+
+# Copy application code
+# Make sure you have a good .dockerignore file!
+COPY --chown=${UID}:${GID} . .
+
+# Run tests (optional in builder, depends on workflow)
 # RUN npm run test
 
 # Build the application
-# Ensure your build script outputs to /node-app/dist
 RUN npm run build
 
-# Remove development dependencies (Optional: Alternative to --only=production later)
-# RUN npm prune --production
+# Optional Pruning: Install only prod dependencies for cleaner copy later
+# This creates a clean node_modules with only production deps
+RUN npm prune --production
 
-# ==================================
-# Final Stage
-# Use a minimal Node.js LTS slim image
-# ==================================
-FROM node:22-slim AS final
+############################################################
+###   Final Stage - Minimal runtime environment        ###
+############################################################
+FROM base as final
 
-# Set environment to production
-ENV NODE_ENV=production
-
-# Arguments for user/group IDs (can be passed during build)
 ARG UID=1004370000
 ARG GID=${UID}
 ARG USERNAME=getapp
+ENV NODE_ENV=production
 
-# Create app directory
 WORKDIR /node-app
 
-# Create non-root user and group, install ca-certificates in one layer
-# Use addgroup/adduser which are standard utilities
-RUN apt-get update && \
-    apt-get install -y --no-cache --no-install-recommends ca-certificates && \
-    addgroup --gid ${GID} ${USERNAME} && \
-    adduser --disabled-password --gecos "" --ingroup ${USERNAME} --uid ${UID} ${USERNAME} && \
-    apt-get purge -y --auto-remove && \
-    rm -rf /var/lib/apt/lists/*
+# Copy only necessary files from the builder stage
+# 1. Copy production node_modules (pruned in builder stage)
+COPY --from=builder --chown=${UID}:${GID} /node-app/node_modules ./node_modules
+# 2. Copy built application artifacts
+COPY --from=builder --chown=${UID}:${GID} /node-app/dist ./dist
+# 3. Copy package.json (maybe needed by runtime, e.g., for version info)
+#    If not needed at runtime, you can potentially remove this COPY line.
+COPY --from=builder --chown=${UID}:${GID} /node-app/package.json ./package.json
 
-# Copy package files needed for production install
-COPY --chown=${USERNAME}:${USERNAME} package*.json /node-app/
+# Alternative to copying node_modules from builder: Install prod deps here
+# This is simpler if you don't prune in the builder, but adds an npm install step/layer here.
+# COPY --chown=${UID}:${GID} package*.json ./
+# RUN npm install --only=production --omit=dev --ignore-scripts && \
+#     npm cache clean --force && \
+#     rm -rf /tmp/* # Clean up npm cache and tmp files
 
-# Install ONLY production dependencies using npm ci
-RUN npm ci --only=production --omit=dev
-
-# Copy built application from the build stage
-COPY --chown=${USERNAME}:${USERNAME} --from=build /node-app/dist /dist
-
-# Copy other runtime assets if needed (e.g., static config files)
-# COPY --chown=${USERNAME}:${USERNAME}./config./config
-
-# Create and write the API version tag file
+# Add version file
 ARG API_VERSION_TAG=unknown
-ENV API_VERSION_TAG=$API_VERSION_TAG
-RUN echo "$API_VERSION_TAG" > api_image_version.txt && \
-    chown ${USERNAME}:${USERNAME} api_image_version.txt
+ENV API_VERSION_TAG=${API_VERSION_TAG}
+RUN echo "$API_VERSION_TAG" > api_image_version.txt
+RUN chown ${UID}:${GID} api_image_version.txt
+
+# Ensure correct ownership of the entire app directory
+# RUN chown -R ${UID}:${GID} /node-app # Might not be needed if COPY --chown works reliably
 
 # Switch to the non-root user
 USER ${USERNAME}
 
-# Expose the application port (adjust if necessary)
-EXPOSE 3000
+# Expose port if necessary (replace 3000 with your app's port)
+# EXPOSE 3000
 
-# Start the application using node directly
-# Adjust the path to your main entrypoint if different
+# Define the command to run the application
+# Adjust the path if your main entrypoint is different after build
 CMD ["node", "dist/apps/api/main.js"]
