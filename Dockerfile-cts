@@ -1,25 +1,6 @@
 # Dockerfile to build the getapp application
 # to fit the prod environmet in the cts
 
-# Build stage with minimal dependencies
-FROM node:19.5.0-alpine as build
-
-WORKDIR /node-app
-
-# Copy package files first to leverage cache
-COPY package*.json ./
-# Install all dependencies including dev dependencies needed for build and test
-RUN npm ci
-
-# Copy source and build
-COPY . .
-# Run tests and build, then create production node_modules
-RUN npm run test && \
-    npm run build && \
-    # Create a clean production node_modules
-    rm -rf node_modules && \
-    npm ci --only=production
-
 ############################################################
 ###               ///    CTS part     ///                ###
 ############################################################
@@ -28,10 +9,15 @@ FROM node:19.5.0-alpine as cts
 WORKDIR /node-app
 
 # ===   create a uid and a gid to fit CTS project uid and setup CA certificates === #
+ARG uid=1004370000
+ARG username=getapp
 
 # Combine user creation and CA setup in a single layer
-RUN apk --no-cache add ca-certificates bash curl && \
-    mkdir -p /usr/local/share/ca-certificates/ 
+RUN echo "${username}:x:${uid}:${uid}:${username}:/home/${username}:/sbin/nologin" >> /etc/passwd && \
+    echo "${username}:x:${uid}:" >> /etc/group && \
+    apk --no-cache add ca-certificates bash curl && \
+    mkdir -p /usr/local/share/ca-certificates/ && \
+    chown -R ${uid}:${uid} /node-app
 
 # ===   inside part - must be run inside in the CTS   === #
 # Update the CA certificates bundle inside the container
@@ -45,15 +31,47 @@ ENV CI=true
 ###               ///       end      ///                 ###
 ############################################################
 
+# Build stage with minimal dependencies
+FROM node:19.5.0-alpine as build
+
+WORKDIR /node-app
+
+# Copy package files first to leverage cache
+COPY package*.json ./
+
+# Install dependencies and clean npm cache
+RUN npm ci && \
+    npm cache clean --force
+
+# Copy only necessary source files
+COPY tsconfig*.json ./ 
+COPY src/ ./src/
+
+# Run tests and build, then create a clean production node_modules
+RUN npm run test && \
+    npm run build && \
+    rm -rf node_modules && \
+    npm ci --only=production && \
+    npm cache clean --force && \
+    # Remove unnecessary files from node_modules
+    find node_modules -type f -name "*.d.ts" -delete && \
+    find node_modules -type f -name "*.map" -delete && \
+    find node_modules -type d -name "test" -exec rm -rf {} + 2>/dev/null || true && \
+    find node_modules -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true && \
+    find node_modules -type d -name "docs" -exec rm -rf {} + 2>/dev/null || true
+
 # Final stage
 FROM cts as deploy
 
 ENV NODE_ENV=production
 
+ARG uid=1004370000
+ARG username=getapp
+
 # Copy only the minimal required files from build stage
-COPY package*.json ./
-COPY --from=build /node-app/node_modules ./node_modules
-COPY --from=build /node-app/dist/ .
+COPY --chown=${uid}:${uid} package*.json ./
+COPY --chown=${uid}:${uid} --from=build /node-app/node_modules ./node_modules
+COPY --chown=${uid}:${uid} --from=build /node-app/dist/ .
 
 # Set version info in a single layer
 ARG api_version_tag
@@ -61,4 +79,4 @@ ENV api_version_tag=$api_version_tag
 RUN echo "$api_version_tag" > api_image_version.txt
 
 USER ${username}
-CMD ["node", "apps/api/main.js"]
+CMD ["node", "apps/api/main.js"].
