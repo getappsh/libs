@@ -38,16 +38,15 @@ WORKDIR /node-app
 
 # Copy package files first to leverage cache
 COPY package*.json ./
-# Use npm ci for more reliable builds and clean install
-RUN npm ci && \
-    # Keep only production dependencies
-    npm prune --production
+# Install all dependencies including dev dependencies needed for build and test
+RUN npm ci
 
 # Copy source and build
 COPY . .
 # Combine test and build in single layer
 RUN npm run test && \
-    npm run build
+    npm run build && \
+    npm prune --production
 
 # Final stage
 FROM cts as deploy
@@ -59,9 +58,7 @@ ARG username=getapp
 
 # Copy only necessary files from build stage
 COPY --chown=${uid}:${uid} package*.json ./
-RUN npm ci --only=production --omit=dev
-
-# Copy only the dist directory from build stage
+COPY --chown=${uid}:${uid} --from=build /node-app/node_modules ./node_modules
 COPY --chown=${uid}:${uid} --from=build /node-app/dist/ .
 
 # Set version info in a single layer
