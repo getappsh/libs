@@ -8,7 +8,7 @@ FROM node:22-slim AS build
 WORKDIR /node-app
 
 # Copy package files first to leverage Docker cache
-COPY package*.json./
+COPY package*.json /node-app/
 
 # Install ALL dependencies (including dev) needed for build and tests using npm ci
 # Ensure package-lock.json is up-to-date and committed
@@ -16,7 +16,7 @@ RUN npm ci
 
 # Copy the rest of the application source code
 # This invalidates the cache more often, so it comes after npm ci
-COPY ..
+COPY . .
 
 # Run tests (Optional but recommended)
 # RUN npm run test
@@ -55,13 +55,13 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy package files needed for production install
-COPY --chown=${USERNAME}:${USERNAME} package*.json./
+COPY --chown=${USERNAME}:${USERNAME} package*.json /node-app/
 
 # Install ONLY production dependencies using npm ci
 RUN npm ci --only=production --omit=dev
 
 # Copy built application from the build stage
-COPY --chown=${USERNAME}:${USERNAME} --from=build /node-app/dist./dist
+COPY --chown=${USERNAME}:${USERNAME} --from=build /node-app/dist /dist
 
 # Copy other runtime assets if needed (e.g., static config files)
 # COPY --chown=${USERNAME}:${USERNAME}./config./config
