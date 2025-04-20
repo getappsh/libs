@@ -28,15 +28,10 @@ FROM node:19.5.0-alpine as cts
 WORKDIR /node-app
 
 # ===   create a uid and a gid to fit CTS project uid and setup CA certificates === #
-ARG uid=1004370000
-ARG username=getapp
 
 # Combine user creation and CA setup in a single layer
-RUN echo "${username}:x:${uid}:${uid}:${username}:/home/${username}:/sbin/nologin" >> /etc/passwd && \
-    echo "${username}:x:${uid}:" >> /etc/group && \
-    apk --no-cache add ca-certificates bash curl && \
-    mkdir -p /usr/local/share/ca-certificates/ && \
-    chown -R ${uid}:${uid} /node-app
+RUN apk --no-cache add ca-certificates bash curl && \
+    mkdir -p /usr/local/share/ca-certificates/ 
 
 # ===   inside part - must be run inside in the CTS   === #
 # Update the CA certificates bundle inside the container
@@ -54,9 +49,6 @@ ENV CI=true
 FROM cts as deploy
 
 ENV NODE_ENV=production
-
-ARG uid=1004370000
-ARG username=getapp
 
 # Copy only the minimal required files from build stage
 COPY package*.json ./
