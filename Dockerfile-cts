@@ -16,7 +16,7 @@ RUN npm ci
 
 # Copy the rest of the application source code
 # This invalidates the cache more often, so it comes after npm ci
-COPY..
+COPY ..
 
 # Run tests (Optional but recommended)
 # RUN npm run test
