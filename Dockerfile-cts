@@ -1,6 +1,25 @@
 # Dockerfile to build the getapp application
 # to fit the prod environmet in the cts
 
+# Build stage with minimal dependencies
+FROM node:19.5.0-alpine as build
+
+WORKDIR /node-app
+
+# Copy package files first to leverage cache
+COPY package*.json ./
+# Install all dependencies including dev dependencies needed for build and test
+RUN npm ci
+
+# Copy source and build
+COPY . .
+# Run tests and build, then create production node_modules
+RUN npm run test && \
+    npm run build && \
+    # Create a clean production node_modules
+    rm -rf node_modules && \
+    npm ci --only=production
+
 ############################################################
 ###               ///    CTS part     ///                ###
 ############################################################
@@ -31,23 +50,6 @@ ENV CI=true
 ###               ///       end      ///                 ###
 ############################################################
 
-# Build stage with minimal dependencies
-FROM node:19.5.0-alpine as build
-
-WORKDIR /node-app
-
-# Copy package files first to leverage cache
-COPY package*.json ./
-# Install all dependencies including dev dependencies needed for build and test
-RUN npm ci
-
-# Copy source and build
-COPY . .
-# Combine test and build in single layer
-RUN npm run test && \
-    npm run build && \
-    npm prune --production
-
 # Final stage
 FROM cts as deploy
 
@@ -56,7 +58,7 @@ ENV NODE_ENV=production
 ARG uid=1004370000
 ARG username=getapp
 
-# Copy only necessary files from build stage
+# Copy only the minimal required files from build stage
 COPY --chown=${uid}:${uid} package*.json ./
 COPY --chown=${uid}:${uid} --from=build /node-app/node_modules ./node_modules
 COPY --chown=${uid}:${uid} --from=build /node-app/dist/ .
