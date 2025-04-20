@@ -1,80 +1,83 @@
-# Dockerfile to build the getapp application
-# to fit the prod environmet in the cts
+# ==================================
+# Build Stage
+# Use a Node.js LTS version (Slim or standard)
+# ==================================
+FROM node:22-slim AS build
 
-############################################################
-###               ///    CTS part     ///                ###
-############################################################
-FROM node:19.5.0-alpine as cts
-
+# Set working directory
 WORKDIR /node-app
 
-# ===   create a uid and a gid to fit CTS project uid === #
-ARG uid=1004370000
-ARG username=getapp
-# Add the user to /etc/passwd
-RUN echo "${username}:x:${uid}:${uid}:${username}:/home/${username}:/sbin/nologin" >> /etc/passwd
-# Add the user to /etc/group
-RUN echo "${username}:x:${uid}:" 
+# Copy package files first to leverage Docker cache
+COPY package*.json./
 
-# ===   install ca sofeware === #
-# Install the ca-certificates package to manage certificates
-RUN apk --no-cache add ca-certificates bash curl
-# Create the CA certificates directory
-RUN mkdir -p /usr/local/share/ca-certificates/
+# Install ALL dependencies (including dev) needed for build and tests using npm ci
+# Ensure package-lock.json is up-to-date and committed
+RUN npm ci
 
-# ===   inside part - must be run inside in the CTS   === #
-# Update the CA certificates bundle inside the container
-# inside the CTS build the image only with these two lines, ant commit all the rest.
-# COPY idfcts/* /usr/local/share/ca-certificates/
-# RUN update-ca-certificates
+# Copy the rest of the application source code
+# This invalidates the cache more often, so it comes after npm ci
+COPY..
 
-# # copt the app files
-RUN chown -R ${uid}:${uid} /node-app
-# COPY --chown=${uid}:${uid} . .
+# Run tests (Optional but recommended)
+# RUN npm run test
 
-# # inside the CTS the privios command wont work. so if for some resion you need to run this command inside the cts - you need to use these 2 commands insted.
-# # COPY . .
-# # RUN chown -R ${uid}:${uid} /node-app
-ENV CI=true
-
-
-############################################################
-###               ///       end      ///                 ###
-############################################################
-
-# using a alpine image - lite as posible
-FROM node:19.5.0-alpine as build
-# some of the commands can't be executed if the user is not root
-USER root
-# hear the files of the app are stored.
-WORKDIR /node-app
-COPY package*.json ./
-RUN npm i
-COPY . .
-# test stage
-RUN npm run test
-# build
+# Build the application
+# Ensure your build script outputs to /node-app/dist
 RUN npm run build
 
+# Remove development dependencies (Optional: Alternative to --only=production later)
+# RUN npm prune --production
 
-FROM cts as deploy
+# ==================================
+# Final Stage
+# Use a minimal Node.js LTS slim image
+# ==================================
+FROM node:22-slim AS final
 
+# Set environment to production
 ENV NODE_ENV=production
-# adding the image tag as a env inside the image
 
-ARG uid=1004370000
-ARG username=getapp
-COPY --chown=${uid}:${uid} package*.json ./
+# Arguments for user/group IDs (can be passed during build)
+ARG UID=1004370000
+ARG GID=${UID}
+ARG USERNAME=getapp
 
-RUN npm install --only=production --omit=dev
+# Create app directory
+WORKDIR /node-app
 
-COPY --chown=${uid}:${uid} --from=build /node-app/dist/ .
+# Create non-root user and group, install ca-certificates in one layer
+# Use addgroup/adduser which are standard utilities
+RUN apt-get update && \
+    apt-get install -y --no-cache --no-install-recommends ca-certificates && \
+    addgroup --gid ${GID} ${USERNAME} && \
+    adduser --disabled-password --gecos "" --ingroup ${USERNAME} --uid ${UID} ${USERNAME} && \
+    apt-get purge -y --auto-remove && \
+    rm -rf /var/lib/apt/lists/*
 
-# a file that contains the image version
-ARG api_version_tag
-ENV api_version_tag=$api_version_tag
-RUN echo "$api_version_tag" > api_image_version.txt
-RUN cat api_image_version.txt
+# Copy package files needed for production install
+COPY --chown=${USERNAME}:${USERNAME} package*.json./
 
-USER ${username}
-CMD ["node", "apps/api/main.js"]
+# Install ONLY production dependencies using npm ci
+RUN npm ci --only=production --omit=dev
+
+# Copy built application from the build stage
+COPY --chown=${USERNAME}:${USERNAME} --from=build /node-app/dist./dist
+
+# Copy other runtime assets if needed (e.g., static config files)
+# COPY --chown=${USERNAME}:${USERNAME}./config./config
+
+# Create and write the API version tag file
+ARG API_VERSION_TAG=unknown
+ENV API_VERSION_TAG=$API_VERSION_TAG
+RUN echo "$API_VERSION_TAG" > api_image_version.txt && \
+    chown ${USERNAME}:${USERNAME} api_image_version.txt
+
+# Switch to the non-root user
+USER ${USERNAME}
+
+# Expose the application port (adjust if necessary)
+EXPOSE 3000
+
+# Start the application using node directly
+# Adjust the path to your main entrypoint if different
+CMD ["node", "dist/apps/api/main.js"]
