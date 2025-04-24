@@ -2,7 +2,7 @@ import { applyDecorators, Type } from "@nestjs/common";
 import { ApiExtraModels, ApiOkResponse, ApiProperty, getSchemaPath } from "@nestjs/swagger";
 
 export class PaginatedResultDto<T> {
-  @ApiProperty({ description: 'The data items for the current page' })
+  @ApiProperty({ description: 'The data items for the current page', type: "object", isArray: true })
   data: T[];
 
   @ApiProperty({ description: 'The total number of items available', example: 100 })
@@ -14,7 +14,7 @@ export class PaginatedResultDto<T> {
   @ApiProperty({ description: 'The number of items per page', example: 10 })
   perPage: number;
 
-  toString(){
+  toString() {
     return JSON.stringify(this)
   }
 

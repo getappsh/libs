@@ -7,6 +7,7 @@ import { MicroserviceModule, MicroserviceName, MicroserviceType } from '@app/com
     MicroserviceModule.register({
       name: MicroserviceName.DEPLOY_SERVICE,
       type: MicroserviceType.DEPLOY,
+      id: "api",
     })
   ],
   controllers: [DeployController],

@@ -4,7 +4,7 @@ import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min
 
 export class DeviceDto {
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: true })
   @IsString()
   @IsNotEmpty()
   id: string;
