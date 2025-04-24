@@ -77,7 +77,7 @@ export class ReleaseArtifactDto {
   @ApiProperty()
   artifactName: string
 
-  @ApiProperty()
+  @ApiProperty({type: 'enum', enum: ArtifactTypeEnum})
   type: ArtifactTypeEnum
 
   @ApiProperty()
