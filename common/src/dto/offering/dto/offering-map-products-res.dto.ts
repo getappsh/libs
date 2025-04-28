@@ -4,6 +4,10 @@ import { MapProductResDto } from "../../map/dto/map-product-res.dto";
 import { ErrorDto } from "../../error";
 import { Type } from "class-transformer";
 
+export enum GetRecordMethod {
+  POLYGON_PARTS = 'polygonParts',
+  SINGLE = 'single',
+}
 
 
 export enum MapOfferingStatus {
@@ -12,19 +16,23 @@ export enum MapOfferingStatus {
 }
 
 export class OfferingMapProductsResDto {
-  @ApiProperty({required: false, type: MapProductResDto, isArray: true})
+  @ApiProperty({ required: false, type: MapProductResDto, isArray: true })
   @IsArray()
-  @ValidateNested({each: true})
+  @ValidateNested({ each: true })
   @Type(() => MapProductResDto)
   products: MapProductResDto[];
 
-  @ApiProperty({enum: MapOfferingStatus})
+  @ApiProperty({ enum: GetRecordMethod, default: GetRecordMethod.POLYGON_PARTS })
+  @IsEnum(GetRecordMethod)
+  method: GetRecordMethod
+
+  @ApiProperty({ enum: MapOfferingStatus })
   @IsEnum(MapOfferingStatus)
   status: MapOfferingStatus
 
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   error: ErrorDto
-  
+
   toString() {
     return JSON.stringify(this)
   }
