@@ -5,8 +5,8 @@ import { ErrorDto } from "../../error";
 import { Type } from "class-transformer";
 
 export enum GetRecordMethod {
-  POLYGON_PARTS = 'polygonParts',
   SINGLE = 'single',
+  POLYGON_PARTS = 'polygonParts',
 }
 
 
@@ -15,12 +15,28 @@ export enum MapOfferingStatus {
   ERROR = 'Error'
 }
 
+export class mapOfferingConfig {
+  @ApiProperty({ required: false })
+  exportMaxResolutionDeg: number
+
+  constructor(maxResolutionDeg?: number) {
+    this.exportMaxResolutionDeg = maxResolutionDeg
+  }
+
+  toString() {
+    return JSON.stringify(this)
+  }
+}
+
 export class OfferingMapProductsResDto {
   @ApiProperty({ required: false, type: MapProductResDto, isArray: true })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => MapProductResDto)
   products: MapProductResDto[];
+
+  @ApiProperty({ required: false })
+  configs: mapOfferingConfig
 
   @ApiProperty({ enum: GetRecordMethod, default: GetRecordMethod.POLYGON_PARTS })
   @IsEnum(GetRecordMethod)
