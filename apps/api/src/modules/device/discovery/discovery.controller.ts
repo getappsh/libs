@@ -46,12 +46,12 @@ export class DiscoveryController {
       //   "string"
       // ]
     }
-    const offering = [];
+    const push = [];
     if (comp.catalogId && comp.name &&comp.versionNumber) {
       this.logger.debug(`Returning comp as offering: ${JSON.stringify(comp)}`);
-      offering.push(comp);
+      push.push(comp);
     }
-    return {offer: offering, push: []}
+    return {offer: [], push: push}
   }
 
   @Post("discover/component")
