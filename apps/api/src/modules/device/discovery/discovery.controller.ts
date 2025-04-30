@@ -31,7 +31,27 @@ export class DiscoveryController {
   @Version("1")
   discoverComponent(@Body() body: any) {
     this.logger.warn(`**Deprecated** Device component discovery v1 : ${JSON.stringify(body)}`);
-    return {offer: [], push: []}
+    let comp = {
+      "catalogId": process.env.TC_CATALOG_ID,
+      "name": process.env.TC_NAME,
+      "versionNumber": process.env.TC_VERSION,
+      "latest": process.env.TC_LATEST == "true",
+      "uploadDate": "2025-04-30T11:45:59.682Z",
+      // "releaseNotes": "string",
+      // "virtualSize": 0,
+      // "category": "string",
+      // "baseVersion": "string",
+      // "prevVersion": "string",
+      // "subComponents": [
+      //   "string"
+      // ]
+    }
+    const offering = [];
+    if (comp.catalogId && comp.name &&comp.versionNumber) {
+      this.logger.debug(`Returning comp as offering: ${JSON.stringify(comp)}`);
+      offering.push(comp);
+    }
+    return {offer: offering, push: []}
   }
 
   @Post("discover/component")
