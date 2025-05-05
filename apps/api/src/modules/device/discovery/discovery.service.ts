@@ -2,13 +2,14 @@ import { DeviceTopics, DeviceTopicsEmit, GetMapTopics } from '@app/common/micros
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { DeviceRegisterDto, MTlsStatusDto } from '@app/common/dto/device';
 import { Observable, lastValueFrom } from 'rxjs';
-import { DiscoveryMessageDto } from '@app/common/dto/discovery';
+import { DiscoveryMessageDto, DiscoveryMessageV2Dto } from '@app/common/dto/discovery';
 import { DiscoveryResDto } from '@app/common/dto/discovery';
 import { MicroserviceClient, MicroserviceName } from '@app/common/microservice-client';
 import { DeviceDiscoverDto } from '@app/common/dto/im';
-import { MapOfferingStatus, OfferingMapProductsResDto, OfferingMapResDto } from '@app/common/dto/offering';
+import { ComponentOfferingRequestDto, MapOfferingStatus, OfferingMapProductsResDto, OfferingMapResDto } from '@app/common/dto/offering';
 import { OfferingService } from '../../offering/offering.service';
-import { ErrorCode, ErrorDto } from '@app/common/dto/error';
+import { ErrorCode } from '@app/common/dto/error';
+import { DeviceComponentStateEnum } from '@app/common/database/entities';
 
 @Injectable()
 export class DiscoveryService{
@@ -21,14 +22,19 @@ export class DiscoveryService{
       
     }
     
+  
+  async deviceComponentDiscovery(dto: DiscoveryMessageV2Dto) : Promise<any>{
+    this.sendDeviceContextV2(dto);
 
-  async deviceComponentDiscovery(discoveryMessageDto: DiscoveryMessageDto) : Promise<any>{
-    this.sendDeviceContext(discoveryMessageDto);
-    return this.offeringService.getDeviceComponentOffering(discoveryMessageDto.general.physicalDevice.ID);
+    const offeringDto = ComponentOfferingRequestDto.fromDiscoveryMessageDto(dto);
+    offeringDto.components = dto.softwareData?.components
+      ?.filter(comp => comp.state === DeviceComponentStateEnum.INSTALLED && comp?.error === undefined)
+      ?.map(comp => comp.catalogId)
+    return this.offeringService.getDeviceComponentsOffering(offeringDto);
   }
 
-  async deviceMapDiscovery(discoveryMessageDto: DiscoveryMessageDto) : Promise<OfferingMapResDto>{
-    this.sendDeviceContext(discoveryMessageDto);
+  async deviceMapDiscovery(discoveryMessageDto: DiscoveryMessageV2Dto) : Promise<OfferingMapResDto>{
+    this.sendDeviceContextV2(discoveryMessageDto);
 
 
     let productsObservable = this.getMapClient.sendAndValidate(GetMapTopics.DISCOVERY_MAP, discoveryMessageDto?.mapData, OfferingMapProductsResDto);
@@ -72,12 +78,17 @@ export class DiscoveryService{
     this.deviceClient.emit(DeviceTopicsEmit.DISCOVER_DEVICE_CONTEXT, discoveryMessageDto);
   }
 
+  async sendDeviceContextV2(dto: DiscoveryMessageV2Dto){
+    this.logger.log(`emit device context, deviceId: ${dto.general.physicalDevice.ID}`);
+    this.deviceClient.emit(DeviceTopicsEmit.DISCOVER_DEVICE_CONTEXT_V2, dto);
+  }
+
   
   async discoveryCatalog(discoveryMessageDto: DiscoveryMessageDto): Promise<DiscoveryResDto>{
     let discoveryRes = new DiscoveryResDto();
 
     this.logger.log("send discovery software data")
-    const softObservable = this.deviceClient.send(DeviceTopics.DISCOVERY_SOFTWARE, discoveryMessageDto)
+    this.sendDeviceContext(discoveryMessageDto)
 
     let mapObservable: Observable<Promise<OfferingMapResDto>>
     if (discoveryMessageDto.mapData) {
@@ -85,34 +96,16 @@ export class DiscoveryService{
       mapObservable = this.getMapClient.sendAndValidate(GetMapTopics.DISCOVERY_MAP, discoveryMessageDto.mapData, OfferingMapResDto)
     }
 
-    const [softResult, mapResult] = await Promise.allSettled([lastValueFrom(softObservable), lastValueFrom(mapObservable)])
-
-    if (discoveryMessageDto.mapData){
-      if (mapResult.status ==='fulfilled'){
-        discoveryRes.map = mapResult.value
-
-        if (discoveryRes.map.status == MapOfferingStatus.ERROR){
-            this.logger.error(`get-map offering error ${discoveryRes.map.error.message}`)
-          }else{
-            this.logger.debug(`get-map responded with ${discoveryRes.map.products?.length} maps`)
-          }
+    try{
+      discoveryRes.map = await lastValueFrom(mapObservable)
+      if (discoveryRes.map.status == MapOfferingStatus.ERROR){
+        this.logger.error(`get-map offering error ${discoveryRes.map.error.message}`)
       }else{
-        this.logger.error(`Error getting discovery map data: ${mapResult.reason}`);
-        throw mapResult.reason
+        this.logger.debug(`get-map responded with ${discoveryRes.map.products?.length} maps`)
       }
-    }
-    
-
-    if (softResult.status ==='fulfilled'){
-      discoveryRes.software = softResult.value
-      this.logger.debug(`software discovery response, is new version: ${discoveryRes.software.isNewVersion}`)
-
-    }else{
-      this.logger.error(`Error getting discovery software data: ${softResult.reason}`);
-
-      if (!discoveryMessageDto.mapData){
-        throw softResult.reason
-      }
+    }catch (err){
+      this.logger.error(`Error getting discovery map data: ${err}`);
+      throw err
     }
     return discoveryRes;
   }

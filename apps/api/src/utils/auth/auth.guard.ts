@@ -20,7 +20,17 @@ export class AuthGuard extends ckAuthGuard {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const socket = request.socket as TLSSocket;
+
     const isUnprotected = this.ref.getAllAndOverride("out-of-auth", [context.getHandler(), context.getClass()])
+    const authOrProject = this.ref.getAllAndOverride("auth-or-project", [context.getHandler(), context.getClass()])
+    let accessToken: string;
+    if (request.headers.cookie) {
+      accessToken = this.getCookie(request.headers.cookie, "accessToken");
+    }
+    if (accessToken) {
+      request.headers["Authorization"] = `Bearer ${accessToken}`;
+    }
+
     if ((socket.authorized && request.header("auth_type") && request.header("auth_type") == "CC") || isUnprotected) { // CC stands for client certificates
       if (request.header("integration_test") === "true") {
         request["user"] = {
@@ -32,15 +42,36 @@ export class AuthGuard extends ckAuthGuard {
       }
       return true
     }
-    else {
-      if (request.header("Device-Auth") && request.header("Device-Auth") === (process.env.DEVICE_AUTH ?? process.env.DEVICE_SECRET)) {
-        return true;
-      } else if (request.header("Authorization")) {
-        return await super.canActivate(context);
-      } else {
-        throw new UnauthorizedException({ message: socket.authorizationError || "unknown error" })
+
+    if (authOrProject && request.headers['x-project-token']) {
+      return true
+    }
+
+    if (request.header("Authorization") || request.headers["Authorization"]) {
+      return await super.canActivate(context);
+    }
+
+    if (request.header("Device-Auth") && request.header("Device-Auth") === (process.env.DEVICE_AUTH ?? process.env.DEVICE_SECRET)) {
+      return true;
+    }
+    
+    throw new UnauthorizedException({ message: socket.authorizationError || "unknown error" })
+  }
+
+  getCookie(cookies: string, cname: any) {
+    let name = cname + "=";
+    let ca = cookies?.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
       }
     }
+    return "";
+
   }
 }
 

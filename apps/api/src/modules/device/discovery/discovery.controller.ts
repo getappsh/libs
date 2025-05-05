@@ -1,12 +1,11 @@
-import { Controller, Post, Body, Logger, Get, Param, ParseArrayPipe } from '@nestjs/common';
+import { Controller, Post, Body, Logger, ParseArrayPipe, Version } from '@nestjs/common';
 import { DiscoveryService } from './discovery.service';
-import { DeviceRegisterDto, DeviceContentResDto, MTlsStatusDto } from '@app/common/dto/device';
-import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { MTlsStatusDto } from '@app/common/dto/device';
+import { ApiBearerAuth, ApiCreatedResponse, ApiExcludeEndpoint, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DEVICE } from '@app/common/utils/paths';
-import { DiscoveryResDto } from '@app/common/dto/discovery';
+import { DiscoveryMessageV2Dto, DiscoveryResDto } from '@app/common/dto/discovery';
 import { DiscoveryMessageDto } from '@app/common/dto/discovery';
 import { DeviceDiscoverDto, DeviceDiscoverResDto } from '@app/common/dto/im';
-import { DeviceDto } from '@app/common/dto/device/dto/device.dto';
 import { DeviceComponentsOfferingDto, OfferingMapResDto } from '@app/common/dto/offering';
 @ApiTags("Device - discovery")
 @ApiBearerAuth()
@@ -28,14 +27,43 @@ export class DiscoveryController {
   }
 
   @Post("discover/component")
+  @ApiExcludeEndpoint()
+  @Version("1")
+  discoverComponent(@Body() body: any) {
+    this.logger.warn(`**Deprecated** Device component discovery v1 : ${JSON.stringify(body)}`);
+    let comp = {
+      "catalogId": process.env.TC_CATALOG_ID,
+      "name": process.env.TC_NAME,
+      "versionNumber": process.env.TC_VERSION,
+      "latest": process.env.TC_LATEST == "true",
+      "uploadDate": "2025-04-30T11:45:59.682Z",
+      // "releaseNotes": "string",
+      // "virtualSize": 0,
+      // "category": "string",
+      // "baseVersion": "string",
+      // "prevVersion": "string",
+      // "subComponents": [
+      //   "string"
+      // ]
+    }
+    const push = [];
+    if (comp.catalogId && comp.name &&comp.versionNumber) {
+      this.logger.debug(`Returning comp as offering: ${JSON.stringify(comp)}`);
+      push.push(comp);
+    }
+    return {offer: [], push: push}
+  }
+
+  @Post("discover/component")
+  @Version("2")
   @ApiOperation({ 
     summary: "Discover Device Component", 
     description: "This service message allows a device to post the discovery context for getting device software offers." 
   })
   @ApiOkResponse({type: DeviceComponentsOfferingDto})
-  deviceComponentDiscovery(@Body() discoveryMessageDto: DiscoveryMessageDto) {
-    this.logger.debug(`Device component discovery: ${discoveryMessageDto}`);
-    return this.deviceService.deviceComponentDiscovery(discoveryMessageDto);
+  deviceComponentDiscovery(@Body() dto: DiscoveryMessageV2Dto) {
+    this.logger.debug(`Device component discovery: ${JSON.stringify(dto)}`);
+    return this.deviceService.deviceComponentDiscovery(dto);
   }
 
   @Post("discover/map")
@@ -44,7 +72,7 @@ export class DiscoveryController {
     description: "This service message allows a device to post the discovery context for getting device maps offers." 
   })
   @ApiOkResponse({type: OfferingMapResDto})
-  deviceMapDiscovery(@Body() discoveryMessageDto: DiscoveryMessageDto) {
+  deviceMapDiscovery(@Body() discoveryMessageDto: DiscoveryMessageV2Dto) {
     this.logger.debug(`Device map discovery: ${discoveryMessageDto}`);
     return this.deviceService.deviceMapDiscovery(discoveryMessageDto);
   }

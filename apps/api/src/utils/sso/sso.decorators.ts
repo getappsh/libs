@@ -16,3 +16,5 @@ export const AuthUser = createParamDecorator((data: string, ctx: ExecutionContex
 })
 
 export const Unprotected = (unprotected: boolean = true) =>  SetMetadata("out-of-auth", unprotected) 
+
+export const AuthOrProject = () => SetMetadata("auth-or-project", true)
