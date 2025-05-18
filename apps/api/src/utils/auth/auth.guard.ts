@@ -51,10 +51,16 @@ export class AuthGuard extends ckAuthGuard {
       return await super.canActivate(context);
     }
 
-    if (request.header("Device-Auth") && request.header("Device-Auth") === (process.env.DEVICE_AUTH ?? process.env.DEVICE_SECRET)) {
+    const secret = process.env.DEVICE_AUTH ?? process.env.DEVICE_SECRET
+    let secretKeys: string[] = []
+    if (secret) {
+      secretKeys = secret.split(",");
+    }
+
+    if (request.header("Device-Auth") && secretKeys.some(k => request.header("Device-Auth") === k.trim())) {
       return true;
     }
-    
+
     throw new UnauthorizedException({ message: socket.authorizationError || "unknown error" })
   }
 
