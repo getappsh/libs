@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 import apm from 'nestjs-elastic-apm';
 
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ApiModule } from './api.module';
@@ -17,6 +17,38 @@ import { DeployModule } from './modules/deploy/deploy.module';
 import { DeviceModule } from './modules/device/device.module';
 import { GetMapModule } from './modules/get-map/get-map.module';
 import { Login } from './modules/login/login.module';
+
+
+async function setupSwagger(app: INestApplication){
+   const config = new DocumentBuilder()
+    .setTitle('Get-App')
+    .setDescription('The Get-App API swagger')
+    .setVersion('0.5.4')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('docs', app, document);
+
+  const deviceDocs =  SwaggerModule.createDocument(app, config, {
+      include: [DeliveryModule, DeployModule, DeviceModule, GetMapModule, Login, OfferingModule],
+  });
+  SwaggerModule.setup('docs/device', app, deviceDocs);
+
+  const configAuth = new DocumentBuilder()
+    .setTitle('Get-App')
+    .setDescription('The Get-App API swagger')
+    .setVersion('0.5.4')
+    .addGlobalParameters({
+      in: 'header',
+      required: false,
+      name: 'device-auth'
+    })
+    .addBearerAuth()
+    .build();
+  const documentAuth = SwaggerModule.createDocument(app, configAuth);
+  SwaggerModule.setup('docs/auth', app, documentAuth);
+}
+
 
 async function bootstrap() {
 
@@ -58,21 +90,7 @@ async function bootstrap() {
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
-
-  const config = new DocumentBuilder()
-    .setTitle('Get-App')
-    .setDescription('The Get-App API swagger')
-    .setVersion('0.5.4')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
-
-  const deviceDocs =  SwaggerModule.createDocument(app, config, {
-      include: [DeliveryModule, DeployModule, DeviceModule, GetMapModule, Login, OfferingModule],
-  });
-  SwaggerModule.setup('docs/device', app, deviceDocs);
-
+  setupSwagger(app);
 
   await app.listen(Number(process.env.SERVER_PORT?? 3000))
 }
