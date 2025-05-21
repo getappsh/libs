@@ -41,7 +41,7 @@ async function setupSwagger(app: INestApplication){
     .addGlobalParameters({
       in: 'header',
       required: false,
-      name: 'device-auth'
+      name: 'Device-Auth'
     })
     .addBearerAuth()
     .build();
