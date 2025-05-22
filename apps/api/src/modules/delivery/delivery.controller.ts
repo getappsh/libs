@@ -78,7 +78,7 @@ export class DeliveryController {
     description: "This service message returns an object of delivery cache configurations."
   })
   @ApiOkResponse({ type: CacheConfigResDto })
-  getMapConfig() {
+  getCacheConfig() {
     this.logger.debug(`Get delivery cache configurations`);
     return this.deliveryService.getCacheConfig();
   }
@@ -88,7 +88,7 @@ export class DeliveryController {
     summary: "Set Delivery Cache Configurations",
     description: "This service message sets an object of delivery cache configurations."
   })
-  setMapConfig(@Body() configs: CacheConfigDto) {
+  setCacheConfig(@Body() configs: CacheConfigDto) {
     this.logger.debug(`Set delivery cache configurations`);
     return this.deliveryService.setCacheConfig(configs);
   }
