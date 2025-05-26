@@ -76,7 +76,7 @@ function runSDKTest() {
     group("Discovery", () => {
 
       {
-          let url = BASE_URL + `/api/device/discover`;
+          let url = BASE_URL + `/api/device/discover/map`;
           let body = {"discoveryType":"get-map","general":{"personalDevice":{"name":"user-1","idNumber":"idNumber-123","personalNumber":"personalNumber-123"},"situationalDevice":{"weather":23,"bandwidth":30,"time": new Date(),"operativeState":true,"power":94,"location":{"lat":"33.4","long":"23.3","alt":"344"}},"physicalDevice":{"OS":"android","MAC":"00-B0-D0-63-C2-26","IP":"129.2.3.4","ID":"a36147aa81428033","serialNumber":"a36147aa81428033","possibleBandwidth":"Yes","availableStorage":"38142328832"}},"softwareData":{"formation":"yatush","platform":{"name":"Olar","platformNumber":"1","virtualSize":0,"components":[]}},"mapData":{"productId":"dummy product","productName":"no-name","productVersion":"3","productType":"osm","description":"bla-bla","boundingBox":"1,2,3,4","crs":"WGS84","imagingTimeStart":"2024-02-26T15:17:14.679733","imagingTimeEnd":"2024-02-26T15:17:14.680871","creationDate":"2024-02-26T15:17:14.681874","source":"DJI Mavic","classification":"raster","compartmentalization":"N/A","region":"ME","sensor":"CCD","precisionLevel":"3.14","resolution":"0.12"}};
           // let body = {"discoveryType":"get-map","general":{"personalDevice":{"name":"user-1","idNumber":"idNumber-123","personalNumber":"personalNumber-123"},"situationalDevice":{"weather":23,"bandwidth":30,"time": new Date(),"operativeState":true,"power":94,"location":{"lat":"33.4","long":"23.3","alt":"344"}},"physicalDevice":{"OS":"android","MAC":"00-B0-D0-63-C2-26","IP":"129.2.3.4","ID":"a36147aa81428033","serialNumber":"a36147aa81428033","possibleBandwidth":"Yes","availableStorage":"38142328832"}},"softwareData":{"formation":"yatush","platform":{"name":"Olar","platformNumber":"1","virtualSize":0,"components":[]}}};
           let params = {headers: {"Content-Type": "application/json", "Accept": "application/json", "Authorization": `Bearer ${authToken}`}};
@@ -163,7 +163,8 @@ function runSDKTest() {
 
     let downloadUrl
     group("Prepare Delivery", () => {
-      {
+      let status = 'start';
+      const prepareDelivery = () => {
           let url = BASE_URL + `/api/delivery/prepareDelivery`;
           let body = {"catalogId": importRequestId, "deviceId": deviceId, "itemType": "map"};
           let params = {headers: {"Content-Type": "application/json", "Accept": "application/json", "Authorization": `Bearer ${authToken}`}};
@@ -180,7 +181,8 @@ function runSDKTest() {
           sleep(1)
       }
 
-      {
+      let artifacts
+      const getPreparedDelivery = () => {
           let url = BASE_URL + `/api/delivery/preparedDelivery/${importRequestId}`;
           let params = {headers: {"Content-Type": "application/json", "Accept": "application/json", "Authorization": `Bearer ${authToken}`}};
           let request = http.get(url, params);
@@ -193,10 +195,17 @@ function runSDKTest() {
               return true;
               }
           });
-          downloadUrl = request.json("url")
-          sleep(1)
+          status = request.json("status");
+          artifacts = request.json("artifacts")
       }
 
+      prepareDelivery()
+      while (status !== 'done' && status !== 'error'){
+        sleep(2)
+        getPreparedDelivery()
+      }
+
+      downloadUrl = artifacts[0].url;
     });
 
     // put in a comment if you want to skip file download
