@@ -128,7 +128,31 @@ jobs:
     runs-on: ubuntu-latest
     # env:
     #   NEW_VERSION: ${{ needs.calculate_new_tag.outputs.tag }}
+   
+    env:
+      MINIO_ENDPOINT: ${{ secrets.MINIO_ENDPOINT }}
+      MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
+      MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
     steps:
+      - name: Checkout repo to get files
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Install MinIO Client (mc)
+        run: |
+          wget https://dl.min.io/client/mc/release/linux-amd64/mc
+          chmod +x mc
+          sudo mv mc /usr/local/bin/mc
+
+      - name: Configure mc alias
+        run: |
+          mc alias set s3 $MINIO_ENDPOINT $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
+
+      - name: Upload env.json to MinIO
+        run: |
+          mc cp libs/common/src/env/env.json s3/your-bucket-name/env/env-vars.json
+
       - name: Checkout code
         uses: actions/checkout@v3
         with:
@@ -152,6 +176,6 @@ jobs:
           MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
           MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
         run: |
-          mc alias set s3 $MINIO_ENDPOINT $MINIO_ACCESS_KEY $MINIO_SECRET_KEY --api S3v4
+          mc alias set s3 ${{ secrets.MINIO_ENDPOINT }} ${{ secrets.MINIO_ACCESS_KEY }} ${{ secrets.MINIO_SECRET_KEY }} --api S3v4
           mc cp libs/common/src/env/env.json s3/getapp-develop-public/env/env-vars.json
 
