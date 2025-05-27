@@ -153,7 +153,7 @@ jobs:
         run: |
           # jq --arg newTag "${{ needs.calculate_new_tag.outputs.tag }}" \
           jq --arg newTag "2.0.0" \
-            '.apiVersion = $newTag' libs/common/src/env/env.json > tmp.json && mv tmp.json libs/common/src/env/env.json
+            '.version = $newTag' libs/common/src/env/env.json > tmp.json && mv tmp.json libs/common/src/env/env.json
 
       - name: Upload env.json to MinIO
         run: |
