@@ -149,6 +149,12 @@ jobs:
         run: |
           mc alias set s3 $MINIO_ENDPOINT $MINIO_ACCESS_KEY $MINIO_SECRET_KEY --api S3v4
 
+      - name: Update version tag in env.json
+        run: |
+          # jq --arg newTag "${{ needs.calculate_new_tag.outputs.tag }}" \
+          jq --arg newTag "2.0.0" \
+            '.apiVersion = $newTag' libs/common/src/env/env.json > tmp.json && mv tmp.json libs/common/src/env/env.json
+
       - name: Upload env.json to MinIO
         run: |
           mc cp libs/common/src/env/env.json s3/getapp-develop-public/env/env-vars.json
