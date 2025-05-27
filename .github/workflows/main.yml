@@ -139,12 +139,12 @@ jobs:
           wget https://dl.min.io/client/mc/release/linux-amd64/mc
           chmod +x mc
           sudo mv mc /usr/local/bin/
-
-       name: Debug MinIO env vars
-       run: |
-        echo "MINIO_ENDPOINT is set? - ${MINIO_ENDPOINT:+yes}"
-        echo "MINIO_ACCESS_KEY is set? - ${MINIO_ACCESS_KEY:+yes}"
-        echo "MINIO_SECRET_KEY is set? - ${MINIO_SECRET_KEY:+yes}"
+      
+      - name: Debug MinIO env vars
+        run: |
+          echo "MINIO_ENDPOINT is set? - ${MINIO_ENDPOINT:+yes}"
+          echo "MINIO_ACCESS_KEY is set? - ${MINIO_ACCESS_KEY:+yes}"
+          echo "MINIO_SECRET_KEY is set? - ${MINIO_SECRET_KEY:+yes}"
 
       - name: Set MinIO alias and upload file
         env:
