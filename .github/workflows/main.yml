@@ -147,36 +147,13 @@ jobs:
 
       - name: Configure mc alias
         run: |
-          mc alias set s3 $MINIO_ENDPOINT $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
+          mc alias set s3 ${{ MINIO_ENDPOINT }} ${{ MINIO_ACCESS_KEY }} ${{ MINIO_SECRET_KEY }}
 
       - name: Upload env.json to MinIO
         run: |
-          mc cp libs/common/src/env/env.json s3/your-bucket-name/env/env-vars.json
+          mc cp libs/common/src/env/env.json s3/getapp-develop-public/env/env-vars.json
 
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          
-
-      - name: Install MinIO Client (mc)
-        run: |
-          wget https://dl.min.io/client/mc/release/linux-amd64/mc
-          chmod +x mc
-          sudo mv mc /usr/local/bin/
-      
-      - name: Debug MinIO env vars
-        run: |
-          echo "MINIO_ENDPOINT is set? - ${MINIO_ENDPOINT:+yes}"
-          echo "MINIO_ACCESS_KEY is set? - ${MINIO_ACCESS_KEY:+yes}"
-          echo "MINIO_SECRET_KEY is set? - ${MINIO_SECRET_KEY:+yes}"
-
-      - name: Set MinIO alias and upload file
-        env:
-          MINIO_ENDPOINT: ${{ secrets.MINIO_ENDPOINT }}
-          MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
-          MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
-        run: |
-          mc alias set s3 ${{ secrets.MINIO_ENDPOINT }} ${{ secrets.MINIO_ACCESS_KEY }} ${{ secrets.MINIO_SECRET_KEY }} --api S3v4
-          mc cp libs/common/src/env/env.json s3/getapp-develop-public/env/env-vars.json
-
