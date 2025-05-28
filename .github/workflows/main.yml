@@ -159,3 +159,8 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+  call_docs_action:
+    uses: getappsh/docs/.github/workflows/deploy.yml@main
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
