@@ -155,14 +155,10 @@ jobs:
         run: |
           mc cp libs/common/src/env/env.json s3/getapp-develop-public/env/env-vars.json
 
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
   deploy_docs:
     needs: 
-      - calculate_new_tag
+      - upload_env_to_s3
     uses: getappsh/docs/.github/workflows/deploy.yml@main
     secrets:
       SECRET_GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
