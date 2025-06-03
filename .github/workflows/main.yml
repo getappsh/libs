@@ -162,3 +162,4 @@ jobs:
     uses: getappsh/docs/.github/workflows/deploy.yml@main
     secrets:
       SECRET_GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
+      
