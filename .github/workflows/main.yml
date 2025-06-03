@@ -192,4 +192,4 @@ jobs:
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: token $PAT" \
             https://api.github.com/repos/getappsh/docs/dispatches \
-            -d '{"event_type":"deploy-docs"}'
+            -d '{"event_type":"docs:deploy:from-api"}'
