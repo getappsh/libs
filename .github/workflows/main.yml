@@ -121,9 +121,29 @@ jobs:
           GET_APP_PATH: ${{ secrets.GET_APP_PROJECT_REFACTOR_PATH }}
           UPLOAD_TOKEN: ${{ secrets.PROJECT_REFACTOR_UPLOAD_TOKEN }}  # Add the secret token here
 
+  check_env_json_change:
+    runs-on: ubuntu-latest
+    outputs:
+      env_changed: ${{ steps.check.outputs.changed }}
+    steps:
+     - name: Checkout repo
+       uses: actions/checkout@v3
+
+     - name: Check if env.json changed
+       id: check
+       run: |
+          if git diff --name-only origin/main...HEAD | grep -q "^libs/common/src/env/env.json$"; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+
   upload_env_to_s3:
     needs: 
       - calculate_new_tag
+      - check_env_json_change
+    if: needs.check_env_json_change.outputs.env_changed == 'true'
     runs-on: ubuntu-latest
     env:
       NEW_VERSION: ${{ needs.calculate_new_tag.outputs.tag }}
@@ -162,4 +182,3 @@ jobs:
     uses: getappsh/docs/.github/workflows/deploy.yml@main
     secrets:
       SECRET_GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
-      
