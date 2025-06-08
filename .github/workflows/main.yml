@@ -5,6 +5,7 @@ on:
     branches:
       - develop
       - project-refactor
+      - build-json-the-auto-generate-env-docs
 ##
 jobs:
   calculate_new_tag:
@@ -119,3 +120,76 @@ jobs:
         env:
           GET_APP_PATH: ${{ secrets.GET_APP_PROJECT_REFACTOR_PATH }}
           UPLOAD_TOKEN: ${{ secrets.PROJECT_REFACTOR_UPLOAD_TOKEN }}  # Add the secret token here
+
+  check_env_json_change:
+    runs-on: ubuntu-latest
+    outputs:
+      env_changed: ${{ steps.check.outputs.changed }}
+    steps:
+     - name: Checkout repo
+       uses: actions/checkout@v3
+       with:
+        fetch-depth: 0  # Needed for full history
+
+     - name: Check if env.json changed
+       id: check
+       run: |
+          echo "Comparing ${{ github.event.before }} to ${{ github.sha }}"
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q "^libs/common/src/env/env.json$"; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+
+  upload_env_to_s3:
+    needs: 
+      - calculate_new_tag
+      - check_env_json_change
+    if: needs.check_env_json_change.outputs.env_changed == 'true'
+    runs-on: ubuntu-latest
+    env:
+      NEW_VERSION: ${{ needs.calculate_new_tag.outputs.tag }}
+      MINIO_ENDPOINT: ${{ secrets.MINIO_ENDPOINT }}
+      MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
+      MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+    steps:
+      - name: Checkout repo to get files
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Install MinIO Client (mc)
+        run: |
+          wget https://dl.min.io/client/mc/release/linux-amd64/mc
+          chmod +x mc
+          sudo mv mc /usr/local/bin/mc
+
+      - name: Configure mc alias
+        run: |
+          mc alias set s3 $MINIO_ENDPOINT $MINIO_ACCESS_KEY $MINIO_SECRET_KEY --api S3v4
+
+      - name: Update version tag in env.json
+        run: |
+          jq --arg newTag "$NEW_VERSION" \
+            '.version = $newTag' libs/common/src/env/env.json > tmp.json && mv tmp.json libs/common/src/env/env.json
+
+      - name: Upload env.json to MinIO
+        run: |
+          mc cp libs/common/src/env/env.json s3/getapp-develop-public/env/env-vars.json
+
+
+  deploy_docs:
+    needs: 
+      - upload_env_to_s3
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send repository_dispatch event to docs repo
+        env:
+          PAT: ${{ secrets.ORG_PAT_TOKEN }}
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token $PAT" \
+            https://api.github.com/repos/getappsh/docs/dispatches \
+            -d '{"event_type":"docs:deploy:from-api"}'

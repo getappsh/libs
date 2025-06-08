@@ -54,8 +54,9 @@ export class ProxyMiddleware implements NestMiddleware {
         })
       }
 
-      this.logger.log("Proxy configured in unsecure mode"); this.proxy = createProxyMiddleware({
-        target: configService.get<string>("GETAPP_URL"),
+      this.logger.log("Proxy configured in unsecure mode"); 
+      this.proxy = createProxyMiddleware({
+        target: getAppUrl,
         agent,
         changeOrigin: true,
         secure: this.validateTLS,
