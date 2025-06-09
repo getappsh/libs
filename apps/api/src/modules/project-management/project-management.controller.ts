@@ -29,6 +29,10 @@ import {
   DocDto,
   CreateDocDto,
   UpdateDocDto,
+  CreatePlatformDto,
+  PlatformParams,
+  UpdatePlatformDto,
+  PlatformDto,
 
 } from "@app/common/dto/project-management";
 import { DeviceResDto } from "@app/common/dto/project-management/dto/device-res.dto";
@@ -87,10 +91,44 @@ export class ProjectManagementController {
 
   @Get('/platforms')
   @ApiOperation({ summary: 'Get all platforms' })
-  @ApiOkResponse({ type: String, isArray: true })
+  @ApiOkResponse({ type: PlatformDto, isArray: true })
   @ApiQuery({ name: 'query', required: false, description: 'Query to search platforms', type: String })
   getPlatforms(@Query('query') query?: string) {
+    this.logger.debug(`Getting all platforms with query: ${query}`);
     return this.projectManagementService.getPlatforms(query)
+  }
+
+  @Post('/platforms')
+  @ApiOperation({ summary: 'Create Platform' })
+  @ApiCreatedResponse({ type: PlatformDto })
+  createPlatform(@Body() dto: CreatePlatformDto) {
+    this.logger.debug(`Creating platform with data: ${JSON.stringify(dto)}`);
+    return this.projectManagementService.createPlatform(dto);
+  }
+
+  @Get('/platforms/:name')
+  @ApiOperation({ summary: 'Get Platform by name' })
+  @ApiOkResponse({ type: PlatformDto })
+  getPlatform(@Param() params: PlatformParams) {
+    this.logger.debug(`Getting platform by name: ${params.name}`);
+    return this.projectManagementService.getPlatform(params);
+  }
+
+  @Put('/platforms/:name')
+  @ApiOperation({ summary: 'Update Platform' })
+  @ApiOkResponse({ type: PlatformDto })
+  @ApiBody({ type: UpdatePlatformDto })
+  updatePlatform(@Param() params: PlatformParams, @Body() dto: UpdatePlatformDto) {
+    this.logger.debug(`Updating platform: ${params.name} with data: ${JSON.stringify(dto)}`);
+    return this.projectManagementService.updatePlatform(params, dto);
+  }
+
+  @ApiOperation({ summary: 'Delete Platform' })
+  @ApiOkResponse()
+  @Delete('/platforms/:name')
+  deletePlatform(@Param() params: PlatformParams) {
+    this.logger.debug(`Deleting platform: ${params.name}`);
+    return this.projectManagementService.deletePlatform(params);
   }
 
   @Get('/:projectIdentifier')
