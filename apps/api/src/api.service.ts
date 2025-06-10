@@ -1,4 +1,4 @@
-import { DeviceBugReportTopics, DeviceTopics, DevicesGroupTopics, GetMapTopics } from '@app/common/microservice-client/topics';
+import { DeviceBugReportTopics, DeviceTopics, DevicesGroupTopics, DevicesHierarchyTopics, GetMapTopics } from '@app/common/microservice-client/topics';
 import { MicroserviceClient, MicroserviceName } from '@app/common/microservice-client';
 import { getKafkaConnection } from '@app/common/microservice-client/clients/kafka/connection';
 import {Inject, Injectable, Logger, OnApplicationBootstrap, OnModuleInit } from '@nestjs/common';
@@ -37,6 +37,7 @@ export class ApiService implements OnModuleInit, OnApplicationBootstrap{
     this.deviceClient.subscribeToResponseOf(Object.values(DeviceTopics));
     this.deviceClient.subscribeToResponseOf(Object.values(DevicesGroupTopics));
     this.deviceClient.subscribeToResponseOf(Object.values(DeviceBugReportTopics));
+    this.deviceClient.subscribeToResponseOf(Object.values(DevicesHierarchyTopics));
 
     await this.deviceClient.connect();
   }
