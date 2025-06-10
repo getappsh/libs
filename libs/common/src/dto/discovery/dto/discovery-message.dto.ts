@@ -1,10 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsEnum, IsNotEmpty, IsOptional, IsString, isString, ValidateNested } from "class-validator"
+import { IsArray, IsDate, IsEnum, IsNotEmpty, IsOptional, IsString, isString, Validate, ValidateNested } from "class-validator"
 import { Type } from "class-transformer";
 import { GeneralDiscoveryDto } from "./discovery-general.dto";
 import { DiscoverySoftwareDto, DiscoverySoftwareV2Dto } from "./discovery-software.dto";
 import { DiscoveryType } from "@app/common/database/entities";
 import { DiscoveryMapDto } from "./discovery-map.dto";
+import { PlatformDiscoverDto } from "./discovery-platform";
+import { EitherIdPresentConstraint } from "@app/common/validators/id-presentation";
 
 export class DiscoveryMessageDto {
 
@@ -35,7 +37,6 @@ export class DiscoveryMessageDto {
 
 }
 
-
 export class DiscoveryMessageV2Dto {
 
   @ApiProperty({ required: false })
@@ -43,20 +44,45 @@ export class DiscoveryMessageV2Dto {
   @IsString()
   /**
    * In the future, this field will be required
-   */
+  */
   @IsOptional()
   id: string
 
-  @ApiProperty({ required: false })
+  /**
+   * Temporary validation until id will be required
+   * put it here to ensure the validation because this field is always not empty
+   */
+  @Validate(EitherIdPresentConstraint)
+  @ApiProperty({
+    required: false, description: 'Timestamp when the discovery snapshot was taken'
+  })
+  @IsOptional()
+  @IsDate()
+  snapshotDate: Date = new Date()
+
+  @ApiProperty({
+    required: false,
+    description: 'Type of the discovered device (e.g., router, switch, server, etc.), used for discovery of devices of type "device"'
+  })
   @IsOptional()
   @IsString()
-  deviceType: string
+  deviceType?: string
+
+  @ApiProperty({
+    required: false,
+    type: () => PlatformDiscoverDto,
+    description: 'Platform-specific discovery information containing device details and associated devices, used for discovery of devices of type "platform"'
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => PlatformDiscoverDto)
+  platform?: PlatformDiscoverDto
 
   @ApiProperty({ required: false })
   @IsOptional()
   @ValidateNested()
   @Type(() => GeneralDiscoveryDto)
-  general: GeneralDiscoveryDto;
+  general?: GeneralDiscoveryDto;
 
   @ApiProperty({ enum: DiscoveryType })
   @IsNotEmpty()
