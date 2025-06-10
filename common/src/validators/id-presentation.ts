@@ -1,5 +1,6 @@
-import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from 'class-validator';
+import { Validate, ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments, registerDecorator, ValidationOptions } from 'class-validator';
 import { DiscoveryMessageV2Dto } from '../dto/discovery';
+import { PlatformDiscoverDto } from '../dto/discovery/dto/discovery-platform';
 
 @ValidatorConstraint({ name: 'EitherIdPresentConstraint', async: false })
 export class EitherIdPresentConstraint implements ValidatorConstraintInterface {
@@ -17,6 +18,15 @@ export class EitherIdPresentConstraint implements ValidatorConstraintInterface {
 
     if (!rootId && hasNestedId) {
       obj.id = obj.general.physicalDevice.ID
+    }
+
+    if (!obj.platform && obj.softwareData.platforms) {
+      const platforms = obj.softwareData.platforms
+      const platform = Array.isArray(platforms) ? platforms[0] : platforms
+      if (platform) {
+        obj.platform = new PlatformDiscoverDto()
+        obj.platform.name = platform
+      }
     }
 
     return hasRootId || hasNestedId;
