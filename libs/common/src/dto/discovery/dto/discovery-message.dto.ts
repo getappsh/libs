@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsEnum, IsNotEmpty, ValidateNested } from "class-validator"
+import { IsEnum, IsNotEmpty, IsOptional, IsString, isString, ValidateNested } from "class-validator"
 import { Type } from "class-transformer";
 import { GeneralDiscoveryDto } from "./discovery-general.dto";
 import { DiscoverySoftwareDto, DiscoverySoftwareV2Dto } from "./discovery-software.dto";
@@ -8,23 +8,23 @@ import { DiscoveryMapDto } from "./discovery-map.dto";
 
 export class DiscoveryMessageDto {
 
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   @IsNotEmpty()
   @ValidateNested()
   @Type(() => GeneralDiscoveryDto)
   general: GeneralDiscoveryDto;
 
-  @ApiProperty({enum: DiscoveryType})
+  @ApiProperty({ enum: DiscoveryType })
   @IsNotEmpty()
   @IsEnum(DiscoveryType)
   discoveryType: DiscoveryType;
 
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   @ValidateNested()
   @Type(() => DiscoverySoftwareDto)
   softwareData: DiscoverySoftwareDto;
 
-  @ApiProperty({required: false, type: DiscoveryMapDto})
+  @ApiProperty({ required: false, type: DiscoveryMapDto })
   @ValidateNested()
   @Type(() => DiscoveryMapDto)
   mapData: DiscoveryMapDto;
@@ -32,34 +32,49 @@ export class DiscoveryMessageDto {
   toString() {
     return JSON.stringify(this)
   }
-  
+
 }
 
 
 export class DiscoveryMessageV2Dto {
-  @ApiProperty({required: false})
+
+  @ApiProperty({ required: false })
   @IsNotEmpty()
+  @IsString()
+  /**
+   * In the future, this field will be required
+   */
+  @IsOptional()
+  id: string
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  deviceType: string
+
+  @ApiProperty({ required: false })
+  @IsOptional()
   @ValidateNested()
   @Type(() => GeneralDiscoveryDto)
   general: GeneralDiscoveryDto;
 
-  @ApiProperty({enum: DiscoveryType})
+  @ApiProperty({ enum: DiscoveryType })
   @IsNotEmpty()
   @IsEnum(DiscoveryType)
   discoveryType: DiscoveryType;
 
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   @ValidateNested()
   @Type(() => DiscoverySoftwareV2Dto)
   softwareData: DiscoverySoftwareV2Dto;
 
-  @ApiProperty({required: false, type: DiscoveryMapDto})
+  @ApiProperty({ required: false, type: DiscoveryMapDto })
   @ValidateNested()
   @Type(() => DiscoveryMapDto)
   mapData: DiscoveryMapDto;
 
 
-  toString(){
+  toString() {
     return JSON.stringify(this)
   }
 }
