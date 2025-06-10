@@ -83,8 +83,8 @@ export class DiscoveryController {
     description: "This service message allows a device to post the discovery context."
   })
   @ApiCreatedResponse()
-  deviceContext(@Body() discoveryMessageDto: DiscoveryMessageDto) {
-    this.deviceService.sendDeviceContext(discoveryMessageDto);
+  deviceContext(@Body() discoveryMessageDto: DiscoveryMessageV2Dto) {
+    this.deviceService.sendDeviceContextV2(discoveryMessageDto);
   }
 
   @Post("im/push/discovery")
