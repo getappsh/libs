@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Logger, Param, Post, Put, Query } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { HierarchyService } from "./hierarchy.service";
-import { DeviceTypeDto, CreateDeviceTypeDto, DeviceTypeParams, UpdateDeviceTypeDto } from "@app/common/dto/devices-hierarchy";
+import { DeviceTypeDto, CreateDeviceTypeDto, DeviceTypeParams, UpdateDeviceTypeDto, CreatePlatformDto, PlatformDto, PlatformParams, UpdatePlatformDto } from "@app/common/dto/devices-hierarchy";
 
 
 @ApiTags("Device - Hierarchy")
@@ -11,6 +11,47 @@ export class HierarchyController {
   private readonly logger = new Logger(HierarchyController.name);
 
   constructor(private readonly hierarchyService: HierarchyService) {}
+    @Get('/platforms')
+    @ApiOperation({ summary: 'Get all platforms' })
+    @ApiOkResponse({ type: PlatformDto, isArray: true })
+    @ApiQuery({ name: 'query', required: false, description: 'Query to search platforms', type: String })
+    getPlatforms(@Query('query') query?: string) {
+      this.logger.debug(`Getting all platforms with query: ${query}`);
+      return this.hierarchyService.getPlatforms(query)
+    }
+  
+    @Post('/platforms')
+    @ApiOperation({ summary: 'Create Platform' })
+    @ApiCreatedResponse({ type: PlatformDto })
+    createPlatform(@Body() dto: CreatePlatformDto) {
+      this.logger.debug(`Creating platform with data: ${JSON.stringify(dto)}`);
+      return this.hierarchyService.createPlatform(dto);
+    }
+  
+    @Get('/platforms/:name')
+    @ApiOperation({ summary: 'Get Platform by name' })
+    @ApiOkResponse({ type: PlatformDto })
+    getPlatform(@Param() params: PlatformParams) {
+      this.logger.debug(`Getting platform by name: ${params.name}`);
+      return this.hierarchyService.getPlatform(params);
+    }
+  
+    @Put('/platforms/:name')
+    @ApiOperation({ summary: 'Update Platform' })
+    @ApiOkResponse({ type: PlatformDto })
+    @ApiBody({ type: UpdatePlatformDto })
+    updatePlatform(@Param() params: PlatformParams, @Body() dto: UpdatePlatformDto) {
+      this.logger.debug(`Updating platform: ${params.name} with data: ${JSON.stringify(dto)}`);
+      return this.hierarchyService.updatePlatform(params, dto);
+    }
+  
+    @ApiOperation({ summary: 'Delete Platform' })
+    @ApiOkResponse()
+    @Delete('/platforms/:name')
+    deletePlatform(@Param() params: PlatformParams) {
+      this.logger.debug(`Deleting platform: ${params.name}`);
+      return this.hierarchyService.deletePlatform(params);
+    }
 
     @Get('/device-types')
     @ApiOperation({ summary: 'Get all device types' })
