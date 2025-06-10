@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Logger, Param, Post, Put } from "@nestjs/common";
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
-import { CreateDevicesGroupDto, ChildGroupDto, EditDevicesGroupDto, SetChildInGroupDto } from "@app/common/dto/devices-group";
+import { CreateDevicesGroupDto, ChildGroupDto, EditDevicesGroupDto, SetChildInGroupDto, GroupResponseDto } from "@app/common/dto/devices-group";
 import { GroupService } from "./group.service";
 import { DEVICE_GROUP } from "@app/common/utils/paths";
 
@@ -34,20 +34,20 @@ export class GroupController {
 
   @Get()
   @ApiOperation({ summary: "Get root groups and its children groups and devices" })
-// TODO return type is not documented well, need to be Record<number, ChildGroupDto>
-  @ApiOkResponse({ type: ChildGroupDto, description: "return type is not documented well, needs to be `Record<number, ChildGroupDto>`" })
+  // TODO return type is not documented well, need to be Record<number, ChildGroupDto>
+  @ApiOkResponse({ type: GroupResponseDto, description: 'Returns root group IDs and a mapping of all groups by ID' })
   getGroups() {
-    this.logger.debug(`Get all root groups`);    
+    this.logger.debug(`Get all root groups`);
     return this.groupService.getGroups();
   }
-  
-  
+
+
   @Get("/:groupId/")
   @ApiOperation({ summary: "Get groups of the given id and its children groups and devices" })
   @ApiParam({ name: 'groupId', type: String })
   @ApiOkResponse({ type: ChildGroupDto })
   getGroupById(@Param("groupId") groupId: string) {
-    this.logger.debug(`Get group with id ${groupId}`);    
+    this.logger.debug(`Get group with id ${groupId}`);
     return this.groupService.getGroups(groupId);
   }
   // getGroupDevices(@Param("groupId") groupId: string) {
