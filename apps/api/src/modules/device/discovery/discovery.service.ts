@@ -90,18 +90,20 @@ export class DiscoveryService {
     this.logger.log("send discovery software data")
     this.sendDeviceContext(discoveryMessageDto)
 
-    let mapObservable: Observable<Promise<OfferingMapResDto>>
+    let mapObservable: Observable<Promise<OfferingMapResDto>> | undefined = undefined;
     if (discoveryMessageDto.mapData) {
       this.logger.log("send discovery map data to get-map");
       mapObservable = this.getMapClient.sendAndValidate(GetMapTopics.DISCOVERY_MAP, discoveryMessageDto.mapData, OfferingMapResDto)
     }
 
     try {
-      discoveryRes.map = await lastValueFrom(mapObservable)
-      if (discoveryRes.map.status == MapOfferingStatus.ERROR) {
-        this.logger.error(`get-map offering error ${discoveryRes.map.error.message}`)
-      } else {
-        this.logger.debug(`get-map responded with ${discoveryRes.map.products?.length} maps`)
+      if (mapObservable) {
+        discoveryRes.map = await lastValueFrom(mapObservable)
+        if (discoveryRes.map.status == MapOfferingStatus.ERROR) {
+          this.logger.error(`get-map offering error ${discoveryRes.map.error.message}`)
+        } else {
+          this.logger.debug(`get-map responded with ${discoveryRes.map.products?.length} maps`)
+        }
       }
     } catch (err) {
       this.logger.error(`Error getting discovery map data: ${err}`);

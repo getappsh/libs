@@ -46,7 +46,13 @@ export class DiscoveryController {
       //   "string"
       // ]
     }
-    const push = [];
+    const push: Array<{
+      catalogId: string | undefined;
+      name: string | undefined;
+      versionNumber: string | undefined;
+      latest: boolean;
+      uploadDate: string;
+    }> = [];
     if (comp.catalogId && comp.name && comp.versionNumber) {
       this.logger.debug(`Returning comp as offering: ${JSON.stringify(comp)}`);
       push.push(comp);

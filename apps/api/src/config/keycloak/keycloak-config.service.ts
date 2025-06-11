@@ -12,7 +12,7 @@ export class KeycloakConfigService implements KeycloakConnectOptionsFactory {
       authServerUrl: this.configService.get<string>('AUTH_SERVER_URL'),
       realm: this.configService.get<string>('REALM'),
       clientId: this.configService.get<string>('CLIENT_ID'),
-      secret: this.configService.get<string>('SECRET_KEY'),
+      secret: this.configService.get<string>('SECRET_KEY') ?? "",
       cookieKey: this.configService.get<string>('COOKIE_KEY'),
       policyEnforcement: PolicyEnforcementMode.PERMISSIVE,
       tokenValidation: TokenValidation.OFFLINE,

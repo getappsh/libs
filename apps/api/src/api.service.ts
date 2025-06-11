@@ -1,39 +1,39 @@
 import { DeviceBugReportTopics, DeviceTopics, DevicesGroupTopics, GetMapTopics } from '@app/common/microservice-client/topics';
 import { MicroserviceClient, MicroserviceName } from '@app/common/microservice-client';
 import { getKafkaConnection } from '@app/common/microservice-client/clients/kafka/connection';
-import {Inject, Injectable, Logger, OnApplicationBootstrap, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnApplicationBootstrap, OnModuleInit } from '@nestjs/common';
 import { Kafka, KafkaConfig } from 'kafkajs';
 import { ApmService } from 'nestjs-elastic-apm';
 import * as fs from 'fs';
 
 @Injectable()
 
-export class ApiService implements OnModuleInit, OnApplicationBootstrap{
+export class ApiService implements OnModuleInit, OnApplicationBootstrap {
   private readonly logger = new Logger(ApiService.name);
 
-  
+
   constructor(
     @Inject(MicroserviceName.GET_MAP_SERVICE) private readonly getMapClient: MicroserviceClient,
     @Inject(MicroserviceName.DEVICE_SERVICE) private readonly deviceClient: MicroserviceClient,
     private readonly apmService: ApmService
-    ){}
+  ) { }
 
 
-  readImageVersion(){
+  readImageVersion() {
     let version = 'unknown'
-    try{
-      version = fs.readFileSync('NEW_TAG.txt','utf8');
-    }catch(error){
+    try {
+      version = fs.readFileSync('NEW_TAG.txt', 'utf8');
+    } catch (error) {
       this.logger.error(`Unable to read image version - error: ${error}`)
     }
     return version
   }
-  async subscribeToGetMapClient(){
+  async subscribeToGetMapClient() {
     this.getMapClient.subscribeToResponseOf(Object.values(GetMapTopics));
     await this.getMapClient.connect();
   }
 
-  async subscribeToDeviceClient(){
+  async subscribeToDeviceClient() {
     this.deviceClient.subscribeToResponseOf(Object.values(DeviceTopics));
     this.deviceClient.subscribeToResponseOf(Object.values(DevicesGroupTopics));
     this.deviceClient.subscribeToResponseOf(Object.values(DeviceBugReportTopics));
@@ -46,17 +46,17 @@ export class ApiService implements OnModuleInit, OnApplicationBootstrap{
     await this.subscribeToDeviceClient()
   }
 
-  async createMapTopicsIfNotExist(){
+  async createMapTopicsIfNotExist() {
     const admin = new Kafka(getKafkaConnection() as KafkaConfig).admin();
     await admin.connect();
 
     const topicList = await admin.listTopics();
-    const topicsToCreate = [];
+    const topicsToCreate: { topic: string }[] = [];
 
-    const addTopicsIfNotExists = (enumValues) => {
-      enumValues.forEach((value) => {
+    const addTopicsIfNotExists = (enumValues: string[]) => {
+      enumValues.forEach((value: string) => {
         if (!topicList.includes(value)) {
-          topicsToCreate.push({ topic: value});
+          topicsToCreate.push({ topic: value });
           this.logger.debug(`Topic to create: ${value}`);
         }
       });
@@ -68,13 +68,13 @@ export class ApiService implements OnModuleInit, OnApplicationBootstrap{
       topics: topicsToCreate,
       waitForLeaders: true,
     });
-   
+
   }
   onApplicationBootstrap() {
-    if (this.getMapClient.isKafka()){
+    if (this.getMapClient.isKafka()) {
       this.logger.log("Using Kafka client");
       // this.createMapTopicsIfNotExist().catch(error => this.logger.error(error))
-    }else {
+    } else {
       this.logger.log("Does not using Kafka client");
     }
   }

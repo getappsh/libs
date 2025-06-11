@@ -15,9 +15,9 @@ export class AnalyticsProxy implements NestMiddleware {
 
   constructor(configService: ConfigService) {
     const target = configService.get<string>("ANALYTICS_SERVER_URL")
-    let agent: https.Agent;
+    let agent: https.Agent | undefined = undefined;
     if (target && target.startsWith("https") && configService.get("NODE_EXTRA_CA_CERTS")) {
-      const extraCa = fs.readFileSync(configService.get("NODE_EXTRA_CA_CERTS"));
+      const extraCa = fs.readFileSync(configService.get("NODE_EXTRA_CA_CERTS") ?? "");
       agent = new https.Agent({
         ca: extraCa,
       })
@@ -32,7 +32,7 @@ export class AnalyticsProxy implements NestMiddleware {
     });
   }
 
-  use(req: any, res: any, next: (error?: Error | any) => void) {        
+  use(req: any, res: any, next: (error?: Error | any) => void) {
     this.logger.debug(`Analytics proxy Middleware routes the end-point: ${req.baseUrl}`)
     this.proxy(req, res, next)
   }

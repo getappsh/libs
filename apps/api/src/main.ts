@@ -19,8 +19,8 @@ import { GetMapModule } from './modules/get-map/get-map.module';
 import { Login } from './modules/login/login.module';
 
 
-async function setupSwagger(app: INestApplication){
-   const config = new DocumentBuilder()
+async function setupSwagger(app: INestApplication) {
+  const config = new DocumentBuilder()
     .setTitle('Get-App')
     .setDescription('The Get-App API swagger')
     .setVersion('0.5.4')
@@ -29,8 +29,8 @@ async function setupSwagger(app: INestApplication){
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
-  const deviceDocs =  SwaggerModule.createDocument(app, config, {
-      include: [DeliveryModule, DeployModule, DeviceModule, GetMapModule, Login, OfferingModule],
+  const deviceDocs = SwaggerModule.createDocument(app, config, {
+    include: [DeliveryModule, DeployModule, DeviceModule, GetMapModule, Login, OfferingModule],
   });
   SwaggerModule.setup('docs/device', app, deviceDocs);
 
@@ -58,9 +58,9 @@ async function bootstrap() {
 
   if (isSecureMode) {
     console.log("Server launch in secure mode")
-    const key = fs.readFileSync(process.env.SERVER_KEY_PATH)
-    const cert = fs.readFileSync(process.env.SERVER_CERT_PATH)
-    const ca = fs.readFileSync(process.env.CA_CERT_PATH)
+    const key = fs.readFileSync(process.env.SERVER_KEY_PATH || "")
+    const cert = fs.readFileSync(process.env.SERVER_CERT_PATH || "")
+    const ca = fs.readFileSync(process.env.CA_CERT_PATH || "")
 
     httpsOptions = {
       key,
@@ -92,7 +92,7 @@ async function bootstrap() {
 
   setupSwagger(app);
 
-  await app.listen(Number(process.env.SERVER_PORT?? 3000))
+  await app.listen(Number(process.env.SERVER_PORT ?? 3000))
 }
 
 bootstrap();

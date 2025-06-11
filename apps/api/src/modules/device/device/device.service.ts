@@ -29,7 +29,7 @@ export class DeviceService {
   }
 
   getRegisteredDevices(groups: string[]) {
-    return this.deviceClient.send(DeviceTopics.All_DEVICES, { groups: groups });
+    return this.deviceClient.send(DeviceTopics.All_DEVICES, { groups });
   }
 
   putDeviceName(deviceId: string, body: DevicePutDto) {

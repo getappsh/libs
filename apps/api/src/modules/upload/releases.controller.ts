@@ -122,7 +122,12 @@ export class ReleasesController {
     // res.setHeader('Content-Disposition', `attachment; filename="${params.fileName}"`);
     // response.data.pipe(res);
 
-    res.redirect(302, resDto.downloadUrl);
+    if (typeof resDto.downloadUrl === 'string') {
+      res.redirect(302, resDto.downloadUrl);
+    } else {
+      this.logger.error('Download URL is undefined');
+      res.status(500).send('Download URL is unavailable.');
+    }
   }
 
   // @Post('project/:projectIdentifier/version/:version/artifact/upload/:fileName')
