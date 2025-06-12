@@ -12,18 +12,18 @@ import { ErrorCode } from '@app/common/dto/error';
 import { DeviceComponentStateEnum } from '@app/common/database/entities';
 
 @Injectable()
-export class DiscoveryService{
+export class DiscoveryService {
   private readonly logger = new Logger(DiscoveryService.name);
 
   constructor(
     @Inject(MicroserviceName.DEVICE_SERVICE) private readonly deviceClient: MicroserviceClient,
     @Inject(MicroserviceName.GET_MAP_SERVICE) private readonly getMapClient: MicroserviceClient,
-    private readonly offeringService: OfferingService) { 
-      
-    }
-    
-  
-  async deviceComponentDiscovery(dto: DiscoveryMessageV2Dto) : Promise<any>{
+    private readonly offeringService: OfferingService) {
+
+  }
+
+
+  async deviceComponentDiscovery(dto: DiscoveryMessageV2Dto): Promise<any> {
     this.sendDeviceContextV2(dto);
 
     const offeringDto = ComponentOfferingRequestDto.fromDiscoveryMessageDto(dto);
@@ -33,77 +33,79 @@ export class DiscoveryService{
     return this.offeringService.getDeviceComponentsOffering(offeringDto);
   }
 
-  async deviceMapDiscovery(discoveryMessageDto: DiscoveryMessageV2Dto) : Promise<OfferingMapResDto>{
+  async deviceMapDiscovery(discoveryMessageDto: DiscoveryMessageV2Dto): Promise<OfferingMapResDto> {
     this.sendDeviceContextV2(discoveryMessageDto);
 
 
     let productsObservable = this.getMapClient.sendAndValidate(GetMapTopics.DISCOVERY_MAP, discoveryMessageDto?.mapData, OfferingMapProductsResDto);
-    let offeringObservable = this.offeringService.getDeviceMapOffering(discoveryMessageDto.general.physicalDevice.ID);
+    let offeringObservable = this.offeringService.getDeviceMapOffering(discoveryMessageDto.id);
     const [offeringResults, productsResults] = await Promise.allSettled([lastValueFrom(offeringObservable), lastValueFrom(productsObservable)])
 
     let mapOffering = new OfferingMapResDto();
 
-    if (productsResults.status ==='fulfilled'){
+    if (productsResults.status === 'fulfilled') {
       mapOffering = productsResults.value as OfferingMapResDto;
 
-      if (mapOffering.status == MapOfferingStatus.ERROR){
+      if (mapOffering.status == MapOfferingStatus.ERROR) {
         this.logger.error(`get-map offering error ${mapOffering.error.message}`)
-      }else{
+      } else {
         this.logger.debug(`get-map responded with ${mapOffering.products?.length} products`)
       }
 
-    }else{
+    } else {
       this.logger.error(`Error getting discovery map data: ${productsResults.reason}`);
       mapOffering.products = [];
       mapOffering.status = MapOfferingStatus.ERROR;
-      mapOffering.error = {errorCode: ErrorCode.MAP_OTHER, message: productsResults.reason?.message};
+      mapOffering.error = { errorCode: ErrorCode.MAP_OTHER, message: productsResults.reason?.message };
     }
 
-    if (offeringResults.status ==='fulfilled'){
+    if (offeringResults.status === 'fulfilled') {
       mapOffering.push = offeringResults.value.push;
       this.logger.debug(`map push offering response with ${mapOffering.push.length} maps`);
 
-    }else{
+    } else {
       this.logger.error(`Error getting map push offering software data: ${offeringResults.reason}`);
       mapOffering.push = [];
     }
 
-   
+
     return mapOffering
   }
-    
 
-  async sendDeviceContext(discoveryMessageDto: DiscoveryMessageDto){
+
+  async sendDeviceContext(discoveryMessageDto: DiscoveryMessageDto) {
     this.logger.log(`emit device context, deviceId: ${discoveryMessageDto.general.physicalDevice.ID}`);
     this.deviceClient.emit(DeviceTopicsEmit.DISCOVER_DEVICE_CONTEXT, discoveryMessageDto);
   }
 
-  async sendDeviceContextV2(dto: DiscoveryMessageV2Dto){
-    this.logger.log(`emit device context, deviceId: ${dto.general.physicalDevice.ID}`);
+  async sendDeviceContextV2(dto: DiscoveryMessageV2Dto) {
+    this.logger.log(`emit device context, deviceId: ${dto.id}`);
     this.deviceClient.emit(DeviceTopicsEmit.DISCOVER_DEVICE_CONTEXT_V2, dto);
   }
 
-  
-  async discoveryCatalog(discoveryMessageDto: DiscoveryMessageDto): Promise<DiscoveryResDto>{
+
+  async discoveryCatalog(discoveryMessageDto: DiscoveryMessageDto): Promise<DiscoveryResDto> {
     let discoveryRes = new DiscoveryResDto();
 
     this.logger.log("send discovery software data")
     this.sendDeviceContext(discoveryMessageDto)
 
-    let mapObservable: Observable<Promise<OfferingMapResDto>>
+    let mapObservable: Observable<Promise<OfferingMapResDto>> | undefined = undefined;
     if (discoveryMessageDto.mapData) {
       this.logger.log("send discovery map data to get-map");
       mapObservable = this.getMapClient.sendAndValidate(GetMapTopics.DISCOVERY_MAP, discoveryMessageDto.mapData, OfferingMapResDto)
     }
 
-    try{
-      discoveryRes.map = await lastValueFrom(mapObservable)
-      if (discoveryRes.map.status == MapOfferingStatus.ERROR){
-        this.logger.error(`get-map offering error ${discoveryRes.map.error.message}`)
-      }else{
-        this.logger.debug(`get-map responded with ${discoveryRes.map.products?.length} maps`)
+    try {
+      if (mapObservable) {
+        discoveryRes.map = await lastValueFrom(mapObservable)
+        if (discoveryRes.map.status == MapOfferingStatus.ERROR) {
+          this.logger.error(`get-map offering error ${discoveryRes.map.error.message}`)
+        } else {
+          this.logger.debug(`get-map responded with ${discoveryRes.map.products?.length} maps`)
+        }
       }
-    }catch (err){
+    } catch (err) {
       this.logger.error(`Error getting discovery map data: ${err}`);
       throw err
     }
@@ -111,16 +113,16 @@ export class DiscoveryService{
   }
 
 
-  async imPushDiscoveryDevices(devicesDiscovery: DeviceDiscoverDto[]){
+  async imPushDiscoveryDevices(devicesDiscovery: DeviceDiscoverDto[]) {
     this.deviceClient.emit(DeviceTopicsEmit.IM_PUSH_DISCOVERY, devicesDiscovery);
   }
 
-  imPullDiscoveryDevices(devicesDiscovery: DeviceDiscoverDto[]){
+  imPullDiscoveryDevices(devicesDiscovery: DeviceDiscoverDto[]) {
     return this.deviceClient.send(DeviceTopics.IM_PULL_DISCOVERY, devicesDiscovery);
   }
 
 
-  mTlsStatus(mTlsStatus: MTlsStatusDto) {    
+  mTlsStatus(mTlsStatus: MTlsStatusDto) {
     this.deviceClient.emit(DeviceTopicsEmit.UPDATE_TLS_STATUS, mTlsStatus)
   }
 }

@@ -16,8 +16,8 @@ export class LoginService {
   url: string = this.configService.get<string>("AUTH_SERVER_URL") + "/realms/" + this.configService.get<string>("REALM") + "/protocol/openid-connect/token"
   data: ILoginBody = {
     grant_type: "",
-    client_secret: this.configService.get<string>("SECRET_KEY"),
-    client_id: this.configService.get<string>("CLIENT_ID"),
+    client_secret: this.configService.get<string>("SECRET_KEY") || "",
+    client_id: this.configService.get<string>("CLIENT_ID") || "",
   }
   config = {
     headers: {

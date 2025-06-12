@@ -23,7 +23,7 @@ export class AuthGuard extends ckAuthGuard {
 
     const isUnprotected = this.ref.getAllAndOverride("out-of-auth", [context.getHandler(), context.getClass()])
     const authOrProject = this.ref.getAllAndOverride("auth-or-project", [context.getHandler(), context.getClass()])
-    let accessToken: string;
+    let accessToken: string | undefined = undefined;
     if (request.headers.cookie) {
       accessToken = this.getCookie(request.headers.cookie, "accessToken");
     }

@@ -28,14 +28,14 @@ export class ProxyMiddleware implements NestMiddleware {
   ) {
     if (this.isDistSecureMode) {
       this.logger.log("Proxy configured in secure mode");
-      const key = fs.readFileSync(configService.get("CLIENT_KEY_PATH")).toString()
-      const cert = fs.readFileSync(configService.get("CLIENT_CERT_PATH")).toString()
-      const ca = fs.readFileSync(configService.get("CA_CERT_PATH")).toString()
+      const key = fs.readFileSync(configService.get("CLIENT_KEY_PATH") || "").toString()
+      const cert = fs.readFileSync(configService.get("CLIENT_CERT_PATH") || "").toString()
+      const ca = fs.readFileSync(configService.get("CA_CERT_PATH") || "").toString()
 
       this.proxy = createProxyMiddleware({
         target: {
           protocol: "https:",
-          host: configService.get("GETAPP_SSL_URL"),
+          host: configService.get("GETAPP_SSL_URL") || "",
           port: Number(configService.get("GETAPP_SSL_PORT")),
         },
         secure: this.validateTLS,
@@ -46,15 +46,15 @@ export class ProxyMiddleware implements NestMiddleware {
       });
     } else {
       const getAppUrl = configService.get<string>("GETAPP_URL")
-      let agent: https.Agent;
+      let agent: https.Agent | undefined = undefined;
       if (getAppUrl && getAppUrl.startsWith("https") && configService.get("NODE_EXTRA_CA_CERTS")) {
-        const extraCa = fs.readFileSync(configService.get("NODE_EXTRA_CA_CERTS"));
+        const extraCa = fs.readFileSync(configService.get("NODE_EXTRA_CA_CERTS") || "");
         agent = new https.Agent({
           ca: extraCa,
         })
       }
 
-      this.logger.log("Proxy configured in unsecure mode"); 
+      this.logger.log("Proxy configured in unsecure mode");
       this.proxy = createProxyMiddleware({
         target: getAppUrl,
         agent,
@@ -73,8 +73,8 @@ export class ProxyMiddleware implements NestMiddleware {
 
   async onProxyReq(proxyReq: ClientRequest, req: Request, res: Response,) {
     const socket = req.socket as TLSSocket;
- 
-    const traceId = this.cls.getId(); 
+
+    const traceId = this.cls.getId();
     proxyReq.setHeader("x-request-id", traceId);
 
     if (!this.isSecureMode || socket.authorized) {
