@@ -1,6 +1,6 @@
 import { ProjectManagementTopics } from "@app/common/microservice-client/topics";
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
-import { AddMemberToProjectDto, EditProjectMemberDto, CreateProjectDto, CreateRegulationDto, UpdateRegulationDto, RegulationParams, ProjectMemberParams, ProjectIdentifierParams, GetProjectsQueryDto, SearchProjectsQueryDto, TokenParams, CreateProjectTokenDto, UpdateProjectTokenDto, EditProjectDto, ProjectMemberPreferencesDto, UpdateOneOfManyRegulationDto, DocsParams, CreateDocDto, UpdateDocDto, PlatformParams, CreatePlatformDto, UpdatePlatformDto} from "@app/common/dto/project-management";
+import { AddMemberToProjectDto, EditProjectMemberDto, CreateProjectDto, CreateRegulationDto, UpdateRegulationDto, RegulationParams, ProjectMemberParams, ProjectIdentifierParams, GetProjectsQueryDto, SearchProjectsQueryDto, TokenParams, CreateProjectTokenDto, UpdateProjectTokenDto, EditProjectDto, ProjectMemberPreferencesDto, UpdateOneOfManyRegulationDto, DocsParams, CreateDocDto, UpdateDocDto} from "@app/common/dto/project-management";
 import { MicroserviceClient, MicroserviceName } from "@app/common/microservice-client";
 import { UserSearchDto } from "@app/common/oidc/oidc.interface";
 
@@ -152,43 +152,6 @@ export class ProjectManagementService implements OnModuleInit{
     return this.projectManagementClient.send(
       ProjectManagementTopics.GET_REGULATION_TYPES,
       {}
-    )
-  }
-
-  createPlatform(dto: CreatePlatformDto){
-    return this.projectManagementClient.send(
-      ProjectManagementTopics.CREATE_PLATFORM,
-      dto
-    )
-  }
-
-  getPlatforms(query?: string){
-    return this.projectManagementClient.send(
-      ProjectManagementTopics.GET_PLATFORMS,
-      query
-    )
-  }
-  
-  getPlatform(params: PlatformParams){
-    return this.projectManagementClient.send(
-      ProjectManagementTopics.GET_PLATFORM_BY_NAME,
-      params
-    )
-  }
-
-
-  updatePlatform(params: PlatformParams, dto: UpdatePlatformDto){
-    dto.name = params.name;
-    return this.projectManagementClient.send(
-      ProjectManagementTopics.UPDATE_PLATFORM,
-      dto
-    )
-  }
-
-  deletePlatform(params: PlatformParams){
-    return this.projectManagementClient.send(
-      ProjectManagementTopics.DELETE_PLATFORM,
-      params
     )
   }
 
