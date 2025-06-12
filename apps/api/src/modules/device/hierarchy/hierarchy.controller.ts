@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Logger, Param, Post, Put, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, UseInterceptors } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { HierarchyService } from "./hierarchy.service";
-import { DeviceTypeDto, CreateDeviceTypeDto, DeviceTypeParams, UpdateDeviceTypeDto, CreatePlatformDto, PlatformDto, PlatformParams, UpdatePlatformDto, PlatformDeviceTypeParams } from "@app/common/dto/devices-hierarchy";
+import { DeviceTypeDto, CreateDeviceTypeDto, DeviceTypeParams, UpdateDeviceTypeDto, CreatePlatformDto, PlatformDto, PlatformParams, UpdatePlatformDto, PlatformDeviceTypeParams, DeviceTypeProjectParams } from "@app/common/dto/devices-hierarchy";
+import { UserContextInterceptor } from "../../../utils/interceptor/user-context.interceptor";
 
 
 @ApiTags("Device - Hierarchy")
@@ -113,4 +114,21 @@ export class HierarchyController {
     this.logger.debug(`Deleting device type: ${params.name}`);
     return this.hierarchyService.deleteDeviceType(params);
   }
+
+  @UseInterceptors(UserContextInterceptor)
+  @ApiOperation({ summary: 'Add Project to Device Type' })
+  @Put('/device-types/:deviceTypeName/projects/:projectIdentifier')
+  addProjectToDeviceType(@Param() params: DeviceTypeProjectParams) {
+    this.logger.debug(`Adding project: '${params.projectIdentifier}' to device type: '${params.deviceTypeName}'`);
+    return this.hierarchyService.addProjectToDeviceType(params);
+  }
+
+  @UseInterceptors(UserContextInterceptor)
+  @ApiOperation({ summary: 'Remove Project from Device Type' })
+  @Delete('/device-types/:deviceTypeName/projects/:projectIdentifier')
+  removeProjectFromDeviceType(@Param() params: DeviceTypeProjectParams) {
+    this.logger.debug(`Removing project: '${params.projectIdentifier}' from device type: '${params.deviceTypeName}'`);
+    return this.hierarchyService.removeProjectFromDeviceType(params);
+  }
+
 }

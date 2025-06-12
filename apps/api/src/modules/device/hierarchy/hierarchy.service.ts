@@ -1,4 +1,4 @@
-import { CreateDeviceTypeDto, CreatePlatformDto, DeviceTypeParams, PlatformDeviceTypeParams, PlatformParams, UpdateDeviceTypeDto, UpdatePlatformDto } from "@app/common/dto/devices-hierarchy";
+import { CreateDeviceTypeDto, CreatePlatformDto, DeviceTypeParams, DeviceTypeProjectParams, PlatformDeviceTypeParams, PlatformParams, UpdateDeviceTypeDto, UpdatePlatformDto } from "@app/common/dto/devices-hierarchy";
 import { MicroserviceName, MicroserviceClient } from "@app/common/microservice-client";
 import { DevicesHierarchyTopics } from "@app/common/microservice-client/topics";
 import { Injectable, Inject, Logger } from "@nestjs/common";
@@ -97,6 +97,19 @@ export class HierarchyService {
   deleteDeviceType(params: DeviceTypeParams) {
     return this.deviceClient.send(
       DevicesHierarchyTopics.DELETE_DEVICE_TYPE,
+      params
+    );
+  }
+  
+  addProjectToDeviceType(params: DeviceTypeProjectParams) {
+    return this.deviceClient.send(
+      DevicesHierarchyTopics.ADD_PROJECT_TO_DEVICE_TYPE,
+      params
+    );
+  }
+  removeProjectFromDeviceType(params: DeviceTypeProjectParams) {
+    return this.deviceClient.send(
+      DevicesHierarchyTopics.REMOVE_PROJECT_FROM_DEVICE_TYPE,
       params
     );
   }
