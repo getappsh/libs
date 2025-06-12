@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Logger, Param, Post, Put, Query, UseInterceptors } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { HierarchyService } from "./hierarchy.service";
-import { DeviceTypeDto, CreateDeviceTypeDto, DeviceTypeParams, UpdateDeviceTypeDto, CreatePlatformDto, PlatformDto, PlatformParams, UpdatePlatformDto, PlatformDeviceTypeParams, DeviceTypeProjectParams } from "@app/common/dto/devices-hierarchy";
+import { DeviceTypeDto, CreateDeviceTypeDto, DeviceTypeParams, UpdateDeviceTypeDto, CreatePlatformDto, PlatformDto, PlatformParams, UpdatePlatformDto, PlatformDeviceTypeParams, DeviceTypeProjectParams, PlatformHierarchyDto, DeviceTypeHierarchyDto } from "@app/common/dto/devices-hierarchy";
 import { UserContextInterceptor } from "../../../utils/interceptor/user-context.interceptor";
 
 
@@ -56,9 +56,16 @@ export class HierarchyController {
     return this.hierarchyService.deletePlatform(params);
   }
 
+  @Get('platforms/:name/tree')
+  @ApiOperation({ summary: 'Get full hierarchy for a platform' })
+  @ApiOkResponse({ type: PlatformHierarchyDto })
+  getPlatformHierarchy(@Param() params: PlatformParams) {
+    this.logger.debug(`Getting full hierarchy tree for platform: '${params.name}'`);
+    return this.hierarchyService.getPlatformHierarchy(params);
+  }
 
   @ApiOperation({ summary: 'Add Device Type to Platform' })
-  // @ApiOkResponse({ type: PlatformDto })
+  @ApiOkResponse({ type: PlatformHierarchyDto })
   @Put('/platforms/:platformName/device-types/:deviceTypeName')
   addDeviceTypeToPlatform(@Param() params: PlatformDeviceTypeParams) {
     this.logger.debug(`Adding device type: '${params.deviceTypeName}' to platform: '${params.platformName}'`);
@@ -66,7 +73,7 @@ export class HierarchyController {
   }
 
   @ApiOperation({ summary: 'Remove Device Type from Platform' })
-  // @ApiOkResponse({ type: PlatformDto })
+  @ApiOkResponse({ type: PlatformHierarchyDto })
   @Delete('/platforms/:platformName/device-types/:deviceTypeName')
   removeDeviceTypeFromPlatform(@Param() params: PlatformDeviceTypeParams) {
     this.logger.debug(`Removing device type: '${params.deviceTypeName}' to platform: '${params.platformName}'`);
@@ -115,8 +122,17 @@ export class HierarchyController {
     return this.hierarchyService.deleteDeviceType(params);
   }
 
+  @Get('device-types/:name/tree')
+  @ApiOperation({ summary: 'Get all projects for a device type' })
+  @ApiOkResponse({ type: DeviceTypeHierarchyDto })
+  getDeviceTypeHierarchy(@Param() params: DeviceTypeParams ) {
+    this.logger.debug(`Getting full hierarchy tree for device type: '${params.name}'`);
+    return this.hierarchyService.getDeviceTypeHierarchy(params);
+  }
+
   @UseInterceptors(UserContextInterceptor)
   @ApiOperation({ summary: 'Add Project to Device Type' })
+  @ApiOkResponse({ type: DeviceTypeHierarchyDto })
   @Put('/device-types/:deviceTypeName/projects/:projectIdentifier')
   addProjectToDeviceType(@Param() params: DeviceTypeProjectParams) {
     this.logger.debug(`Adding project: '${params.projectIdentifier}' to device type: '${params.deviceTypeName}'`);
@@ -125,6 +141,7 @@ export class HierarchyController {
 
   @UseInterceptors(UserContextInterceptor)
   @ApiOperation({ summary: 'Remove Project from Device Type' })
+  @ApiOkResponse({ type: DeviceTypeHierarchyDto })
   @Delete('/device-types/:deviceTypeName/projects/:projectIdentifier')
   removeProjectFromDeviceType(@Param() params: DeviceTypeProjectParams) {
     this.logger.debug(`Removing project: '${params.projectIdentifier}' from device type: '${params.deviceTypeName}'`);

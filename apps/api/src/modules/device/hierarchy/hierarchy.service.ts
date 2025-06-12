@@ -86,6 +86,20 @@ export class HierarchyService {
     );
   }
 
+  getPlatformHierarchy(params: PlatformParams) {
+    return this.deviceClient.send(
+      DevicesHierarchyTopics.GET_PLATFORM_HIERARCHY_TREE,
+      params
+    );
+  }
+
+  getDeviceTypeHierarchy(params: DeviceTypeParams) {
+    return this.deviceClient.send(
+      DevicesHierarchyTopics.GET_DEVICE_TYPE_HIERARCHY_TREE,
+      params
+    );
+  }
+
   updateDeviceType(params: DeviceTypeParams, dto: UpdateDeviceTypeDto) {
     dto.name = params.name;
     return this.deviceClient.send(
