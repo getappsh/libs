@@ -7,7 +7,7 @@ import { UserContextInterceptor } from "../../../utils/interceptor/user-context.
 
 @ApiTags("Device - Hierarchy")
 @ApiBearerAuth()
-@Controller("device/hierarchy")
+@Controller("hierarchy")
 export class HierarchyController {
   private readonly logger = new Logger(HierarchyController.name);
 
