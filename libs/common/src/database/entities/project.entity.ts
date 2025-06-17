@@ -5,9 +5,9 @@ import { RegulationEntity } from "./regulation.entity";
 import { ReleaseEntity } from "./release.entity";
 import { ProjectTokenEntity } from "./project-token.entity";
 import { DocEntity } from "./document.entity";
-import { PlatformEntity } from "./platform.entity";
 import { ProjectType } from "./enums.entity";
 import { DeviceTypeEntity } from "./device-type.entity";
+import { PlatformEntity } from "./platform.entity";
 
 @Entity("project")
 export class ProjectEntity extends BaseEntity{
@@ -16,11 +16,13 @@ export class ProjectEntity extends BaseEntity{
     @Column({name: "name"})
     name: string;
 
+    // needs to be nullable
     @Column({name: "description"})
     description: string
    
     @OneToMany(() => ProjectTokenEntity, (token) => token.project)
     tokens: ProjectTokenEntity[];
+
 
     @ManyToMany(() => PlatformEntity, { eager: true })
     @JoinTable({

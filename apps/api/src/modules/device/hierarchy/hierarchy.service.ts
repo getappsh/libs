@@ -35,7 +35,7 @@ export class HierarchyService {
 
 
   updatePlatform(params: PlatformParams, dto: UpdatePlatformDto){
-    dto.name = params.name;
+    dto.id = params.platformId;
     return this.deviceClient.send(
       DevicesHierarchyTopics.UPDATE_PLATFORM,
       dto
@@ -101,7 +101,7 @@ export class HierarchyService {
   }
 
   updateDeviceType(params: DeviceTypeParams, dto: UpdateDeviceTypeDto) {
-    dto.name = params.name;
+    dto.id = params.deviceTypeId;
     return this.deviceClient.send(
       DevicesHierarchyTopics.UPDATE_DEVICE_TYPE,
       dto
