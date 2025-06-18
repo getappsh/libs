@@ -4,7 +4,6 @@ import { ApiBearerAuth, ApiCreatedResponse, ApiExcludeEndpoint, ApiOkResponse, A
 import { OFFERING } from '@app/common/utils/paths';
 import { Unprotected } from '../../utils/sso/sso.decorators';
 import { PushOfferingDto } from '@app/common/dto/offering';
-import { ComponentV2Dto } from '@app/common/dto/upload';
 import { DeviceTypeParams, PlatformParams } from '@app/common/dto/devices-hierarchy';
 import { DeviceTypeOfferingDto, PlatformOfferingDto, ProjectRefOfferingDto } from '@app/common/dto/offering/dto/offering.dto';
 import { ProjectIdentifierParams } from '@app/common/dto/project-management';
@@ -16,18 +15,6 @@ export class OfferingController {
   private readonly logger = new Logger(OfferingController.name);
 
   constructor(private readonly offeringService: OfferingService) { }
-
-  @Get("component/:catalogId")
-  @ApiOperation({ 
-    summary: "Get Offering of Component", 
-    description: "This service message allows retrieval of the offering of a specific component by catalog ID." 
-  })
-  @ApiOkResponse({ type: ComponentV2Dto })
-  getOfferingOfComp(@Param("catalogId") catalogId: string) {
-    this.logger.debug(`get offering of ${catalogId}`);
-    return this.offeringService.getOfferingOfComp(catalogId);
-  }
-
 
   @Get('platform/:platformId')
   @ApiOperation({

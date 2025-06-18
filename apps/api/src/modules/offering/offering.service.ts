@@ -11,11 +11,6 @@ export class OfferingService implements OnModuleInit{
 
   constructor(@Inject(MicroserviceName.OFFERING_SERVICE) private readonly offeringClient: MicroserviceClient){}
 
-
-  getOfferingOfComp(catalogId: string) {
-    return this.offeringClient.send(OfferingTopics.GET_OFFER_OF_COMP, catalogId)
-  }
-
   getOfferingForPlatform(params: PlatformParams) {
     return this.offeringClient.send(OfferingTopics.GET_OFFERING_FOR_PLATFORM, params)
   }
