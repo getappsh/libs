@@ -5,6 +5,9 @@ import { OFFERING } from '@app/common/utils/paths';
 import { Unprotected } from '../../utils/sso/sso.decorators';
 import { PushOfferingDto } from '@app/common/dto/offering';
 import { ComponentV2Dto } from '@app/common/dto/upload';
+import { DeviceTypeParams, PlatformParams } from '@app/common/dto/devices-hierarchy';
+import { DeviceTypeOfferingDto, PlatformOfferingDto, ProjectRefOfferingDto } from '@app/common/dto/offering/dto/offering.dto';
+import { ProjectIdentifierParams } from '@app/common/dto/project-management';
 
 @ApiBearerAuth()
 @ApiTags("Offering")
@@ -24,6 +27,43 @@ export class OfferingController {
     this.logger.debug(`get offering of ${catalogId}`);
     return this.offeringService.getOfferingOfComp(catalogId);
   }
+
+
+  @Get('platform/:platformId')
+  @ApiOperation({
+    summary: "Get Offering of Platform",
+    description: "This service message allows retrieval of the offering of a specific platform by platform ID."
+  })
+  @ApiOkResponse({ type: PlatformOfferingDto })
+  getOfferingForPlatform(@Param() params: PlatformParams) {
+    this.logger.debug(`get offering for platform: ${params.platformId}`)
+    return this.offeringService.getOfferingForPlatform(params);
+  }
+
+
+  @Get('device-type/:deviceTypeId')
+  @ApiOperation({
+    summary: "Get Offering of Device Type",
+    description: "This service message allows retrieval of the offering of a specific device type by device type ID."
+  })
+  
+  @ApiOkResponse({ type: DeviceTypeOfferingDto })
+  getOfferingForDeviceType(@Param() params: DeviceTypeParams) {
+    this.logger.debug(`get offering for device type: ${params.deviceTypeId}`)
+    return this.offeringService.getOfferingForDeviceType(params);
+  }
+
+  @Get('project/:projectIdentifier')
+  @ApiOperation({
+    summary: "Get Offering of Project",
+    description: "This service message allows retrieval of the offering of a specific project by project identifier."
+  })
+  @ApiOkResponse({ type: ProjectRefOfferingDto })
+  getOfferingForProject(@Param() params: ProjectIdentifierParams) {
+    this.logger.debug(`get offering for project: ${params.projectIdentifier}`)
+    return this.offeringService.getOfferingForProject(params);
+  }
+
 
   @Post('push')
   @ApiOperation({ 

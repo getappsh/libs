@@ -2,6 +2,8 @@ import { OfferingTopics, OfferingTopicsEmit } from '@app/common/microservice-cli
 import { Inject, Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { MicroserviceClient, MicroserviceName } from '@app/common/microservice-client';
 import { ComponentOfferingRequestDto, PushOfferingDto } from '@app/common/dto/offering';
+import { DeviceTypeParams, PlatformParams } from '@app/common/dto/devices-hierarchy';
+import { ProjectIdentifierParams } from '@app/common/dto/project-management';
 
 @Injectable()
 export class OfferingService implements OnModuleInit{
@@ -12,6 +14,18 @@ export class OfferingService implements OnModuleInit{
 
   getOfferingOfComp(catalogId: string) {
     return this.offeringClient.send(OfferingTopics.GET_OFFER_OF_COMP, catalogId)
+  }
+
+  getOfferingForPlatform(params: PlatformParams) {
+    return this.offeringClient.send(OfferingTopics.GET_OFFERING_FOR_PLATFORM, params)
+  }
+
+  getOfferingForDeviceType(params: DeviceTypeParams){
+    return this.offeringClient.send(OfferingTopics.GET_OFFERING_FOR_DEVICE_TYPE, params);
+  }
+
+  getOfferingForProject(params: ProjectIdentifierParams){
+    return this.offeringClient.send(OfferingTopics.GET_OFFERING_FOR_PROJECT, params);
   }
 
   checkHealth() {
