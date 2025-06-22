@@ -5,7 +5,7 @@ import { GroupService } from "./group.service";
 import { DEVICE_GROUP } from "@app/common/utils/paths";
 
 
-@ApiTags("Device - group")
+@ApiTags("Organization Groups")
 @ApiBearerAuth()
 @Controller(DEVICE_GROUP)
 export class GroupController {
