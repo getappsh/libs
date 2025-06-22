@@ -4,8 +4,7 @@ import { ApiBearerAuth, ApiCreatedResponse, ApiExcludeEndpoint, ApiOkResponse, A
 import { OFFERING } from '@app/common/utils/paths';
 import { Unprotected } from '../../utils/sso/sso.decorators';
 import { PushOfferingDto } from '@app/common/dto/offering';
-import { DeviceTypeParams, PlatformParams } from '@app/common/dto/devices-hierarchy';
-import { DeviceTypeOfferingDto, PlatformOfferingDto, ProjectRefOfferingDto } from '@app/common/dto/offering/dto/offering.dto';
+import { DeviceTypeOfferingDto, DeviceTypeOfferingParams, PlatformOfferingDto, PlatformOfferingParams, ProjectRefOfferingDto } from '@app/common/dto/offering/dto/offering.dto';
 import { ProjectIdentifierParams } from '@app/common/dto/project-management';
 
 @ApiBearerAuth()
@@ -16,27 +15,27 @@ export class OfferingController {
 
   constructor(private readonly offeringService: OfferingService) { }
 
-  @Get('platform/:platformId')
+  @Get('platform/:platformIdentifier')
   @ApiOperation({
     summary: "Get Offering of Platform",
     description: "This service message allows retrieval of the offering of a specific platform by platform ID."
   })
   @ApiOkResponse({ type: PlatformOfferingDto })
-  getOfferingForPlatform(@Param() params: PlatformParams) {
-    this.logger.debug(`get offering for platform: ${params.platformId}`)
+  getOfferingForPlatform(@Param() params: PlatformOfferingParams) {
+    this.logger.debug(`get offering for platform: ${params.platformIdentifier}`)
     return this.offeringService.getOfferingForPlatform(params);
   }
 
 
-  @Get('device-type/:deviceTypeId')
+  @Get('device-type/:deviceTypeIdentifier')
   @ApiOperation({
     summary: "Get Offering of Device Type",
     description: "This service message allows retrieval of the offering of a specific device type by device type ID."
   })
   
   @ApiOkResponse({ type: DeviceTypeOfferingDto })
-  getOfferingForDeviceType(@Param() params: DeviceTypeParams) {
-    this.logger.debug(`get offering for device type: ${params.deviceTypeId}`)
+  getOfferingForDeviceType(@Param() params: DeviceTypeOfferingParams) {
+    this.logger.debug(`get offering for device type: ${params.deviceTypeIdentifier}`)
     return this.offeringService.getOfferingForDeviceType(params);
   }
 
