@@ -17,7 +17,7 @@ import axios from 'axios';
   required: false
 })
 @ApiBearerAuth()
-@ApiTags('Releases')
+@ApiTags('Catalog - Upload') // Releases
 @AuthOrProject()
 @UseInterceptors(UserContextInterceptor)
 @Controller(UPLOAD_RELEASES)

@@ -9,7 +9,7 @@ import { DeviceTypeOfferingDto, PlatformOfferingDto, ProjectRefOfferingDto } fro
 import { ProjectIdentifierParams } from '@app/common/dto/project-management';
 
 @ApiBearerAuth()
-@ApiTags("Offering")
+@ApiTags("Catalog - Offering") // Offering
 @Controller(OFFERING)
 export class OfferingController {
   private readonly logger = new Logger(OfferingController.name);
