@@ -18,9 +18,8 @@ export class CustomRpcExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
 
     let data, error, error_http_code, error_message, error_stack;
+    this.logger.error(exception)
     if (typeof exception === 'string') {
-
-      console.log(exception);
       try {
         exception = JSON.parse(exception)
       } catch (error) {
@@ -30,6 +29,13 @@ export class CustomRpcExceptionFilter implements ExceptionFilter {
 
     try {
       error = JSON.parse(exception.message);
+
+      if ('errorCode' in error) {
+        data = error.error_data || {};
+        error_http_code = error.code || 500;
+        error_message = error.message ?? error.errorCode ?? 'Unknown error';
+        error_stack = error.stack;
+      }
     } catch (e) {
       error = exception.message;
     }
@@ -40,9 +46,10 @@ export class CustomRpcExceptionFilter implements ExceptionFilter {
       error_message = error.message || 'Error message not provided';
       error_stack = error.stack || 'Error stack not provided';
 
-    } else if (exception instanceof HttpException) {      
+    } else if (exception instanceof HttpException) {
       data = exception.getResponse()?.['data'] || exception.getResponse();
       error_http_code = exception.getStatus();
+
       error_message = exception.getResponse()?.['message']
         ? exception.getResponse()['message']
         : exception.message || 'Error message not provided';
@@ -75,7 +82,7 @@ export class CustomRpcExceptionFilter implements ExceptionFilter {
           data = error_message.error_data;
         }
 
-        if (error_message.message) {
+        if (error_message.message || "message" in error_message) {
           error_message = error_message.message;
         }
       } catch (error) {
@@ -90,11 +97,11 @@ export class CustomRpcExceptionFilter implements ExceptionFilter {
         name: exception.name,
         statusCode: error_http_code,
         message: error_message,
-        // stack: error_stack,
-        // data: data,
+        errorCode: error?.errorCode,
         timestamp: new Date().toISOString(),
         path: request.url,
       });
+
 
     } catch (e) {
       // Maybe details are not in json format, send simple text
