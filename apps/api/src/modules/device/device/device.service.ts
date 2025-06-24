@@ -14,11 +14,6 @@ export class DeviceService {
     @Inject(MicroserviceName.DEVICE_SERVICE) private readonly deviceClient: MicroserviceClient,
     @Inject(MicroserviceName.GET_MAP_SERVICE) private readonly getMapClient: MicroserviceClient,) { }
 
-  register(deviceRegister: DeviceRegisterDto) {
-    this.deviceClient.send(DeviceTopics.REGISTER_SOFTWARE, deviceRegister);
-    return this.getMapClient.send(GetMapTopics.REGISTER_MAP, deviceRegister);
-  }
-
 
   getDevicesSoftwareStatisticInfo(params: { [key: string]: string[] }) {
     return this.deviceClient.send(DeviceTopics.DEVICES_SOFTWARE_STATISTIC_INFO, { params });
@@ -30,6 +25,10 @@ export class DeviceService {
 
   getRegisteredDevices(groups: string[]) {
     return this.deviceClient.send(DeviceTopics.All_DEVICES, { groups });
+  }
+
+  getDeviceDetails(deviceId: string) {
+    return this.deviceClient.send(DeviceTopics.GET_DEVICE, deviceId);
   }
 
   putDeviceName(deviceId: string, body: DevicePutDto) {
@@ -45,6 +44,7 @@ export class DeviceService {
     return this.deviceClient.send(DeviceTopics.DEVICE_SOFTWARES, deviceId);
   }
 
+  // configs
   getDeviceConfig(group: string) {
     return this.deviceClient.send(DeviceTopics.GET_DEVICE_CONFIG, group);
   }
@@ -52,6 +52,13 @@ export class DeviceService {
   setDeviceConfig(config: BaseConfigDto) {
     return this.deviceClient.send(DeviceTopics.SET_DEVICE_CONFIG, config);
   }
+
+  // Miscellaneous
+  register(deviceRegister: DeviceRegisterDto) {
+    this.deviceClient.send(DeviceTopics.REGISTER_SOFTWARE, deviceRegister);
+    return this.getMapClient.send(GetMapTopics.REGISTER_MAP, deviceRegister);
+  }
+
   async getDeviceContentInstalled(deviceId: string) {
     // let deviceContentRes = new DeviceContentResDto();
     // const comps$ = this.kafkaSenderService.send(DeviceTopics.DEVICE_SOFTWARE_CONTENT, deviceId).pipe(catchError(err => of([])));
