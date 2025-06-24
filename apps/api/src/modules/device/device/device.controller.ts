@@ -17,15 +17,20 @@ export class DeviceController {
 
   constructor(private readonly deviceService: DeviceService) { }
 
-  @Post('register')
+  // devices
+  @Get("devices")
   @ApiOperation({
-    summary: "Register Device",
-    description: "This service message allows the device registration process for GetApp services."
+    summary: "Get Registered Devices",
+    description: "This service message allows retrieval of all registered devices."
   })
-  register(@Body() deviceRegister: DeviceRegisterDto) {
-    this.logger.debug(`Register, device: ${deviceRegister}`);
-    return this.deviceService.register(deviceRegister);
+  @ApiQuery({ name: 'groups', type: [String], required: false, description: 'Array of groups IDs or a single group ID' })
+  @ApiOkResponse({ type: DeviceDto, isArray: true })
+  getRegisteredDevices(@Query('groups') groups: string | string[]) {
+    this.logger.debug(`Get all registered devices, for groups ${groups}`);
+    let arrGroups = groups === undefined ? [] : (Array.isArray(groups) ? groups : [groups]);
+    return this.deviceService.getRegisteredDevices(arrGroups);
   }
+
 
   @Get("/devices/software/info")
   @ApiOperation({
@@ -63,53 +68,7 @@ export class DeviceController {
     return this.deviceService.getDevicesMapStatisticInfo({ groups: arrGroups, map: arrMap });
   }
 
-  @Get("devices")
-  @ApiOperation({
-    summary: "Get Registered Devices",
-    description: "This service message allows retrieval of all registered devices."
-  })
-  @ApiQuery({ name: 'groups', type: [String], required: false, description: 'Array of groups IDs or a single group ID' })
-  @ApiOkResponse({ type: DeviceDto, isArray: true })
-  getRegisteredDevices(@Query('groups') groups: string | string[]) {
-    this.logger.debug(`Get all registered devices, for groups ${groups}`);
-    let arrGroups = groups === undefined ? [] : (Array.isArray(groups) ? groups : [groups]);
-    return this.deviceService.getRegisteredDevices(arrGroups);
-  }
-
-  @Get("config/:deviceId")
-  @ApiQuery({ name: 'group', type: String })
-  @ApiParam({ name: 'deviceId', type: String })
-  @ApiOperation({
-    summary: "Get Device Configurations",
-    description: "This service message returns an object of device configurations.",
-  })
-  @ApiOkResponse({
-    schema: { title: "ConfigDto", oneOf: [{ $ref: getSchemaPath(AndroidConfigDto) }, { $ref: getSchemaPath(WindowsConfigDto) }] }
-  })
-  getDeviceConfig(@Query('group') group: string) {
-    this.logger.debug(`Get device config - group: ${group}`)
-    return this.deviceService.getDeviceConfig(group);
-  }
-
-
-  @Put("config")
-  @ApiOperation({
-    summary: "Set Device Configurations",
-    description: "This service message returns an object of device configurations.",
-  })
-  @ApiExtraModels(AndroidConfigDto, WindowsConfigDto,)
-  @ApiBody({
-    schema: { title: "ConfigDto", oneOf: [{ $ref: getSchemaPath(AndroidConfigDto) }, { $ref: getSchemaPath(WindowsConfigDto) }] }
-  })
-  @ApiOkResponse({
-    schema: { title: "ConfigDto", oneOf: [{ $ref: getSchemaPath(AndroidConfigDto) }, { $ref: getSchemaPath(WindowsConfigDto) }] }
-  })
-  @UsePipes(DeviceConfigValidator)
-  setDeviceConfig(@Body() config: AndroidConfigDto | WindowsConfigDto | BaseConfigDto) {
-    this.logger.debug('Set device config')
-    return this.deviceService.setDeviceConfig(config);
-  }
-
+  // :deviceId
   @Put(":deviceId")
   @ApiOperation({ summary: "Set Device Name", description: "This service message allow to update props of device" })
   @ApiOkResponse({ type: DevicePutDto })
@@ -138,6 +97,51 @@ export class DeviceController {
   getDeviceSoftwares(@Param("deviceId") deviceId: string) {
     this.logger.debug(`Get all softwares of device ${deviceId}`);
     return this.deviceService.getDeviceSoftwares(deviceId);
+  }
+
+  // config
+  @Get("config/:deviceId")
+  @ApiQuery({ name: 'group', type: String })
+  @ApiParam({ name: 'deviceId', type: String })
+  @ApiOperation({
+    summary: "Get Device Configurations",
+    description: "This service message returns an object of device configurations.",
+  })
+  @ApiOkResponse({
+    schema: { title: "ConfigDto", oneOf: [{ $ref: getSchemaPath(AndroidConfigDto) }, { $ref: getSchemaPath(WindowsConfigDto) }] }
+  })
+  getDeviceConfig(@Query('group') group: string) {
+    this.logger.debug(`Get device config - group: ${group}`)
+    return this.deviceService.getDeviceConfig(group);
+  }
+
+  @Put("config")
+  @ApiOperation({
+    summary: "Set Device Configurations",
+    description: "This service message returns an object of device configurations.",
+  })
+  @ApiExtraModels(AndroidConfigDto, WindowsConfigDto,)
+  @ApiBody({
+    schema: { title: "ConfigDto", oneOf: [{ $ref: getSchemaPath(AndroidConfigDto) }, { $ref: getSchemaPath(WindowsConfigDto) }] }
+  })
+  @ApiOkResponse({
+    schema: { title: "ConfigDto", oneOf: [{ $ref: getSchemaPath(AndroidConfigDto) }, { $ref: getSchemaPath(WindowsConfigDto) }] }
+  })
+  @UsePipes(DeviceConfigValidator)
+  setDeviceConfig(@Body() config: AndroidConfigDto | WindowsConfigDto | BaseConfigDto) {
+    this.logger.debug('Set device config')
+    return this.deviceService.setDeviceConfig(config);
+  }
+
+  // Miscellaneous
+  @Post('register')
+  @ApiOperation({
+    summary: "Register Device",
+    description: "This service message allows the device registration process for GetApp services."
+  })
+  register(@Body() deviceRegister: DeviceRegisterDto) {
+    this.logger.debug(`Register, device: ${deviceRegister}`);
+    return this.deviceService.register(deviceRegister);
   }
 
   @Get("info/installed/:deviceId")
