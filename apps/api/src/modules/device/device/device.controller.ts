@@ -27,7 +27,7 @@ export class DeviceController {
   @ApiOkResponse({ type: DeviceDto, isArray: true })
   getRegisteredDevices(@Query('groups') groups: string | string[]) {
     this.logger.debug(`Get all registered devices, for groups ${groups}`);
-    let arrGroups = groups === undefined ? [] : (Array.isArray(groups) ? groups : [groups]);
+    let arrGroups = groups === undefined ? undefined : (Array.isArray(groups) ? groups : [groups]);
     return this.deviceService.getRegisteredDevices(arrGroups);
   }
 
@@ -44,8 +44,8 @@ export class DeviceController {
     @Query('groups') groups: string | string[],
     @Query('software') software: string | string[],
   ) {
-    let arrGroups = groups === undefined ? [] : (Array.isArray(groups) ? groups : [groups]);
-    let arrSoftware = software === undefined ? [] : (Array.isArray(software) ? software : [software]);
+    let arrGroups = groups === undefined ? undefined : (Array.isArray(groups) ? groups : [groups]);
+    let arrSoftware = software === undefined ? undefined : (Array.isArray(software) ? software : [software]);
     this.logger.debug(`Get devices statistic info, ${groups ? "- groups=" + groups : ""} ${software ? "- software=" + software : ""}`);
     return this.deviceService.getDevicesSoftwareStatisticInfo({ groups: arrGroups, software: arrSoftware });
   }
@@ -62,8 +62,8 @@ export class DeviceController {
     @Query('groups') groups: string | string[],
     @Query('map') map: string | string[]
   ) {
-    let arrGroups = groups === undefined ? [] : (Array.isArray(groups) ? groups : [groups]);
-    let arrMap = map === undefined ? [] : (Array.isArray(map) ? map : [map]);
+    let arrGroups = groups === undefined ? undefined : (Array.isArray(groups) ? groups : [groups]);
+    let arrMap = map === undefined ? undefined : (Array.isArray(map) ? map : [map]);
     this.logger.debug(`Get devices statistic info, ${groups ? "- groups=" + groups : ""} ${map ? "map=" + map : ""}`);
     return this.deviceService.getDevicesMapStatisticInfo({ groups: arrGroups, map: arrMap });
   }

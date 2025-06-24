@@ -15,15 +15,15 @@ export class DeviceService {
     @Inject(MicroserviceName.GET_MAP_SERVICE) private readonly getMapClient: MicroserviceClient,) { }
 
 
-  getDevicesSoftwareStatisticInfo(params: { [key: string]: string[] }) {
+  getDevicesSoftwareStatisticInfo(params?: { [key: string]: string[] | undefined }) {
     return this.deviceClient.send(DeviceTopics.DEVICES_SOFTWARE_STATISTIC_INFO, { params });
   }
 
-  getDevicesMapStatisticInfo(params: { [key: string]: string[] }) {
+  getDevicesMapStatisticInfo(params?: { [key: string]: string[] | undefined }) {
     return this.deviceClient.send(DeviceTopics.DEVICES_MAP_STATISTIC_INFO, { params });
   }
 
-  getRegisteredDevices(groups: string[]) {
+  getRegisteredDevices(groups?: string[]) {
     return this.deviceClient.send(DeviceTopics.All_DEVICES, { groups });
   }
 
