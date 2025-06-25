@@ -1,6 +1,7 @@
+import { DeviceDto } from "@app/common/dto/device/dto/device.dto";
 import { CreateDevicesGroupDto, EditDevicesGroupDto, SetChildInGroupDto } from "@app/common/dto/devices-group";
 import { MicroserviceClient, MicroserviceName } from "@app/common/microservice-client";
-import { DevicesGroupTopics } from "@app/common/microservice-client/topics";
+import { DevicesGroupTopics, DeviceTopics } from "@app/common/microservice-client/topics";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 
 @Injectable()
@@ -29,6 +30,10 @@ export class GroupService {
 
   getGroupDevices(groupId: string) {
     return this.deviceClient.send(DevicesGroupTopics.GET_GROUP_DEVICES, groupId);
+  }
+
+  getOrgDeviceData(deviceId: string) {
+    return this.deviceClient.sendAndValidate(DeviceTopics.GET_DEVICE, deviceId, DeviceDto);
   }
 
 
