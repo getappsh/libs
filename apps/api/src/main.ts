@@ -27,12 +27,12 @@ async function setupSwagger(app: INestApplication) {
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup('docs', app, document, { swaggerOptions: { docExpansion: 'none' } });
 
   const deviceDocs = SwaggerModule.createDocument(app, config, {
     include: [DeliveryModule, DeployModule, DeviceModule, GetMapModule, Login, OfferingModule],
   });
-  SwaggerModule.setup('docs/device', app, deviceDocs);
+  SwaggerModule.setup('docs/device', app, deviceDocs, { swaggerOptions: { docExpansion: 'none' } });
 
   const configAuth = new DocumentBuilder()
     .setTitle('Get-App')
@@ -46,7 +46,7 @@ async function setupSwagger(app: INestApplication) {
     .addBearerAuth()
     .build();
   const documentAuth = SwaggerModule.createDocument(app, configAuth);
-  SwaggerModule.setup('docs/auth', app, documentAuth);
+  SwaggerModule.setup('docs/auth', app, documentAuth, { swaggerOptions: { docExpansion: 'none' } });
 }
 
 
