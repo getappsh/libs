@@ -17,8 +17,12 @@ export class CustomRpcExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    let data, error, error_http_code, error_message, error_stack;
-    this.logger.error(exception)
+    let data: any = {};
+    let error: any;
+    let error_http_code: number = 500;
+    let error_message: string = '';
+    let error_stack: string | string[] | undefined;
+    // this.logger.error(exception)
     if (typeof exception === 'string') {
       try {
         exception = JSON.parse(exception)
@@ -57,7 +61,7 @@ export class CustomRpcExceptionFilter implements ExceptionFilter {
 
     } else if (exception instanceof AxiosError) {
       data = exception.response?.data
-      error_http_code = exception.response?.status;
+      error_http_code = exception.response?.status ?? 500;
       error_message = exception.message;
       error_stack = exception.stack;
 
@@ -70,27 +74,28 @@ export class CustomRpcExceptionFilter implements ExceptionFilter {
       try {
         error_message = JSON.parse(exception.message);
 
-        if (error_message.stack) {
-          error_stack = `${error_message.stack}`;
-        }
+        if (typeof error_message === 'object' && error_message !== null) {
+          if ('stack' in error_message) {
+            error_stack = `${(error_message as any).stack}`;
+          }
 
-        if (error_message.code) {
-          error_http_code = error_message.code;
-        }
+          if ('code' in error_message) {
+            error_http_code = (error_message as any).code;
+          }
 
-        if (error_message.error_data) {
-          data = error_message.error_data;
-        }
+          if ('error_data' in error_message) {
+            data = (error_message as any).error_data;
+          }
 
-        if (error_message.message || "message" in error_message) {
-          error_message = error_message.message;
+          if ('message' in error_message) {
+            error_message = (error_message as any).message;
+          }
         }
       } catch (error) {
         error_message = exception.message;
-
       }
     }
-    this.logger.error(`${error_message}`, error_stack)
+    this.logger.error(`${error_message}`, error_stack);
 
     try {
       response.status(error_http_code).json({
@@ -101,8 +106,6 @@ export class CustomRpcExceptionFilter implements ExceptionFilter {
         timestamp: new Date().toISOString(),
         path: request.url,
       });
-
-
     } catch (e) {
       // Maybe details are not in json format, send simple text
       response.status(500).json({
@@ -113,8 +116,6 @@ export class CustomRpcExceptionFilter implements ExceptionFilter {
         timestamp: new Date().toISOString(),
         path: request.url,
       });
-
     }
-
   }
 }
