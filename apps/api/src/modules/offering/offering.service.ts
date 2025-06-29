@@ -6,38 +6,42 @@ import { ProjectIdentifierParams } from '@app/common/dto/project-management';
 import { DeviceTypeOfferingParams, PlatformOfferingParams } from '@app/common/dto/offering/dto/offering.dto';
 
 @Injectable()
-export class OfferingService implements OnModuleInit{
+export class OfferingService implements OnModuleInit {
   private readonly logger = new Logger(OfferingService.name);
 
-  constructor(@Inject(MicroserviceName.OFFERING_SERVICE) private readonly offeringClient: MicroserviceClient){}
+  constructor(@Inject(MicroserviceName.OFFERING_SERVICE) private readonly offeringClient: MicroserviceClient) { }
 
   getOfferingForPlatform(params: PlatformOfferingParams) {
     return this.offeringClient.send(OfferingTopics.GET_OFFERING_FOR_PLATFORM, params)
   }
 
-  getOfferingForDeviceType(params: DeviceTypeOfferingParams){
+  getOfferingForDeviceType(params: DeviceTypeOfferingParams) {
     return this.offeringClient.send(OfferingTopics.GET_OFFERING_FOR_DEVICE_TYPE, params);
   }
 
-  getOfferingForProject(params: ProjectIdentifierParams){
+  getOfferingForProject(params: ProjectIdentifierParams) {
     return this.offeringClient.send(OfferingTopics.GET_OFFERING_FOR_PROJECT, params);
+  }
+
+  getOfferingOfComp(catalogId: string) {
+    return this.offeringClient.send(OfferingTopics.GET_OFFER_OF_COMP, catalogId)
   }
 
   checkHealth() {
     return this.offeringClient.send(OfferingTopics.CHECK_HEALTH, {})
   }
 
-  getDeviceComponentsOffering(dto: ComponentOfferingRequestDto){
+  getDeviceComponentsOffering(dto: ComponentOfferingRequestDto) {
     this.logger.debug(`Get components offering, dto: ${JSON.stringify(dto)}`)
     return this.offeringClient.send(OfferingTopics.DEVICE_COMPONENT_OFFERING, dto);
   }
 
-  getDeviceMapOffering(deviceId: string){
+  getDeviceMapOffering(deviceId: string) {
     this.logger.debug(`Get device map offering, deviceId: ${deviceId}`)
     return this.offeringClient.send(OfferingTopics.DEVICE_MAP_OFFERING, deviceId);
   }
 
-  pushOffering(po: PushOfferingDto){
+  pushOffering(po: PushOfferingDto) {
     return this.offeringClient.emit(OfferingTopicsEmit.OFFERING_PUSH, po);
   }
   async onModuleInit() {

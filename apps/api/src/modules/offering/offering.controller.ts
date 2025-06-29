@@ -6,6 +6,7 @@ import { Unprotected } from '../../utils/sso/sso.decorators';
 import { PushOfferingDto } from '@app/common/dto/offering';
 import { DeviceTypeOfferingDto, DeviceTypeOfferingParams, PlatformOfferingDto, PlatformOfferingParams, ProjectRefOfferingDto } from '@app/common/dto/offering/dto/offering.dto';
 import { ProjectIdentifierParams } from '@app/common/dto/project-management';
+import { ComponentV2Dto } from '@app/common/dto/upload';
 
 @ApiBearerAuth()
 @ApiTags("Catalog - Offering") // Offering
@@ -48,6 +49,17 @@ export class OfferingController {
   getOfferingForProject(@Param() params: ProjectIdentifierParams) {
     this.logger.debug(`get offering for project: ${params.projectIdentifier}`)
     return this.offeringService.getOfferingForProject(params);
+  }
+
+  @Get("component/:catalogId")
+  @ApiOperation({ 
+    summary: "Get Offering of Component", 
+    description: "This service message allows retrieval of the offering of a specific component by catalog ID." 
+  })
+  @ApiOkResponse({ type: ComponentV2Dto })
+  getOfferingOfComp(@Param("catalogId") catalogId: string) {
+    this.logger.debug(`get offering of ${catalogId}`);
+    return this.offeringService.getOfferingOfComp(catalogId);
   }
 
 
