@@ -19,23 +19,23 @@ export class DeployStatusDto {
   @IsOptional()    
   @Type(() => Date)
   @IsDate()
-  deployStop: Date;
+  deployStop?: Date;
 
   @ApiProperty({required: false})
   @IsOptional()    
   @Type(() => Date)
   @IsDate()
-  deployStart: Date;
+  deployStart?: Date;
 
   @ApiProperty({required: false})
   @IsOptional()    
   @Type(() => Date)
   @IsDate()
-  deployDone: Date;
+  deployDone?: Date;
   
   @ApiProperty({required: false})
   @IsOptional()
-  deployEstimateTime: number;
+  deployEstimateTime?: number;
 
   @ApiProperty({required: true})
   @IsOptional()    
@@ -45,7 +45,7 @@ export class DeployStatusDto {
 
   @ApiProperty({enum: DeployStatusEnum})
   @IsEnum(DeployStatusEnum)
-  deployStatus: DeployStatusEnum
+  deployStatus?: DeployStatusEnum
 
 
   @ApiProperty({required: false, type: 'integer', format: 'int32', minimum: 0, maximum: 100})
@@ -53,7 +53,7 @@ export class DeployStatusDto {
   @IsInt()
   @Min(0)
   @Max(100)
-  progress: number;
+  progress?: number;
 
   @ApiProperty({enum: ItemTypeEnum})
   @IsEnum(ItemTypeEnum)
