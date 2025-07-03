@@ -41,5 +41,8 @@ export class GroupService {
     return this.deviceClient.send(DevicesGroupTopics.SET_GROUP_DEVICES, devices);
   }
 
+  deleteGroup(groupId: string) {
+    return this.deviceClient.send(DevicesGroupTopics.DELETE_GROUP, groupId);
+  }
 
 }

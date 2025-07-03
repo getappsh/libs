@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Logger, Param, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Logger, Param, Post, Put } from "@nestjs/common";
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { CreateDevicesGroupDto, ChildGroupDto, EditDevicesGroupDto, SetChildInGroupDto, GroupResponseDto } from "@app/common/dto/devices-group";
 import { GroupService } from "./group.service";
@@ -76,6 +76,13 @@ export class GroupController {
     return this.groupService.setDevicesInGroup(devices);
   }
 
-
+  @Delete(":groupId")
+  @ApiOperation({ summary: "Delete Devices Group by ID" })
+  @ApiParam({ name: 'groupId', type: String })
+  @ApiOkResponse({ description: 'Group deleted successfully' })
+  deleteGroup(@Param("groupId") groupId: string) {
+    this.logger.debug(`Delete group with id ${groupId}`);
+    return this.groupService.deleteGroup(groupId);
+  }
 
 }
