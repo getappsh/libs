@@ -26,11 +26,13 @@ export class GroupController {
   }
 
 
-  @Put()
+  @Put("/:groupId/")
   @ApiOperation({ summary: "Edit Devices Group" })
+  @ApiParam({ name: 'groupId', type: String })
   @ApiOkResponse({ type: ChildGroupDto })
-  editGroup(@Body() group: EditDevicesGroupDto) {
+  editGroup(@Param("groupId") groupId: string, @Body() group: EditDevicesGroupDto) {
     this.logger.debug(`Edit devices group: ${group}`);
+    group.id = parseInt(groupId, 10);
     return this.groupService.editGroup(group);
   }
 
@@ -76,10 +78,10 @@ export class GroupController {
     return this.groupService.setDevicesInGroup(devices);
   }
 
-  @Delete(":groupId")
+  @Delete("/:groupId/")
   @ApiOperation({ summary: "Delete Devices Group by ID" })
   @ApiParam({ name: 'groupId', type: String })
-  @ApiOkResponse({ description: 'Group deleted successfully' })
+  @ApiOkResponse({ type: ChildGroupDto, description: 'Group deleted successfully' })
   deleteGroup(@Param("groupId") groupId: string) {
     this.logger.debug(`Delete group with id ${groupId}`);
     return this.groupService.deleteGroup(groupId);
