@@ -3,6 +3,7 @@ import { CreateDevicesGroupDto, EditDevicesGroupDto, SetChildInGroupDto } from "
 import { MicroserviceClient, MicroserviceName } from "@app/common/microservice-client";
 import { DevicesGroupTopics, DeviceTopics } from "@app/common/microservice-client/topics";
 import { Inject, Injectable, Logger } from "@nestjs/common";
+import { OrgIdDto, OrgIdPutDto } from "@app/common/dto/devices-group/dto/org-id.dto";
 
 @Injectable()
 export class GroupService {
@@ -43,6 +44,26 @@ export class GroupService {
 
   deleteGroup(groupId: string) {
     return this.deviceClient.send(DevicesGroupTopics.DELETE_GROUP, groupId);
+  }
+
+  createOrgIds(orgIds: OrgIdDto) {
+    return this.deviceClient.send(DevicesGroupTopics.CREATE_ORG_IDS, orgIds);
+  }
+
+  getOrgIds(group?: number, empties: boolean = true) {
+    return this.deviceClient.send(DevicesGroupTopics.GET_ORG_IDS, { group, empties });
+  }
+
+  getOrgId(orgId: number) {
+    return this.deviceClient.send(DevicesGroupTopics.GET_ORG_ID, orgId);
+  }
+
+  editOrgIds(orgId: number, orgIds: OrgIdPutDto) {
+    return this.deviceClient.send(DevicesGroupTopics.EDIT_ORG_IDS, { orgId, ...orgIds });
+  }
+
+  deleteOrgIds(orgId: number) {
+    return this.deviceClient.send(DevicesGroupTopics.DELETE_ORG_IDS, orgId);
   }
 
 }

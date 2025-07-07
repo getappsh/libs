@@ -1,11 +1,12 @@
-import { Body, Controller, Delete, Get, Logger, Param, Post, Put } from "@nestjs/common";
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Delete, Get, Logger, Param, Post, Put, Query } from "@nestjs/common";
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { CreateDevicesGroupDto, ChildGroupDto, EditDevicesGroupDto, SetChildInGroupDto, GroupResponseDto } from "@app/common/dto/devices-group";
 import { GroupService } from "./group.service";
 import { DEVICE_GROUP } from "@app/common/utils/paths";
 import { DeviceDto } from "@app/common/dto/device/dto/device.dto";
 import { DeviceOrgDto } from "@app/common/dto/device/dto/device-org.dto";
 import { switchMap } from "rxjs";
+import { OrgIdDto, OrgIdPutDto, OrgIdRefDto } from "@app/common/dto/devices-group/dto/org-id.dto";
 
 
 @ApiTags("Organization Groups")
@@ -25,6 +26,14 @@ export class GroupController {
     return this.groupService.createGroup(group);
   }
 
+  @Get("/:groupId/")
+  @ApiOperation({ summary: "Retrieve a group by its ID, including all its child groups and associated devices" })
+  @ApiParam({ name: 'groupId', type: String })
+  @ApiOkResponse({ type: ChildGroupDto })
+  getGroupById(@Param("groupId") groupId: string) {
+    this.logger.debug(`Get group with id ${groupId}`);
+    return this.groupService.getGroups(groupId);
+  }
 
   @Put("/:groupId/")
   @ApiOperation({ summary: "Edit Devices Group" })
@@ -36,6 +45,14 @@ export class GroupController {
     return this.groupService.editGroup(group);
   }
 
+  @Delete("/:groupId/")
+  @ApiOperation({ summary: "Delete Devices Group by ID" })
+  @ApiParam({ name: 'groupId', type: String })
+  @ApiOkResponse({ type: ChildGroupDto, description: 'Group deleted successfully' })
+  deleteGroup(@Param("groupId") groupId: string) {
+    this.logger.debug(`Delete group with id ${groupId}`);
+    return this.groupService.deleteGroup(groupId);
+  }
 
   @Get()
   @ApiOperation({ summary: "Get all root groups with their child groups" })
@@ -46,16 +63,13 @@ export class GroupController {
     return this.groupService.getGroups();
   }
 
-
-  @Get("/:groupId/")
-  @ApiOperation({ summary: "Retrieve a group by its ID, including all its child groups and associated devices" })
-  @ApiParam({ name: 'groupId', type: String })
-  @ApiOkResponse({ type: ChildGroupDto })
-  getGroupById(@Param("groupId") groupId: string) {
-    this.logger.debug(`Get group with id ${groupId}`);
-    return this.groupService.getGroups(groupId);
+  @Post("childs")
+  @ApiOperation({ summary: "Set Groups and Devices in Group" })
+  @ApiCreatedResponse({ type: ChildGroupDto })
+  setDevicesInGroup(@Body() devices: SetChildInGroupDto) {
+    this.logger.debug(`Set devices in a group: ${devices}`);
+    return this.groupService.setDevicesInGroup(devices);
   }
-
 
   @Get("devices/:deviceId")
   @ApiOperation({ summary: "Get device org group data" })
@@ -70,21 +84,48 @@ export class GroupController {
     );
   }
 
-  @Post("devices")
-  @ApiOperation({ summary: "Set Devices in a Group" })
-  @ApiCreatedResponse({ type: ChildGroupDto })
-  setDevicesInGroup(@Body() devices: SetChildInGroupDto) {
-    this.logger.debug(`Set devices in a group: ${devices}`);
-    return this.groupService.setDevicesInGroup(devices);
+  @Post("orgIds")
+  @ApiOperation({ summary: "Create Organization ID" })
+  @ApiCreatedResponse({ type: OrgIdRefDto })
+  createOrgIds(@Body() orgIds: OrgIdDto) {
+    this.logger.debug(`Create organization IDs : ${orgIds}`);
+    return this.groupService.createOrgIds(orgIds);
   }
 
-  @Delete("/:groupId/")
-  @ApiOperation({ summary: "Delete Devices Group by ID" })
-  @ApiParam({ name: 'groupId', type: String })
-  @ApiOkResponse({ type: ChildGroupDto, description: 'Group deleted successfully' })
-  deleteGroup(@Param("groupId") groupId: string) {
-    this.logger.debug(`Delete group with id ${groupId}`);
-    return this.groupService.deleteGroup(groupId);
+  @Get("orgIds")
+  @ApiOperation({ summary: "Get Organization IDs details" })
+  @ApiOkResponse({ type: OrgIdRefDto })
+  @ApiQuery({ name: 'group', required: false, type: Number, description: 'To filter organization IDs by group ID' })
+  @ApiQuery({ name: 'empties', required: false, type: Boolean, description: 'To include only organization IDs that are not associated with a group' })
+  getOrgIds(
+    @Query("group") group?: number,
+    @Query("empties") empties: boolean = true,
+  ) {
+    this.logger.debug(`Get organization IDs : ${group}, ${empties}`);
+    return this.groupService.getOrgIds(group, empties);
   }
 
+  @Get("orgIds/:orgId")
+  @ApiOperation({ summary: "Get Organization IDs details" })
+  @ApiOkResponse({ type: OrgIdRefDto })
+  getOrgId(@Param("orgId") orgId: number) {
+    this.logger.debug(`Get organization IDs : ${orgId}`);
+    return this.groupService.getOrgId(orgId);
+  }
+
+  @Put("orgIds/:orgId")
+  @ApiOperation({ summary: "Edit Organization ID" })
+  @ApiOkResponse({ type: OrgIdRefDto })
+  editOrgIds(@Param("orgId") orgId: number, @Body() orgIds: OrgIdPutDto) {
+    this.logger.debug(`Edit organization IDs : ${orgId}`);
+    return this.groupService.editOrgIds(orgId, orgIds);
+  }
+
+  @Delete("orgIds/:orgId")
+  @ApiOperation({ summary: "Delete Organization ID" })
+  @ApiOkResponse({ type: OrgIdRefDto })
+  deleteOrgIds(@Param("orgId") orgId: number) {
+    this.logger.debug(`Delete organization IDs : ${orgId}`);
+    return this.groupService.deleteOrgIds(orgId);
+  }
 }
