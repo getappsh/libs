@@ -78,11 +78,11 @@ export class DeviceController {
   }
 
   @Put(":deviceId")
-  @ApiOperation({ summary: "Set Device Name", description: "This service message allow to update props of device" })
+  @ApiOperation({ summary: "Set Device Properties", description: "This service message allow to update props of device" })
   @ApiOkResponse({ type: DevicePutDto })
-  putDeviceName(@Param("deviceId") deviceId: string, @Body() body: DevicePutDto) {
+  putDeviceProps(@Param("deviceId") deviceId: string, @Body() body: DevicePutDto) {
     this.logger.debug(`Put properties for device ${deviceId}`)
-    return this.deviceService.putDeviceName(deviceId, body)
+    return this.deviceService.putDeviceProps(deviceId, body)
   }
 
   @Get(":deviceId/maps")

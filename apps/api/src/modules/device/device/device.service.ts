@@ -31,7 +31,7 @@ export class DeviceService {
     return this.deviceClient.send(DeviceTopics.GET_DEVICE, deviceId);
   }
 
-  putDeviceName(deviceId: string, body: DevicePutDto) {
+  putDeviceProps(deviceId: string, body: DevicePutDto) {
     body.deviceId = deviceId
     return this.deviceClient.send(DeviceTopics.DEVICES_PUT, body)
   }
