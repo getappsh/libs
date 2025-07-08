@@ -68,22 +68,6 @@ export class DeviceController {
     return this.deviceService.getDevicesMapStatisticInfo({ groups: arrGroups, map: arrMap });
   }
 
-  // :deviceId
-  @Get(":deviceId")
-  @ApiOperation({ summary: "Get Device meta data", description: "This service message allow to get device meta data and properties" })
-  @ApiOkResponse({ type: DeviceDto })
-  getDeviceDetails(@Param("deviceId") deviceId: string) {
-    this.logger.debug(`get metadata for device ${deviceId}`)
-    return this.deviceService.getDeviceDetails(deviceId)
-  }
-
-  @Put(":deviceId")
-  @ApiOperation({ summary: "Set Device Name", description: "This service message allow to update props of device" })
-  @ApiOkResponse({ type: DevicePutDto })
-  putDeviceName(@Param("deviceId") deviceId: string, @Body() body: DevicePutDto) {
-    this.logger.debug(`Put properties for device ${deviceId}`)
-    return this.deviceService.putDeviceName(deviceId, body)
-  }
 
   @Get(":deviceId/maps")
   @ApiOperation({
@@ -139,6 +123,24 @@ export class DeviceController {
   setDeviceConfig(@Body() config: AndroidConfigDto | WindowsConfigDto | BaseConfigDto) {
     this.logger.debug('Set device config')
     return this.deviceService.setDeviceConfig(config);
+  }
+
+  
+  // :deviceId
+  @Get(":deviceId")
+  @ApiOperation({ summary: "Get Device meta data", description: "This service message allow to get device meta data and properties" })
+  @ApiOkResponse({ type: DeviceDto })
+  getDeviceDetails(@Param("deviceId") deviceId: string) {
+    this.logger.debug(`get metadata for device ${deviceId}`)
+    return this.deviceService.getDeviceDetails(deviceId)
+  }
+
+  @Put(":deviceId")
+  @ApiOperation({ summary: "Set Device Name", description: "This service message allow to update props of device" })
+  @ApiOkResponse({ type: DevicePutDto })
+  putDeviceName(@Param("deviceId") deviceId: string, @Body() body: DevicePutDto) {
+    this.logger.debug(`Put properties for device ${deviceId}`)
+    return this.deviceService.putDeviceName(deviceId, body)
   }
 
   // Miscellaneous
