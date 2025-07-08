@@ -50,8 +50,8 @@ export class GroupService {
     return this.deviceClient.send(DevicesGroupTopics.CREATE_ORG_IDS, orgIds);
   }
 
-  getOrgIds(group?: number, empties: boolean = true) {
-    return this.deviceClient.send(DevicesGroupTopics.GET_ORG_IDS, { group, empties });
+  getOrgIds(group?: number, emptyGroup?: boolean, emptyDevice?: boolean) {
+    return this.deviceClient.send(DevicesGroupTopics.GET_ORG_IDS, { group, emptyGroup, emptyDevice });
   }
 
   getOrgId(orgId: number) {
@@ -59,7 +59,8 @@ export class GroupService {
   }
 
   editOrgIds(orgId: number, orgIds: OrgIdPutDto) {
-    return this.deviceClient.send(DevicesGroupTopics.EDIT_ORG_IDS, { orgId, ...orgIds });
+    orgIds.orgId = orgId;
+    return this.deviceClient.send(DevicesGroupTopics.EDIT_ORG_IDS, orgIds);
   }
 
   deleteOrgIds(orgId: number) {
