@@ -18,15 +18,15 @@ export class GroupController {
   constructor(private readonly groupService: GroupService) { }
 
 
-  @Post()
-  @ApiOperation({ summary: "Create Devices Group" })
+  @Post("groups")
+  @ApiOperation({ summary: "Create organization group of devices" })
   @ApiCreatedResponse({ type: ChildGroupDto })
   createGroup(@Body() group: CreateDevicesGroupDto) {
-    this.logger.debug(`Create devices group: ${group}`);
+    this.logger.debug(`Create organization group of devices: ${group}`);
     return this.groupService.createGroup(group);
   }
 
-  @Get()
+  @Get("groups")
   @ApiOperation({ summary: "Get all root groups with their child groups" })
   // TODO return type is not documented well, need to be Record<number, ChildGroupDto>
   @ApiOkResponse({ type: GroupResponseDto, description: 'Returns root group IDs and a mapping of all groups by ID' })
@@ -35,16 +35,44 @@ export class GroupController {
     return this.groupService.getGroups();
   }
 
-  @Post("childs")
-  @ApiOperation({ summary: "Set Groups and Devices in Group" })
+  @Post("groups/childs")
+  @ApiOperation({ summary: "Set groups and devices in group" })
   @ApiCreatedResponse({ type: ChildGroupDto })
   setDevicesInGroup(@Body() devices: SetChildInGroupDto) {
     this.logger.debug(`Set devices in a group: ${devices}`);
     return this.groupService.setDevicesInGroup(devices);
   }
 
+  @Get("groups/:groupId/")
+  @ApiOperation({ summary: "Retrieve a group by its ID, including all its child groups and associated devices" })
+  @ApiParam({ name: 'groupId', type: String })
+  @ApiOkResponse({ type: ChildGroupDto })
+  getGroupById(@Param("groupId") groupId: string) {
+    this.logger.debug(`Get group with id ${groupId}`);
+    return this.groupService.getGroups(groupId);
+  }
+
+  @Put("groups/:groupId/")
+  @ApiOperation({ summary: "Edit organization group of devices" })
+  @ApiParam({ name: 'groupId', type: String })
+  @ApiOkResponse({ type: ChildGroupDto })
+  editGroup(@Param("groupId") groupId: string, @Body() group: EditDevicesGroupDto) {
+    this.logger.debug(`Edit organization group: ${group}`);
+    group.id = parseInt(groupId, 10);
+    return this.groupService.editGroup(group);
+  }
+
+  @Delete("groups/:groupId/")
+  @ApiOperation({ summary: "Delete organization group of devices by ID" })
+  @ApiParam({ name: 'groupId', type: String })
+  @ApiOkResponse({ type: ChildGroupDto, description: 'Group deleted successfully' })
+  deleteGroup(@Param("groupId") groupId: string) {
+    this.logger.debug(`Delete group with id ${groupId}`);
+    return this.groupService.deleteGroup(groupId);
+  }
+
   @Get("devices/:deviceId")
-  @ApiOperation({ summary: "Get device org group data" })
+  @ApiOperation({ summary: "Get organization device data by ID" })
   @ApiOkResponse({ type: DeviceOrgDto })
   getOrgDeviceData(@Param("deviceId") deviceId: string) {
     this.logger.debug(`Get device data, ID:  ${deviceId}`);
@@ -101,33 +129,5 @@ export class GroupController {
   deleteOrgIds(@Param("orgId") orgId: number) {
     this.logger.debug(`Delete organization IDs : ${orgId}`);
     return this.groupService.deleteOrgIds(orgId);
-  }
-
-  @Get("/:groupId/")
-  @ApiOperation({ summary: "Retrieve a group by its ID, including all its child groups and associated devices" })
-  @ApiParam({ name: 'groupId', type: String })
-  @ApiOkResponse({ type: ChildGroupDto })
-  getGroupById(@Param("groupId") groupId: string) {
-    this.logger.debug(`Get group with id ${groupId}`);
-    return this.groupService.getGroups(groupId);
-  }
-
-  @Put("/:groupId/")
-  @ApiOperation({ summary: "Edit Devices Group" })
-  @ApiParam({ name: 'groupId', type: String })
-  @ApiOkResponse({ type: ChildGroupDto })
-  editGroup(@Param("groupId") groupId: string, @Body() group: EditDevicesGroupDto) {
-    this.logger.debug(`Edit devices group: ${group}`);
-    group.id = parseInt(groupId, 10);
-    return this.groupService.editGroup(group);
-  }
-
-  @Delete("/:groupId/")
-  @ApiOperation({ summary: "Delete Devices Group by ID" })
-  @ApiParam({ name: 'groupId', type: String })
-  @ApiOkResponse({ type: ChildGroupDto, description: 'Group deleted successfully' })
-  deleteGroup(@Param("groupId") groupId: string) {
-    this.logger.debug(`Delete group with id ${groupId}`);
-    return this.groupService.deleteGroup(groupId);
   }
 }
