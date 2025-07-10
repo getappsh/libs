@@ -71,6 +71,19 @@ export class GroupController {
     return this.groupService.deleteGroup(groupId);
   }
 
+  @Get("devices")
+  @ApiOperation({ summary: "Get org devices data" })
+  @ApiOkResponse({ type: DeviceOrgDto, isArray: true })
+  getOrgDevicesData() {
+    this.logger.debug(`Get devices organization data`);
+    return this.groupService.getOrgDevicesData().pipe(
+      switchMap(async (promise: Promise<DeviceDto[]>) => {
+        const dvcDtos = await promise;
+        return dvcDtos.map(dvcDto => DeviceOrgDto.fromDeviceDto(dvcDto));
+      })
+    );
+  }
+
   @Get("devices/:deviceId")
   @ApiOperation({ summary: "Get organization device data by ID" })
   @ApiOkResponse({ type: DeviceOrgDto })

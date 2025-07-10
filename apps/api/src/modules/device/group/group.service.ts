@@ -33,6 +33,10 @@ export class GroupService {
     return this.deviceClient.send(DevicesGroupTopics.GET_GROUP_DEVICES, groupId);
   }
 
+  getOrgDevicesData() {
+    return this.deviceClient.send(DevicesGroupTopics.GET_ORG_DEVICES, {});
+  }
+
   getOrgDeviceData(deviceId: string) {
     return this.deviceClient.sendAndValidate(DeviceTopics.GET_DEVICE, deviceId, DeviceDto);
   }
