@@ -19,7 +19,17 @@ export class DevicePutDto {
   })
   @IsOptional()
   @IsNumber()
-  orgUID?: number | null
+  orgUID?: number | null;
+
+  @ApiProperty({
+    required: false,
+    description: "Set group ID to associate the device with a specific group. set to null to remove the existing group association.",
+    nullable: true,
+    type: Number
+  })
+  @IsOptional()
+  @IsNumber()
+  groupId?: number | null
 
   toString() {
     return JSON.stringify(this);
