@@ -42,6 +42,7 @@ export class DevicePutDto {
 
     if (dE.orgUID && dE.orgUID.UID) {
       device.orgUID = dE.orgUID.UID
+      device.groupId = dE.orgUID.group?.id || null;
     }
 
     return device
