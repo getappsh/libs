@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Logger, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Param, Post, Put, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiCreatedResponse, ApiExcludeEndpoint, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { UploadArtifactDto, UpdateUploadStatusDto, UploadManifestDto } from '@app/common/dto/upload';
 import { UploadService } from './upload.service';
@@ -6,6 +6,7 @@ import { UPLOAD } from '@app/common/utils/paths';
 import { Unprotected } from '../../utils/sso/sso.decorators';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ComponentDto } from '@app/common/dto/discovery';
+import { Request, Response } from 'express';
 
 @ApiTags('Upload')
 @Controller(UPLOAD)
@@ -62,6 +63,19 @@ export class UploadController {
   @ApiParam({name: 'projectId', type: Number})
   getLastVersion(@Param() params: {projectId: number}){
     return this.uploadService.getLastVersion(params);
+  }
+
+  @Put('/:objectKey(*)')
+  @ApiOperation({ 
+    summary: "Upload File", 
+    description: "This service message allows uploading a file" 
+  })
+  async uploadFile(
+    @Param('objectKey') objectKey: string,
+    @Req() req: Request, @Res() res: Response,
+  ) {
+    let response = await this.uploadService.uploadFile(objectKey, req);
+    res.status(response.status).send(response.data);
   }
 
   @Get('checkHealth')
