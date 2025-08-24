@@ -119,6 +119,18 @@ export class MapConfigDto {
   @IsString()
   controlMapPath: string
 
+
+  @ApiProperty({ required: false, description: 'Substring to match in ortophoto map filename' })
+  @IsOptional()
+  @IsString()
+  ortophotoMapPattern?: string
+  
+  @ApiProperty({ required: false, description: 'Substring to match in control map filename' })
+  @IsOptional()
+  @IsString()
+  controlMapPattern?: string
+
+
   static fromMapConfig(cE: MapConfigEntity) {
     const config = new MapConfigDto()
     config.deliveryTimeoutMins = cE.deliveryTimeoutMins
@@ -143,6 +155,8 @@ export class MapConfigDto {
     config.sdInventoryMaxSizeMB = cE.sdInventoryMaxSizeMB
     config.ortophotoMapPath = cE.ortophotoMapPath
     config.controlMapPath = cE.controlMapPath
+    config.ortophotoMapPattern = cE.ortophotoMapPattern
+    config.controlMapPattern = cE.controlMapPattern
 
     return config
   }

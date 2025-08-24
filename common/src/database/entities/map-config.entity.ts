@@ -73,7 +73,14 @@ export class MapConfigEntity extends BaseEntity {
 
   @Column({ name: "control_map_path", nullable: true })
   controlMapPath: string
+  
+  @Column({ name: "ortophoto_map_pattern", nullable: true })
+  ortophotoMapPattern: string
 
+  @Column({ name: "control_map_pattern", nullable: true })
+  controlMapPattern: string
+
+  
   toString() {
     return JSON.stringify(this)
   }
