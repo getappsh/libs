@@ -29,6 +29,8 @@ import {
   DocDto,
   CreateDocDto,
   UpdateDocDto,
+  LabelDto,
+  LabelNameDto,
 } from "@app/common/dto/project-management";
 import { DeviceResDto } from "@app/common/dto/project-management/dto/device-res.dto";
 import { UserContextInterceptor } from "../../utils/interceptor/user-context.interceptor";
@@ -82,6 +84,42 @@ export class ProjectManagementController {
   getAllRegulationTypes() {
     this.logger.debug("Getting all regulation types");
     return this.projectManagementService.getAllRegulationTypes();
+  }
+  
+  // LABELS
+  @Get('/labels')
+  @ApiOperation({ summary: 'Get all labels' })
+  @ApiOkResponse({ type: LabelDto, isArray: true })
+  @ApiQuery({ name: 'name', required: false, description: 'Filter labels by name' })
+  getLabels(@Query() query?: LabelNameDto) {
+    this.logger.debug(`Getting labels with query: ${JSON.stringify(query)}`);
+    return this.projectManagementService.getLabels(query);
+  }
+
+  @Post('/labels')
+  @ApiOperation({ summary: 'Create a new label' })
+  @ApiCreatedResponse({ type: LabelDto })
+  createLabel(@Body() labelNameDto: LabelNameDto) {
+    this.logger.debug(`Creating label: ${labelNameDto.name}`);
+    return this.projectManagementService.createLabel(labelNameDto);
+  }
+
+  @Put('/labels/:id')
+  @ApiOperation({ summary: 'Update a label' })
+  @ApiOkResponse({ type: LabelDto })
+  @ApiParam({ name: 'id', description: 'Label ID' })
+  updateLabel(@Param('id') id: number, @Body() labelNameDto: LabelNameDto) {
+    this.logger.debug(`Updating label ${id} with data: ${JSON.stringify(labelNameDto)}`);
+    return this.projectManagementService.updateLabel(id, labelNameDto);
+  }
+
+  @Delete('/labels/:id')
+  @ApiOperation({ summary: 'Delete a label' })
+  @ApiOkResponse()
+  @ApiParam({ name: 'id', description: 'Label ID' })
+  deleteLabel(@Param('id') id: number) {
+    this.logger.debug(`Deleting label with ID: ${id}`);
+    return this.projectManagementService.deleteLabel(id);
   }
 
 
