@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { OfferingService } from './offering.service';
 import { OfferingController } from './offering.controller';
 import { MicroserviceModule, MicroserviceName, MicroserviceType } from '@app/common/microservice-client';
+import { OfferingPolicyController } from './offering-policy.controller';
 
 
 @Module({
@@ -12,7 +13,7 @@ import { MicroserviceModule, MicroserviceName, MicroserviceType } from '@app/com
       id: 'api',
     })
   ],
-  controllers: [OfferingController],
+  controllers: [OfferingController, OfferingPolicyController],
   providers: [OfferingService]
 })
 export class OfferingModule {}
