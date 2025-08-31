@@ -1,6 +1,6 @@
 import { ProjectManagementTopics } from "@app/common/microservice-client/topics";
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
-import { AddMemberToProjectDto, EditProjectMemberDto, CreateProjectDto, CreateRegulationDto, UpdateRegulationDto, RegulationParams, ProjectMemberParams, ProjectIdentifierParams, GetProjectsQueryDto, SearchProjectsQueryDto, TokenParams, CreateProjectTokenDto, UpdateProjectTokenDto, EditProjectDto, ProjectMemberPreferencesDto, UpdateOneOfManyRegulationDto, DocsParams, CreateDocDto, UpdateDocDto} from "@app/common/dto/project-management";
+import { AddMemberToProjectDto, EditProjectMemberDto, CreateProjectDto, CreateRegulationDto, UpdateRegulationDto, RegulationParams, ProjectMemberParams, ProjectIdentifierParams, GetProjectsQueryDto, SearchProjectsQueryDto, TokenParams, CreateProjectTokenDto, UpdateProjectTokenDto, EditProjectDto, ProjectMemberPreferencesDto, UpdateOneOfManyRegulationDto, DocsParams, CreateDocDto, UpdateDocDto, LabelNameDto} from "@app/common/dto/project-management";
 import { MicroserviceClient, MicroserviceName } from "@app/common/microservice-client";
 import { UserSearchDto } from "@app/common/oidc/oidc.interface";
 
@@ -285,6 +285,35 @@ export class ProjectManagementService implements OnModuleInit{
 
   checkHealth() {
     return this.projectManagementClient.send(ProjectManagementTopics.CHECK_HEALTH, {})
+  }
+
+  // LABELS
+  getLabels(query?: LabelNameDto) {
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.GET_LABELS,
+      query
+    )
+  }
+
+  createLabel(labelNameDto: LabelNameDto) {
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.CREATE_LABEL,
+      labelNameDto
+    )
+  }
+
+  updateLabel(id: number, labelNameDto: LabelNameDto) {
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.UPDATE_LABEL,
+      { id, ...labelNameDto }
+    )
+  }
+
+  deleteLabel(id: number) {
+    return this.projectManagementClient.send(
+      ProjectManagementTopics.DELETE_LABEL,
+      { id }
+    )
   }
 
   async onModuleInit() {
