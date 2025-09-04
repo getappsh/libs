@@ -1,7 +1,7 @@
 import { OfferingTopics, OfferingTopicsEmit } from '@app/common/microservice-client/topics';
 import { Inject, Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { MicroserviceClient, MicroserviceName } from '@app/common/microservice-client';
-import { ComponentOfferingRequestDto, CreateOfferingTreePolicyDto, OfferingTreePolicyParams, PushOfferingDto, UpdateOfferingTreePolicyDto } from '@app/common/dto/offering';
+import { ComponentOfferingRequestDto, OfferingTreePolicyParams, PushOfferingDto, UpsertOfferingTreePolicyDto } from '@app/common/dto/offering';
 import { ProjectIdentifierParams } from '@app/common/dto/project-management';
 import { DeviceTypeOfferingParams, GetProjectsOfferingDto, PlatformOfferingParams } from '@app/common/dto/offering/dto/offering.dto';
 
@@ -48,25 +48,18 @@ export class OfferingService implements OnModuleInit {
   pushOffering(po: PushOfferingDto) {
     return this.offeringClient.emit(OfferingTopicsEmit.OFFERING_PUSH, po);
   }
-  async onModuleInit() {
-    this.offeringClient.subscribeToResponseOf(Object.values(OfferingTopics))
-    await this.offeringClient.connect()
-  }
 
-  create(createDto: CreateOfferingTreePolicyDto) {
-    return this.offeringClient.send(OfferingTopics.CREATE_OFFERING_TREE_POLICY, createDto);
+  upsert(upsertDto: UpsertOfferingTreePolicyDto) {
+    return this.offeringClient.send(OfferingTopics.UPSERT_OFFERING_TREE_POLICY, upsertDto);
   }
 
   findByProject(params: OfferingTreePolicyParams) {
     return this.offeringClient.send(OfferingTopics.GET_OFFERING_TREE_POLICIES, params);
   }
 
-  update(id: number, updateDto: UpdateOfferingTreePolicyDto) {
-    updateDto.id = id;
-    return this.offeringClient.send(OfferingTopics.UPDATE_OFFERING_TREE_POLICY, updateDto);
-  }
 
-  remove(id: number) {
-    return this.offeringClient.send(OfferingTopics.DELETE_OFFERING_TREE_POLICY, {id: id});
+  async onModuleInit() {
+    this.offeringClient.subscribeToResponseOf(Object.values(OfferingTopics))
+    await this.offeringClient.connect()
   }
 }

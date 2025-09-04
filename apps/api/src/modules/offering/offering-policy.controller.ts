@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, Logger, Param, ParseIntPipe, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Put, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OFFERING } from '@app/common/utils/paths';
-import { CreateOfferingTreePolicyDto, UpdateOfferingTreePolicyDto, OfferingTreePolicyDto, OfferingTreePolicyParams} from '@app/common/dto/offering';
+import { OfferingTreePolicyDto, OfferingTreePolicyParams, UpsertOfferingTreePolicyDto} from '@app/common/dto/offering';
 import { OfferingService } from './offering.service';
 
 @ApiTags("Catalog - Offering Policy")
@@ -12,15 +12,15 @@ export class OfferingPolicyController {
 
   constructor(private readonly offeringService: OfferingService) {}
 
-  @Post()
+  @Put()
   @ApiOperation({
-    summary: "Create Offering Tree Policy",
-    description: "Creates a new policy for managing offering tree policy."
+    summary: "Create/Update/Delete Offering Tree Policy",
+    description: "Create/Update/Delete policy, for managing offering tree policy."
   })
   @ApiOkResponse({ type: OfferingTreePolicyDto })
-  create(@Body() createDto: CreateOfferingTreePolicyDto) {
-    this.logger.debug(`Creating policy: ${JSON.stringify(createDto)}`);
-    return this.offeringService.create(createDto);
+  upsert(@Body() upsetDto: UpsertOfferingTreePolicyDto) {
+    this.logger.debug(`Upsert policy: ${JSON.stringify(upsetDto)}`);
+    return this.offeringService.upsert(upsetDto);
   }
 
   @Get()
@@ -34,28 +34,4 @@ export class OfferingPolicyController {
     return this.offeringService.findByProject(params);
   }
 
-  @Put(':id')
-  @ApiOperation({
-    summary: "Update Offering Tree Policy",
-    description: "Updates an existing offering tree policy."
-  })
-  @ApiOkResponse({ type: OfferingTreePolicyDto })
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateDto: UpdateOfferingTreePolicyDto
-  ) {
-    this.logger.debug(`Updating policy: ${id}`);
-    return this.offeringService.update(id, updateDto);
-  }
-
-  @Delete(':id')
-  @ApiOperation({
-    summary: "Delete Offering Tree Policy",
-    description: "Deletes a offering tree policy."
-  })
-  @ApiOkResponse()
-  remove(@Param('id', ParseIntPipe) id: number) {
-    this.logger.debug(`Deleting policy: ${id}`);
-    return this.offeringService.remove(id);
-  }
 }
