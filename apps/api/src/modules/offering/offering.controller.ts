@@ -4,7 +4,7 @@ import { ApiBearerAuth, ApiCreatedResponse, ApiExcludeEndpoint, ApiOkResponse, A
 import { OFFERING } from '@app/common/utils/paths';
 import { Unprotected } from '../../utils/sso/sso.decorators';
 import { PushOfferingDto } from '@app/common/dto/offering';
-import { DeviceTypeOfferingDto, DeviceTypeOfferingParams, GetProjectsOfferingDto, PlatformOfferingDto, PlatformOfferingParams, ProjectRefOfferingDto } from '@app/common/dto/offering/dto/offering.dto';
+import { DeviceTypeOfferingDto, DeviceTypeOfferingParams, GetProjectsOfferingDto, PlatformOfferingDto, ProjectOfferingFilterQuery, PlatformOfferingParams, ProjectRefOfferingDto } from '@app/common/dto/offering/dto/offering.dto';
 import { ProjectIdentifierParams } from '@app/common/dto/project-management';
 import { ComponentV2Dto } from '@app/common/dto/upload';
 import { ApiOkResponsePaginated } from '@app/common/dto/pagination.dto';
@@ -34,7 +34,6 @@ export class OfferingController {
     summary: "Get Offering of Device Type",
     description: "This service message allows retrieval of the offering of a specific device type by device type ID."
   })
-  
   @ApiOkResponse({ type: DeviceTypeOfferingDto })
   getOfferingForDeviceType(@Param() params: DeviceTypeOfferingParams) {
     this.logger.debug(`get offering for device type: ${params.deviceTypeIdentifier}`)
@@ -55,20 +54,22 @@ export class OfferingController {
   @Get('projects/:projectIdentifier')
   @ApiOperation({
     summary: "Get Offering of Project",
-    description: "This service message allows retrieval of the offering of a specific project by project identifier."
+    description: "This service message allows retrieval of the offering of a specific project by project identifier and also optionally specify if for a specific platform and device-type."
   })
   @ApiOkResponse({ type: ProjectRefOfferingDto })
-  getOfferingForProject(@Param() params: ProjectIdentifierParams) {
-    this.logger.debug(`get offering for project: ${params.projectIdentifier}`)
-    return this.offeringService.getOfferingForProject(params);
+  getOfferingForProject(
+    @Param() params: ProjectIdentifierParams,
+    @Query() query: ProjectOfferingFilterQuery
+  ) {
+    this.logger.debug(`get offering for project: ${params.projectIdentifier}, filterQuery: ${JSON.stringify(query)}`)
+    return this.offeringService.getOfferingForProject(params, query);
   }
-
 
   // Suppressed old endpoint
   @ApiExcludeEndpoint() 
   @Get('project/:projectIdentifier')
   getOfferingForProjectOld(@Param() params: ProjectIdentifierParams) {
-    this.getOfferingForProject(params);
+    this.getOfferingForProject(params, {});
   }
 
   @Get("component/:catalogId")
