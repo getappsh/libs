@@ -6,6 +6,16 @@ import { ValidateIf, IsString, IsNotEmpty, IsInt, IsOptional, IsPositive } from 
 import { Transform, Type } from "class-transformer";
 
 export class GetProjectsOfferingDto {
+  @ApiProperty({
+    description: 'The search term (matches project name or partial match)',
+    required: false
+  })
+  @IsString()
+  @IsOptional()
+  @Type(() => String)
+  query: string;
+
+  
   @ApiPropertyOptional({
     description: 'The page number to fetch (default: 1)',
     example: 1,
@@ -159,5 +169,9 @@ export class ProjectOfferingFilterQuery extends IntersectionType(
   PartialType(PlatformOfferingParams),
   PartialType(DeviceTypeOfferingParams)
 ){
+  @ValidateIf(o => o.platformIdentifier !== undefined && o.platformIdentifier !== null)
+  @IsNotEmpty({ message: 'deviceTypeIdentifier is required when platformIdentifier is provided' })
+  deviceTypeIdentifier?: string | number | undefined;;
+
   projectIdentifier?: string | number | undefined;
 }
