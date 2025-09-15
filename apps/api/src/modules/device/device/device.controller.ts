@@ -68,45 +68,6 @@ export class DeviceController {
     return this.deviceService.getDevicesMapStatisticInfo({ groups: arrGroups, map: arrMap });
   }
 
-  // :deviceId
-  @Get(":deviceId")
-  @ApiOperation({ summary: "Get Device meta data", description: "This service message allow to get device meta data and properties" })
-  @ApiOkResponse({ type: DeviceDto })
-  getDeviceDetails(@Param("deviceId") deviceId: string) {
-    this.logger.debug(`get metadata for device ${deviceId}`)
-    return this.deviceService.getDeviceDetails(deviceId)
-  }
-
-  @Put(":deviceId")
-  @ApiOperation({ summary: "Set Device Properties", description: "This service message allow to update props of device" })
-  @ApiOkResponse({ type: DevicePutDto })
-  putDeviceProps(@Param("deviceId") deviceId: string, @Body() body: DevicePutDto) {
-    this.logger.debug(`Put properties for device ${deviceId}`)
-    return this.deviceService.putDeviceProps(deviceId, body)
-  }
-
-  @Get(":deviceId/maps")
-  @ApiOperation({
-    summary: "Get Device Maps",
-    description: "This service message allows retrieval of all registered maps on the given device."
-  })
-  @ApiOkResponse({ type: DeviceMapDto })
-  getDeviceMaps(@Param("deviceId") deviceId: string) {
-    this.logger.debug(`Get all maps of device ${deviceId}`);
-    return this.deviceService.getDeviceMaps(deviceId);
-  }
-
-  @Get(":deviceId/softwares")
-  @ApiOperation({
-    summary: "Get Device softwares",
-    description: "This service message allows retrieval of all software on a process in a given device."
-  })
-  @ApiOkResponse({ type: DeviceSoftwareDto })
-  getDeviceSoftwares(@Param("deviceId") deviceId: string) {
-    this.logger.debug(`Get all softwares of device ${deviceId}`);
-    return this.deviceService.getDeviceSoftwares(deviceId);
-  }
-
   // config
   @Get("config/:deviceId")
   @ApiQuery({ name: 'group', type: String })
@@ -171,4 +132,44 @@ export class DeviceController {
     this.logger.log("Device service - Health checking");
     return this.deviceService.checkHealth();
   }
+
+  // :deviceId
+  @Get(":deviceId")
+  @ApiOperation({ summary: "Get Device meta data", description: "This service message allow to get device meta data and properties" })
+  @ApiOkResponse({ type: DeviceDto })
+  getDeviceDetails(@Param("deviceId") deviceId: string) {
+    this.logger.debug(`get metadata for device ${deviceId}`)
+    return this.deviceService.getDeviceDetails(deviceId)
+  }
+
+  @Put(":deviceId")
+  @ApiOperation({ summary: "Set Device Properties", description: "This service message allow to update props of device" })
+  @ApiOkResponse({ type: DevicePutDto })
+  putDeviceProps(@Param("deviceId") deviceId: string, @Body() body: DevicePutDto) {
+    this.logger.debug(`Put properties for device ${deviceId}`)
+    return this.deviceService.putDeviceProps(deviceId, body)
+  }
+
+  @Get(":deviceId/maps")
+  @ApiOperation({
+    summary: "Get Device Maps",
+    description: "This service message allows retrieval of all registered maps on the given device."
+  })
+  @ApiOkResponse({ type: DeviceMapDto })
+  getDeviceMaps(@Param("deviceId") deviceId: string) {
+    this.logger.debug(`Get all maps of device ${deviceId}`);
+    return this.deviceService.getDeviceMaps(deviceId);
+  }
+
+  @Get(":deviceId/softwares")
+  @ApiOperation({
+    summary: "Get Device softwares",
+    description: "This service message allows retrieval of all software on a process in a given device.",
+  })
+  @ApiOkResponse({ type: DeviceSoftwareDto })
+  getDeviceSoftwares(@Param("deviceId") deviceId: string) {
+    this.logger.debug(`Get all softwares of device ${deviceId}`);
+    return this.deviceService.getDeviceSoftwares(deviceId);
+  }
+
 }
