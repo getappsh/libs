@@ -72,9 +72,13 @@ ARG uid=1004370000 \
     api_version_tag
 
 # Copy only the minimal required files from build stage
-COPY --chown=${uid}:${uid} package*.json ./
-COPY --chown=${uid}:${uid} --from=build /node-app/node_modules ./node_modules
-COPY --chown=${uid}:${uid} --from=build /node-app/dist/ .
+COPY  package*.json ./
+COPY --from=build /node-app/node_modules ./node_modules
+COPY --from=build /node-app/dist/ .
+
+# COPY --chown=${uid}:${uid} package*.json ./
+# COPY --chown=${uid}:${uid} --from=build /node-app/node_modules ./node_modules
+# COPY --chown=${uid}:${uid} --from=build /node-app/dist/ .
 
 # Set version info in a single layer
 RUN echo "$api_version_tag" > api_image_version.txt
