@@ -1,8 +1,8 @@
-import { Body, Controller, Delete, Get, Logger, Param, Post, Res, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Patch, Logger, Param, Post, Res, UploadedFile, UseInterceptors } from "@nestjs/common";
 import { Response } from 'express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiCreatedResponse, ApiFoundResponse, ApiHeader, ApiOkResponse, ApiOperation, ApiParam, ApiProduces, ApiTags } from "@nestjs/swagger";
 import { ReleasesService } from "./releases.service";
-import { ReleaseDto, SetReleaseDto, SetReleaseArtifactResDto, SetReleaseArtifactDto, ReleaseParams, RegulationStatusParams, SetRegulationCompliancyDto, SetRegulationStatusDto, RegulationStatusDto, ReleaseArtifactParams, DetailedReleaseDto, ReleaseArtifactNameParams } from "@app/common/dto/upload";
+import { ReleaseDto, SetReleaseDto, SetReleaseArtifactResDto, SetReleaseArtifactDto, ReleaseParams, RegulationStatusParams, SetRegulationCompliancyDto, SetRegulationStatusDto, RegulationStatusDto, ReleaseArtifactParams, DetailedReleaseDto, ReleaseArtifactNameParams, UpdateFileMetaDataDto } from "@app/common/dto/upload";
 import { AuthOrProject, Unprotected } from '../../utils/sso/sso.decorators';
 import { UserContextInterceptor } from "../../utils/interceptor/user-context.interceptor";
 import { UPLOAD_RELEASES } from "@app/common/utils/paths";
@@ -97,6 +97,18 @@ export class ReleasesController {
   deleteReleaseArtifact(@Param() params: ReleaseArtifactParams) {
     this.logger.debug(`Deleting release artifact for project: ${params.projectIdentifier}, version: ${params.version}`);
     return this.releasesService.deleteReleaseArtifact(params);
+  }
+
+  @Patch('project/:projectIdentifier/version/:version/artifact/:artifactId')
+  @ApiOperation({
+    summary: "Update file metadata",
+    description: "This route enables to chagne the metadata to an artifact"
+  })
+  @ApiOkResponse({ description: "Release artifact metadata update" })
+  updateFileMetadata(@Param() params: ReleaseArtifactParams, @Body() body: UpdateFileMetaDataDto) {
+    body.id = params.artifactId;
+    this.logger.debug(`update metadata fo artifact for project: ${params.projectIdentifier}, version: ${params.version} ,artifactId: ${params.artifactId}`);
+    return this.releasesService.updateFileMetadata(body);
   }
 
   @Get('project/:projectIdentifier/version/:version/artifact/download/:fileName')

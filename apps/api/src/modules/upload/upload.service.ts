@@ -1,7 +1,7 @@
 import { UploadTopics, UploadTopicsEmit } from '@app/common/microservice-client/topics';
 import { Inject, Injectable, Logger, OnModuleInit, Param, Req, Res, UploadedFile } from '@nestjs/common';
 import { lastValueFrom, Observable } from 'rxjs';
-import { UploadArtifactDto, UpdateUploadStatusDto, UploadManifestDto, FileUploadUrlDto, UpdateFileUploadDto, UpdateFileMetaDataDto } from '@app/common/dto/upload';
+import { UploadArtifactDto, UpdateUploadStatusDto, UploadManifestDto, FileUploadUrlDto, UpdateFileUploadDto } from '@app/common/dto/upload';
 import { MicroserviceClient, MicroserviceName } from '@app/common/microservice-client';
 import { PassThrough } from 'stream';
 import { Request, Response } from 'express';
@@ -123,11 +123,5 @@ export class UploadService implements OnModuleInit {
   }
 
 
-  updateFileMetadata(body: UpdateFileMetaDataDto){
-    return this.uploadClient.send(
-      UploadTopics.UPDATE_FILE_METADATA,
-      body
-    )
-  }
 
 }
