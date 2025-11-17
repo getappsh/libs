@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Logger, Param, Post, Put, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Param, Patch, Post, Put, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiCreatedResponse, ApiExcludeEndpoint, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { UploadArtifactDto, UpdateUploadStatusDto, UploadManifestDto } from '@app/common/dto/upload';
+import { UploadArtifactDto, UpdateUploadStatusDto, UploadManifestDto , UpdateFileDto } from '@app/common/dto/upload';
 import { UploadService } from './upload.service';
 import { UPLOAD } from '@app/common/utils/paths';
 import { Unprotected } from '../../utils/sso/sso.decorators';
@@ -76,6 +76,15 @@ export class UploadController {
   ) {
     let response = await this.uploadService.uploadFile(objectKey, req);
     res.status(response.status).send(response.data);
+  }
+
+  @Patch('updateMetadata')
+  @ApiOperation({
+    summary: "Update File Metadata",
+    description: "This service message allows updating file metadata."
+  })
+  async updateFileMetadata(@Body() body: UpdateFileDto ) {
+    return this.uploadService.updateFileMetadata(body);
   }
 
   @Get('checkHealth')
