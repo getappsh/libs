@@ -48,6 +48,45 @@ export class SetReleaseDto {
 
 }
 
+export class UpdateReleaseDto {
+
+  projectIdentifier: string | number
+
+  version: string
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  name?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  releaseNotes?: string;
+
+  @ApiProperty({ required: false, type: 'object' })
+  @IsOptional()
+  metadata?: Record<string, any>;
+
+  @ApiProperty({ required: false })
+  @IsBoolean()
+  @IsOptional()
+  isDraft?: boolean;
+
+  @ApiProperty({ required: false, type: String, isArray: true, description: 'List of dependencies. Providing an empty array will remove all dependencies. Omitting this field or setting it to null will leave dependencies unchanged.' })
+  @IsOptional()
+  @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  dependencies?: string[]
+
+  toString() {
+    return JSON.stringify(this)
+  }
+
+}
+
 export class ReleaseDto {
   @ApiProperty()
   id: string;

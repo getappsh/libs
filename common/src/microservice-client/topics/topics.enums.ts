@@ -15,6 +15,7 @@ export const UploadTopics = {
     GET_RELEASES: `getapp-upload.get-releases${region}`,
     GET_RELEASE_BY_VERSION: `getapp-upload.get-release-by-version${region}`,
     SET_RELEASE: `getapp-upload.set-release${region}`,
+    UPDATE_RELEASE: `getapp-upload.update-release${region}`,
     DELETE_RELEASE: `getapp-upload.delete-release${region}`,
 
     SET_RELEASE_ARTIFACT: `getapp-upload.set-release-artifact${region}`,
