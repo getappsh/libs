@@ -3,7 +3,7 @@ import { DeviceConfigEntity } from "@app/common/database/entities/device-config.
 import { BadRequestException, Injectable, PipeTransform } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
 import { Expose, plainToClass, Type } from "class-transformer";
-import { IsArray, IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, validate, ValidateNested, ValidationError } from "class-validator";
+import { IsArray, IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, MinLength, validate, ValidateNested, ValidationError } from "class-validator";
 import { LayersConfigDto } from "./layer-config.dto";
 
 
@@ -117,7 +117,7 @@ export class BaseConfigDto {
 }
 
 
-export class WindowsConfigDto extends BaseConfigDto {
+export class WindowsConfigDto extends BaseConfigDto{
 
   @ApiProperty({ required: false, type: [LayersConfigDto] })
   @IsOptional()
@@ -125,12 +125,12 @@ export class WindowsConfigDto extends BaseConfigDto {
   @IsArray()
   @Type(() => LayersConfigDto)
   @Expose()
-  layers: LayersConfigDto[];
+  layers?: LayersConfigDto[];
 
   @ApiProperty({ required: false, type: String, isArray: true })
   @IsOptional()
   @Expose()
-  getAppServerUrls: string[] | { url: string, delete: boolean };
+  getAppServerUrls?: string[] | { url: string, delete: boolean };
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -139,46 +139,84 @@ export class WindowsConfigDto extends BaseConfigDto {
   mapsStoragePath: string
 
 
-  @ApiProperty({ required: false, type: 'integer', description: 'How many seconds to wait between checking the import and prepare status',  })
+  @ApiProperty({ required: false, type: 'integer', description: 'How many seconds to wait between checking the import and prepare status', })
   @IsOptional()
   @IsInt()
   @Expose()
   queryStatusIntervalSec: number
 
-  
-  @ApiProperty({required: false })
+
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
   @Expose()
   networkAvailabilityUrl: string
 
-  @ApiProperty({required: false, type: 'integer'})
+  @ApiProperty({ required: false, type: 'integer' })
   @IsOptional()
   @IsInt()
   @Expose()
   periodicDiscoveryIntervalMins: number
 
 
-  @ApiProperty({required: false, type: 'integer'})
+  @ApiProperty({ required: false, type: 'integer', description: 'Interval for background network status checks in minutes. Used when maps are in the import process.' })
   @IsOptional()
   @IsInt()
   @Expose()
   networkStatusIntervalMins: number
 
 
-  @ApiProperty({ required: false, type: 'integer' , description: ""})
+  @ApiProperty({ required: false, type: 'integer', description: 'Maximum allowed interval (in hours) for inventory updates before triggering an error.' })
   @IsOptional()
   @IsNumber()
   @Expose()
   maxInventoryMissedIntervalHours: number
 
 
-  @ApiProperty({required: false,  type: 'integer'})
+  @ApiProperty({ required: false, type: 'integer' })
   @IsOptional()
   @IsInt()
   @Expose()
   mapInventoryMaxSizeMB: number
 
+  @ApiProperty({
+    required: false,
+    type: 'integer',
+    description: 'Maximum time (in seconds) to wait for a response when checking if a TCP connection is valid. If no response is received within this time, an error is returned.',
+  })
+  @IsOptional()
+  @IsInt()
+  @Expose()
+  tcpStreamTimeoutSec: number;
+
+  @ApiProperty({
+    required: false,
+    type: 'integer',
+    description: 'Maximum retention time for Matomo data in hours. Data older than this will be cleaned up.',
+  })
+  @IsOptional()
+  @IsInt()
+  @Expose()
+  matomoMaxRetentionHour: number;
+
+  @ApiProperty({
+    required: false,
+    type: 'integer',
+    description: 'Maximum buffer size in megabytes. If the buffer limit is reached, the oldest entries will be discarded to free up space.',
+  })
+  @IsOptional()
+  @IsInt()
+  @Expose()
+  matomoMaxBufferSizeMB: number;
+
+
+  @ApiProperty({ required: false, description: 'The password that allows a technician to modify configurations directly on the device. Must be between 4 and 20 characters.', minLength: 4, maxLength: 20 })
+  @MinLength(4)
+  @MaxLength(20)
+  @IsOptional()
+  @IsString()
+  @Expose()
+  technicianPassword: string
 
   constructor() {
     super();
@@ -250,6 +288,18 @@ export class AndroidConfigDto extends BaseConfigDto {
   @Expose()
   controlMapPath: string
 
+  @ApiProperty({ required: false, description: 'Substring to match in ortophoto map filename' })
+  @IsOptional()
+  @IsString()
+  @Expose()
+  ortophotoMapPattern?: string
+  
+  @ApiProperty({ required: false, description: 'Substring to match in control map filename' })
+  @IsOptional()
+  @IsString()
+  @Expose()
+  controlMapPattern?: string
+
   static fromConfigEntity(cE: DeviceConfigEntity) {
     const config = new AndroidConfigDto()
     config.group = cE.group;
@@ -273,10 +323,10 @@ export function fromConfigEntity(eConfig: DeviceConfigEntity): AndroidConfigDto 
   } else {
     config = new WindowsConfigDto();
   }
-  config.lastConfigUpdateDate = eConfig.lastUpdatedDate;
   for (const key in eConfig.data) {
     config[key] = eConfig.data[key];
   }
+  config.lastConfigUpdateDate = eConfig.lastUpdatedDate;
   return config;
 }
 
@@ -307,7 +357,7 @@ export class DeviceConfigValidator implements PipeTransform {
     const baseErrors = await validate(base);
 
     if (baseErrors.length !== 0) {
-      throw new BadRequestException(Object.values(baseErrors[0].constraints));
+      throw new BadRequestException(Object.values(baseErrors[0].constraints ?? {}));
     }
 
     if (base.group === 'windows') {
@@ -321,7 +371,7 @@ export class DeviceConfigValidator implements PipeTransform {
       const android = plainToClass(AndroidConfigDto, value, { excludeExtraneousValues: true, exposeUnsetFields: false });
       const errors = await validate(android);
       if (errors.length !== 0) {
-        throw new BadRequestException(Object.values(errors[0].constraints));
+        throw new BadRequestException(Object.values(errors[0].constraints ?? {}));
       }
       return android
     }

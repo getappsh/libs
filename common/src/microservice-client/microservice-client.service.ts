@@ -18,15 +18,15 @@ export class MicroserviceClient {
   private payloadVersion: string;
 
   constructor(
-    private readonly options: MicroserviceModuleOptions,
+    options: MicroserviceModuleOptions,
     private configService: ConfigService,
     private readonly cls: ClsService
   ) {
-    const dplEnv = MSType[configService.get<string>('MICRO_SERVICE_TYPE')]
+    const dplEnv = MSType[configService.get<string>('MICRO_SERVICE_TYPE') ?? ""]
     const clientConfig = getClientConfig(options, dplEnv)
 
-    this.client = ClientProxyFactory.create(clientConfig)
-    this.payloadVersion = configService.get<string>('RPC_PAYLOAD_VERSION')
+    if (clientConfig) this.client = ClientProxyFactory.create(clientConfig)
+    this.payloadVersion = configService.get<string>('RPC_PAYLOAD_VERSION') ?? ""
   }
 
 
@@ -35,7 +35,7 @@ export class MicroserviceClient {
   }
 
   send<TResult = any, TInput = any>(pattern: any, data: TInput, waitTime?: number): Observable<TResult> {
-    waitTime = (waitTime) ? waitTime : parseInt(this.configService.get("MICROSERVICE_RESPONSE_WAIT_TIME"));
+    waitTime = (waitTime) ? waitTime : parseInt(this.configService.get("MICROSERVICE_RESPONSE_WAIT_TIME") ?? "10000");
     return this.client.send(
       pattern,
       this.formatData(data)
@@ -45,7 +45,7 @@ export class MicroserviceClient {
   }
 
   sendAndValidate<TResult extends Object>(topic: string, data: any, ClassConstructor: ClassConstructor<TResult>, waitTime?: number): Observable<Promise<TResult>> {
-    waitTime = (waitTime) ? waitTime : parseInt(this.configService.get("MICROSERVICE_RESPONSE_WAIT_TIME"))
+    waitTime = (waitTime) ? waitTime : parseInt(this.configService.get("MICROSERVICE_RESPONSE_WAIT_TIME") ?? "10000")
     return this.client.send(
       topic,
       this.formatData(data)
@@ -95,6 +95,11 @@ export class MicroserviceClient {
       headers['user'] = this.isKafka() ? JSON.stringify(user) : user
     }
 
+    const projectToken = this.cls.get('projectToken');
+    if (projectToken !== undefined && typeof projectToken === 'string') {
+      headers['projectToken'] = projectToken
+    }
+
     return {
       headers,
       value: typeof data !== 'string' && this.isKafka()
@@ -124,10 +129,12 @@ export class MicroserviceClient {
     }
   }
 
-  private sendHealthEvents(consumer: Consumer){
-    consumer.on('consumer.heartbeat', event => this.kafkaHealthService.setHeartbeatEvent(event));
-    consumer.on('consumer.disconnect', event => this.kafkaHealthService.setFailedEvent(event))
-    consumer.on('consumer.stop', event => this.kafkaHealthService.setFailedEvent(event));
-    consumer.on('consumer.crash', event => this.kafkaHealthService.setFailedEvent(event))
+  private sendHealthEvents(consumer: Consumer) {
+    if (this.isKafka()) {
+      consumer.on('consumer.heartbeat', event => this.kafkaHealthService.setHeartbeatEvent(event));
+      consumer.on('consumer.disconnect', event => this.kafkaHealthService.setFailedEvent(event))
+      consumer.on('consumer.stop', event => this.kafkaHealthService.setFailedEvent(event));
+      consumer.on('consumer.crash', event => this.kafkaHealthService.setFailedEvent(event))
+    }
   }
 }

@@ -6,8 +6,36 @@ export const UploadTopics = {
     UPLOAD_MANIFEST: `getapp-upload.manifest${region}`,
     UPDATE_UPLOAD_STATUS: `getapp-upload.update-upload-status${region}`,
     LAST_VERSION: `getapp-upload.last-version${region}`,
-    CHECK_HEALTH: `getapp-upload.check-health${region}`
+    CHECK_HEALTH: `getapp-upload.check-health${region}`,
+
+    CREATE_FILE_UPLOAD_URL: `getapp-upload.create-file-upload-url${region}`,
+    GET_FILE_UPLOAD_URL: `getapp-upload.get-file-upload-url${region}`,
+
+    // Releases
+    GET_RELEASES: `getapp-upload.get-releases${region}`,
+    GET_RELEASE_BY_VERSION: `getapp-upload.get-release-by-version${region}`,
+    SET_RELEASE: `getapp-upload.set-release${region}`,
+    DELETE_RELEASE: `getapp-upload.delete-release${region}`,
+
+    SET_RELEASE_ARTIFACT: `getapp-upload.set-release-artifact${region}`,
+    DELETE_RELEASE_ARTIFACT: `getapp-upload.delete-release-artifact${region}`,
+    GET_ARTIFACT_DOWNLOAD_URL: 'getapp-upload.get-artifact-download-url',
+    GET_ARTIFACT_UPLOAD_URL: 'getapp-upload.get-artifact-upload-url',
+    // Regulation Status
+    GET_VERSION_REGULATIONS_STATUSES: `getapp-upload.get-version-regulation-statuses${region}`,
+    GET_VERSION_REGULATION_STATUS_BY_ID: `getapp-upload.get-version-regulation-status-by-id${region}`,
+    SET_VERSION_REGULATION_STATUS: `getapp-upload.set-version-regulation-status${region}`,
+    SET_VERSION_REGULATION_COMPLIANCE: `getapp-upload.set-version-regulation-compliance${region}`,
+    DELETE_VERSION_REGULATION_STATUS: `getapp-upload.delete-version-regulation-status${region}`,
+    //update file metadata
+    UPDATE_FILE_METADATA: `getapp-upload.update-file-metadata${region}`,
+
 } as const
+
+export const UploadTopicsEmit = {
+    PROJECT_REGULATION_CHANGED: `getapp-upload.project-regulation-changed${region}`,
+    UPDATE_FILE_UPLOAD: `getapp-upload.update-file-upload${region}`,
+}
 
 export const DeliveryTopics = {
     PREPARE_DELIVERY: `getapp-delivery.prepare${region}`,
@@ -23,15 +51,26 @@ export const DeliveryTopicsEmit = {
 }
 
 export const OfferingTopics = {
-    CHECK_UPDATES: `getapp-offering.check-updates${region}`,
+    // Deprecated
     DEVICE_COMPONENT_OFFERING: `getapp-offering.device-components${region}`,
     DEVICE_MAP_OFFERING: `getapp-offering.device-map${region}`,
+    CHECK_HEALTH: `getapp-offering.check-health${region}`,
+
+    GET_OFFERING_FOR_PLATFORM: `getapp-offering.get-offering-for-platform${region}`,
+    GET_OFFERING_FOR_DEVICE_TYPE: `getapp-offering.get-offering-for-device-type${region}`,
+    GET_OFFERING_FOR_PROJECT: `getapp-offering.get-offering-for-project${region}`,
+    GET_OFFERING_FOR_ALL_PROJECTS: `getapp-offering.get-offering-for-all-project${region}`,
     GET_OFFER_OF_COMP: `getapp-offering.get-offering-of-comp${region}`,
-    CHECK_HEALTH: `getapp-offering.check-health${region}`
+
+    // Policies
+    UPSERT_OFFERING_TREE_POLICY: `getapp-offering.upsert-offering-tree-policy${region}`,
+    GET_OFFERING_TREE_POLICIES: `getapp-offering.get-offering-tree-policies${region}`,
+    
 } as const
 
 export const OfferingTopicsEmit = {
     COMPONENT_UPLOAD_EVENT: `getapp-offering.component-upload-event${region}`,
+    RELEASE_CHANGED_EVENT: `getapp-offering.release-changed-event${region}`,
     OFFERING_PUSH: `getapp-offering.push${region}`,
     DEVICE_SOFTWARE_EVENT: `getapp-offering.device.software-event${region}`,
     DEVICE_MAP_EVENT: `getapp-offering.device.map-event${region}`,
@@ -45,12 +84,23 @@ export const DeployTopicsEmit = {
 } as const
 
 export const ProjectManagementTopics = {
+    GET_USERS: `getapp-project-management.get-users${region}`,
     GET_USER_PROJECTS: `getapp-project-management.get-user-projects${region}`,
+
     CREATE_PROJECT: `getapp-project-management.create-project${region}`,
-    CREATE_TOKEN: `getapp-project-management.create-token${region}`,
-    ADD_NEW_MEMBER: `getapp-project-management.add-new-member${region}`,
-    EDIT_MEMBER: `getapp-project-management.edit-member${region}`,
-    REMOVE_MEMBER: `getapp-project-management.remove-member${region}`,
+    EDIT_PROJECT: `getapp-project-management.edit-project${region}`,
+    DELETE_PROJECT: `getapp-project-management.delete-project${region}`,
+    GET_PROJECTS: `getapp-project-management.get-projects${region}`,
+    SEARCH_PROJECTS: `getapp-project-management.search-projects${region}`,
+    GET_PROJECT_BY_IDENTIFIER: `getapp-project-management.get-project-by-identifier${region}`,
+
+    ADD_PROJECT_NEW_MEMBER: `getapp-project-management.add-project-new-member${region}`,
+    CONFIRM_PROJECT_MEMBER: `getapp-project-management.confirm-project-member${region}`,
+    EDIT_PROJECT_MEMBER: `getapp-project-management.edit-project-member${region}`,
+    REMOVE_PROJECT_MEMBER: `getapp-project-management.remove-project-member${region}`,
+    GET_MEMBER_PROJECT_PREFERENCES: `getapp-project-management.get-member-project-preferences${region}`,
+    UPDATE_MEMBER_PROJECT_PREFERENCES: `getapp-project-management.update-member-project-preferences${region}`,
+
     GET_PROJECT_RELEASES: `getapp-project-management.get-project-releases${region}`,
 
     GET_DEVICES_BY_CATALOG_ID: `getapp-project-management.get-devices-by-catalog-id${region}`,
@@ -59,13 +109,38 @@ export const ProjectManagementTopics = {
 
     GET_REGULATION_TYPES: `getapp-project-management.get-regulation-types${region}`,
     GET_PROJECT_REGULATIONS: `getapp-project-management.get-project-regulations${region}`,
-    CREATE_REGULATION: `getapp-project-management.create-regulation${region}`,
-    UPDATE_REGULATION: `getapp-project-management.update-regulation${region}`,
-    DELETE_REGULATION: `getapp-project-management.delete-regulation${region}`,
-    GET_REGULATION_BY_ID: `getapp-project-management.get-regulation-by-id${region}`,
+    GET_PROJECT_REGULATION_BY_NAME: `getapp-project-management.get-project-regulation-by-name${region}`,
+    CREATE_PROJECT_REGULATION: `getapp-project-management.create-project-regulation${region}`,
+    UPDATE_PROJECT_REGULATION: `getapp-project-management.update-project-regulation${region}`,
+    UPDATE_PROJECT_REGULATIONS: `getapp-project-management.update-project-regulations${region}`,
+    DELETE_PROJECT_REGULATION: `getapp-project-management.delete-project-regulation${region}`,
+
+    // Tokens
+    GET_PROJECT_TOKENS: `getapp-project-management.get-project-tokens${region}`,
+    GET_PROJECT_TOKEN_BY_ID: `getapp-project-management.get-project-token-by-id${region}`,
+    CREATE_PROJECT_TOKEN: `getapp-project-management.create-project-token${region}`,
+    UPDATE_PROJECT_TOKEN: `getapp-project-management.update-project-token${region}`,
+    DELETE_PROJECT_TOKEN: `getapp-project-management.delete-project-token${region}`,
+
+    // Docs
+    GET_PROJECT_DOCS: `getapp-project-management.get-project-docs${region}`,
+    GET_PROJECT_DOC_BY_ID: `getapp-project-management.get-project-doc-by-id${region}`,
+    CREATE_PROJECT_DOC: `getapp-project-management.create-project-doc${region}`,
+    UPDATE_PROJECT_DOC: `getapp-project-management.update-project-doc${region}`,
+    DELETE_PROJECT_DOC: `getapp-project-management.delete-project-doc${region}`,
+
+    // Labels
+    GET_LABELS: `getapp-project-management.get-labels${region}`,
+    CREATE_LABEL: `getapp-project-management.create-label${region}`,
+    UPDATE_LABEL: `getapp-project-management.update-label${region}`,
+    DELETE_LABEL: `getapp-project-management.delete-label${region}`,
 
     CHECK_HEALTH: `getapp-project-management.check-health${region}`
 } as const
+
+export const ProjectManagementTopicsEmit = {
+    PROJECT_RELEASES_CHANGED: `getapp-project-management.project-releases-changed${region}`,
+}
 
 export const GetMapTopics = {
     // Discovery
@@ -94,7 +169,9 @@ export const GetMapTopicsEmit = {
 } as const
 
 export const DeviceTopics = {
+    DEVICE_PERSONAL: `getapp-device.personal${region}`,
     All_DEVICES: `getapp-device.all${region}`,
+    GET_DEVICE: `getapp-device.get.device${region}`,
     DEVICE_SOFTWARES: `getapp-device.device.softwares${region}`,
     DEVICES_SOFTWARE_STATISTIC_INFO: `getapp-device.device.software.statistic.info${region}`,
     DEVICES_MAP_STATISTIC_INFO: `getapp-device.device.map.statistic.info${region}`,
@@ -104,16 +181,16 @@ export const DeviceTopics = {
     GET_MAP: `getapp-map.map.id${region}`,
     REGISTER_SOFTWARE: `getapp-device.register.software${region}`,
     DEVICE_CONTENT: `getapp-device.content.installed${region}`,
-    DISCOVERY_SOFTWARE: `getapp-device.discover.software.catalog${region}`,
     IM_PULL_DISCOVERY: `getapp-device.im.pull.discovery${region}`,
-     // Config
-     GET_DEVICE_CONFIG: `getapp-device.config.get${region}`,
-     SET_DEVICE_CONFIG: `getapp-device.config.set${region}`,
+    // Config
+    GET_DEVICE_CONFIG: `getapp-device.config.get${region}`,
+    SET_DEVICE_CONFIG: `getapp-device.config.set${region}`,
     CHECK_HEALTH: `getapp-device.check-health${region}`
 } as const
 
 export const DeviceTopicsEmit = {
     DISCOVER_DEVICE_CONTEXT: `getapp-device.discover.device-context${region}`,
+    DISCOVER_DEVICE_CONTEXT_V2: `getapp-device.discover.device-context-V2${region}`,
     UPDATE_DEVICE_SOFTWARE_STATE: `getapp-device.device.update-software-state${region}`,
     UPDATE_DEVICE_MAP_STATE: `getapp-device.device.update-map-state${region}`,
     REGISTER_MAP_TO_DEVICE: `getapp-device.map.register-to-device${region}`,
@@ -121,7 +198,7 @@ export const DeviceTopicsEmit = {
     MAP_UPDATES_JOB_START: `getapp-device.map.job.updates.start${region}`,
     UPDATE_TLS_STATUS: `getapp-device.update.tls.status${region}`,
     IM_PUSH_DISCOVERY: `getapp-device.im.push.discovery${region}`,
-    COMPONENT_EVENT: `getapp-device.component.event`,
+    RELEASE_CHANGED_EVENT: `getapp-device.release-changed-event${region}`,
 } as const
 
 
@@ -131,7 +208,38 @@ export const DevicesGroupTopics = {
     GET_GROUPS: `getapp-device.group.get-all${region}`,
     GET_GROUP_DEVICES: `getapp-device.group.get-devices${region}`,
     SET_GROUP_DEVICES: `getapp-device.group.set-devices${region}`,
+    DELETE_GROUP: `getapp-device.group.delete${region}`,
+    CREATE_ORG_IDS: `getapp-device.group.org-ids.create${region}`,
+    GET_ORG_IDS: `getapp-device.group.org-ids.get-all${region}`,
+    GET_ORG_ID: `getapp-device.group.org-ids.get${region}`,
+    EDIT_ORG_IDS: `getapp-device.group.org-ids.edit${region}`,
+    DELETE_ORG_IDS: `getapp-device.group.org-ids.delete${region}`,
+    GET_ORG_DEVICES: `getapp-device.group.org-devices.get-all${region}`
 } as const
+
+export const DevicesHierarchyTopics = {
+    // Device Types
+    GET_DEVICE_TYPES: `getapp-device.hierarchy.get-device-types${region}`,
+    GET_DEVICE_TYPE_BY_NAME: `getapp-device.hierarchy.get-device-type-by-name${region}`,
+    CREATE_DEVICE_TYPE: `getapp-device.hierarchy.create-device-type${region}`,
+    UPDATE_DEVICE_TYPE: `getapp-device.hierarchy.update-device-type${region}`,
+    DELETE_DEVICE_TYPE: `getapp-device.hierarchy.delete-device-type${region}`,
+
+    // Platforms
+    GET_PLATFORMS: `getapp-device.hierarchy.get-platforms${region}`,
+    GET_PLATFORM_BY_NAME: `getapp-device.hierarchy.get-platform-by-name${region}`,
+    CREATE_PLATFORM: `getapp-device.hierarchy.create-platform${region}`,
+    UPDATE_PLATFORM: `getapp-device.hierarchy.update-platform${region}`,
+    DELETE_PLATFORM: `getapp-device.hierarchy.delete-platform${region}`,
+
+    // Hierarchy Tree
+    GET_PLATFORM_HIERARCHY_TREE: `getapp-device.hierarchy.get-platform-hierarchy-tree${region}`,
+    GET_DEVICE_TYPE_HIERARCHY_TREE: `getapp-device.hierarchy.get-device-type-hierarchy-tree${region}`,
+    ADD_DEVICE_TYPE_TO_PLATFORM: `getapp-device.hierarchy.add-device-type-to-platform${region}`,
+    REMOVE_DEVICE_TYPE_FROM_PLATFORM: `getapp-device.hierarchy.remove-device-type-from-platform${region}`,
+    ADD_PROJECT_TO_DEVICE_TYPE: `getapp-device.hierarchy.add-project-to-device-type${region}`,
+    REMOVE_PROJECT_FROM_DEVICE_TYPE: `getapp-device.hierarchy.remove-project-from-device-type${region}`,
+}
 
 export const DeviceBugReportTopics = {
     NEW_BUG_REPORT: `getapp-device.bug-report.new${region}`,

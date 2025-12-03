@@ -1,12 +1,14 @@
-import { ProjectEntity } from "@app/common/database/entities";
+import { ProjectEntity, ProjectType } from "@app/common/database/entities";
 import { uploadVersionEntityStub } from "./upload-version.stub";
+import { projectTokenEntityStub } from "./project-token.stub";
 
 export const projectEntityStub = (): ProjectEntity => {
   return {
     id: 34,
     name: uploadVersionEntityStub().component,
     description: 'Project description',
-    regulations : [],
-    tokens: ['token-1', 'token-2']
-  } as ProjectEntity
+    regulations: [],
+    tokens: [projectTokenEntityStub()],
+    projectType: ProjectType.FORMATION
+  } as unknown as ProjectEntity
 };

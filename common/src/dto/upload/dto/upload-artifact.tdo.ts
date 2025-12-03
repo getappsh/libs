@@ -1,10 +1,10 @@
 import { IsValidStringFor } from "@app/common/validators"
 import { Pattern } from "@app/common/validators/regex.validator";
 import { ApiProperty } from "@nestjs/swagger"
-import { IsNotEmpty, IsOptional, IsString, IsSemVer } from "class-validator"
+import { IsNotEmpty, IsOptional, IsString, IsSemVer, IsBoolean } from "class-validator"
 
 
-export class UploadArtifactDto{
+export class  UploadArtifactDto{
 
     @IsString()
     @IsNotEmpty()
@@ -62,5 +62,15 @@ export class UploadArtifactDto{
     toString(){
         return JSON.stringify(this)
     }
+
+    @IsBoolean()
+    @IsOptional()
+    @ApiProperty({ required: false, default: false })
+    isExecutable: boolean
+
+    @IsString()
+    @IsOptional()
+    @ApiProperty({ required: false})
+    arguments: string
 
 }
